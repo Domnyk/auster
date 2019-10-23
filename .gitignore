@@ -1,1 +1,4 @@
 eurus/target
+eurus/resources
+eurus/migrations
+.env
