@@ -9,7 +9,10 @@ pub mod rest_api;
 fn main() {
     dotenv::dotenv().ok();
     rocket::ignite()
-        .mount("/", routes![rest_api::index])
+        .mount("/", routes![
+            rest_api::index,
+            rest_api::new_user,
+        ])
         .attach(db::Connection::fairing())
         .launch();
 }
