@@ -1,10 +1,6 @@
-use rocket::{
-    get,
-    post,
-    http::Status,
-};
 use diesel::prelude::*;
 use rand::prelude::*;
+use rocket::{get, http::Status, post};
 
 use crate::db;
 
@@ -38,6 +34,7 @@ pub fn new_user(user_name: Option<String>, db: db::Connection) -> Status {
 fn get_all_users(db: &db::Connection) -> Vec<db::models::User> {
     use db::schema::users::dsl::*;
     let sql_db: &diesel::SqliteConnection = &*db;
-    users.load::<db::models::User>(sql_db)
+    users
+        .load::<db::models::User>(sql_db)
         .expect("Error loading posts")
 }
