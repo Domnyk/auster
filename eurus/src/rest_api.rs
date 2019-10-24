@@ -18,8 +18,8 @@ pub fn index(db: db::Connection) -> String {
     res
 }
 
-#[post("/new")]
-pub fn new_user(db: db::Connection) -> Status {
+#[post("/new", data = "<user_name>")]
+pub fn new_user(user_name: Option<String>, db: db::Connection) -> Status {
     use db::schema::users::dsl::*;
     let rnd_tok: String = thread_rng()
         .sample_iter(&rand::distributions::Alphanumeric)
@@ -28,7 +28,7 @@ pub fn new_user(db: db::Connection) -> Status {
     diesel::insert_into(users)
         .values(db::models::NewUser {
             token: rnd_tok,
-            name: None,
+            name: user_name,
         })
         .execute(&*db)
         .expect("Error while creating new user");
