@@ -6,9 +6,9 @@ use rocket::{
 use rocket_contrib::{
     database,
 };
-
 #[macro_use] extern crate diesel;
 use diesel::prelude::*;
+use dotenv;
 
 pub mod schema;
 pub mod models;
@@ -33,6 +33,7 @@ fn get_all_posts(db: &diesel::SqliteConnection) -> Vec<models::Post> {
 }  
 
 fn main() {
+    dotenv::dotenv().ok();
     rocket::ignite()
         .mount("/", routes![index])
         .attach(DBConnection::fairing())
