@@ -22,6 +22,7 @@ type Room {
 	maxPlayers: Int! @juniper(ownership: "owned")
 	joinedPlayers: Int! @juniper(ownership: "owned")
 	state: RoomState! @juniper(ownership: "owned")
+
 	players: [User!]! @juniper(ownership: "owned")
 }
 

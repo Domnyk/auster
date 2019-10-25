@@ -6,6 +6,7 @@ use std::convert::{
     Into,
 };
 
+
 // TODO: Refactor adapters to higher module
 // it doesn't operate on db types only anymore
 
@@ -21,6 +22,7 @@ where
         A::from(t).into()
     }
 }
+
 
 pub enum RoomState {
     Joining,
@@ -38,6 +40,7 @@ impl From<i32> for RoomState {
         }
     }
 }
+
 
 impl From<graphql::models::RoomState> for RoomState {
     fn from(s: graphql::models::RoomState) -> Self {
