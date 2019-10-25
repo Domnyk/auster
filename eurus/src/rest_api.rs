@@ -1,8 +1,15 @@
 use diesel::prelude::*;
 use rand::prelude::*;
-use rocket::{get, http::Status, post};
+use rocket::{
+    get,
+    http::Status,
+    post,
+    response,
+    State,
+};
 
 use crate::db;
+use crate::graphql;
 
 #[get("/")]
 pub fn index(db: db::Connection) -> String {
@@ -37,4 +44,28 @@ fn get_all_users(db: &db::Connection) -> Vec<db::models::User> {
     users
         .load::<db::models::User>(sql_db)
         .expect("Error loading posts")
+}
+
+
+#[get("/graphiql")]
+pub fn graphiql() -> response::content::Html<String> {
+    juniper_rocket::graphiql_source("/graphql")
+}
+
+#[get("/graphql?<request>")]
+pub fn graphql_query(
+    context: graphql::Context,
+    request: juniper_rocket::GraphQLRequest,
+    schema: State<graphql::models::Schema>
+) -> juniper_rocket::GraphQLResponse {
+    request.execute(&schema, &context)
+}
+
+#[post("/graphql", data = "<request>")]
+pub fn graphql_mutation(
+    context: graphql::Context,
+    request: juniper_rocket::GraphQLRequest,
+    schema: State<graphql::models::Schema>
+) -> juniper_rocket::GraphQLResponse {
+    request.execute(&schema, &context)
 }
