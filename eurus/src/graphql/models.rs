@@ -4,31 +4,19 @@ use juniper_from_schema::graphql_schema_from_file;
 use diesel::prelude::*;
 use rand::prelude::*;
 
-use crate::db;
+use crate::db::{
+    self,
+    adapters,
+};
 use crate::graphql::Context;
+
+// TODO! THIS IS WIP FOR THE NEW GRAPHQL SCHEMA
 
 graphql_schema_from_file!("../schema.graphql");
 
 pub struct Query;
 
 impl QueryFields for Query {
-    fn field_users(
-        &self,
-        executor: &Executor<'_, Context>,
-        _: &QueryTrail<'_, User, Walked>,
-    ) -> FieldResult<Vec<User>> {
-        use db::schema::users::dsl::*;
-        let db_conn = executor.context().db_conn();
-        let u = users
-            .load::<db::models::User>(&**db_conn)
-            .expect("Couldn't load users from the db");
-        Ok(u.into_iter()
-            .map(|user| User {
-                token: user.token,
-                name: user.name,
-            })
-            .collect())
-    }
 
     fn field_user(
         &self,
@@ -47,6 +35,7 @@ impl QueryFields for Query {
             Ok(Some(User {
                 token: u.token,
                 name: u.name,
+                room_id: u.room_id,
             }))
         } else {
             Ok(None)
@@ -87,6 +76,7 @@ impl MutationFields for Mutation {
 pub struct User {
     pub token: String,
     pub name: Option<String>,
+    pub room_id: i32,
 }
 
 impl UserFields for User {
@@ -97,4 +87,28 @@ impl UserFields for User {
     fn field_name(&self, _: &Executor<'_, Context>) -> FieldResult<Option<String>> {
         Ok(self.name.clone())
     }
+
+    fn field_room(&self,
+        executor: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Room, Walked>
+    ) -> FieldResult<Room> {
+        use db::schema::rooms;
+        let db_conn = executor.context().db_conn();
+        let mut room = rooms::dsl::rooms
+            .filter(rooms::dsl::id.eq(self.room_id))
+            .load::<db::models::Room>(&**db_conn)
+            .expect("Couldn't get the room information for the user");
+        let room: adapters::Room = room.pop()
+            .expect("Got empty rooms vector for the player")
+            .into();
+        Ok(room.into())
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Room {
+    pub join_code: String,
+    pub max_players: i32,
+    pub joined_players: i32,
+    pub state: RoomState,
 }

@@ -19,6 +19,8 @@ use rocket::{
 use crate::db;
 use crate::graphql;
 
+// TODO! Smth not working here
+
 #[cfg(debug_assertions)]
 #[get("/")]
 pub fn index(db: db::Connection) -> String {

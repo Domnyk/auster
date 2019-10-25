@@ -4,15 +4,30 @@ schema {
 }
 
 type Query {
-	user(token: String!): User @juniper(ownership: "owned")
-	users: [User!]! @juniper(ownership: "owned")
+	user(player_code: String!): User @juniper(ownership: "owned")
 }
 
 type Mutation {
-	newUser(name: String): User! @juniper(ownership: "owned")
+	newRoom(players: Int!): Room! @juniper(ownership: "owned")
+	joinRoom(room_code: String!, user_name: String!): User! @juniper(ownership: "owned")
+}
+
+enum RoomState {
+	Joining
+	Dead
+}
+
+type Room {
+	joinCode: String! @juniper(ownership: "owned")
+	maxPlayers: Int!
+	joinedPlayer: Int!
+	state: RoomState!
+
+	players: [User!]! @juniper(ownership: "owned")
 }
 
 type User {
 	token: String! @juniper(ownership: "owned") 
 	name: String @juniper(ownership: "owned")
+	room: Room! @juniper(ownership: "owned")
 }
