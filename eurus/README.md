@@ -18,3 +18,14 @@ that the path where the file will be created is present.
 ### run server
 
 * `cargo run`
+
+# Web API endpoints
+
+
+| method 	|  endpoint 	|         arguments         	|                              description                             	|
+|:------:	|:---------:	|:-------------------------:	|:--------------------------------------------------------------------:	|
+|   GET  	|     /     	|    --------------------   	| Temporary main page listing all the users                            	|
+|   GET  	| /graphiql 	|    --------------------   	| Web application to send graphql requests to the api                  	|
+|   GET  	|  /graphql 	|      graphql request      	| GET graphql endpoint                                                 	|
+|  POST  	|  /graphql 	|      graphql request      	| POST graphql endpoint                                                	|
+|  POST  	|    /new   	| user_name:: Maybe\<String\> 	| Creates new user with the given name or empty name if none were sent 	|
