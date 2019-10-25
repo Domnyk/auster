@@ -10,16 +10,20 @@ pub mod rest_api;
 
 fn main() {
     dotenv::dotenv().ok();
-    rocket::ignite()
+    let mut r = rocket::ignite()
         .manage(graphql::models::Schema::new(
             graphql::models::Query,
             graphql::models::Mutation))
         .mount("/", routes![
-            rest_api::index,
-            rest_api::new_user,
-            rest_api::graphiql,
             rest_api::graphql_query,
             rest_api::graphql_mutation])
-        .attach(db::Connection::fairing())
-        .launch();
+        .attach(db::Connection::fairing());
+    if cfg!(debug_assertions) {
+        r = r.mount("/dev", routes![
+            rest_api::graphiql,
+            rest_api::new_user,
+            rest_api::index,
+        ]);
+    }
+    r.launch();
 }

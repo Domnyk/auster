@@ -1,16 +1,25 @@
+#[cfg(debug_assertions)]
 use diesel::prelude::*;
+#[cfg(debug_assertions)]
 use rand::prelude::*;
+
 use rocket::{
     get,
-    http::Status,
     post,
-    response,
     State,
 };
 
+#[cfg(debug_assertions)]
+use rocket::{
+    http::Status,
+    response,
+};
+
+#[cfg(debug_assertions)]
 use crate::db;
 use crate::graphql;
 
+#[cfg(debug_assertions)]
 #[get("/")]
 pub fn index(db: db::Connection) -> String {
     let mut res = String::from("Writing users: \n");
@@ -21,6 +30,11 @@ pub fn index(db: db::Connection) -> String {
     res
 }
 
+#[cfg(not(debug_assertions))]
+#[get("/")]
+pub fn index() {}
+
+#[cfg(debug_assertions)]
 #[post("/new", data = "<user_name>")]
 pub fn new_user(user_name: Option<String>, db: db::Connection) -> Status {
     use db::schema::users::dsl::*;
@@ -38,6 +52,7 @@ pub fn new_user(user_name: Option<String>, db: db::Connection) -> Status {
     Status::Accepted
 }
 
+#[cfg(debug_assertions)]
 fn get_all_users(db: &db::Connection) -> Vec<db::models::User> {
     use db::schema::users::dsl::*;
     let sql_db: &diesel::SqliteConnection = &*db;
@@ -46,11 +61,19 @@ fn get_all_users(db: &db::Connection) -> Vec<db::models::User> {
         .expect("Error loading posts")
 }
 
+#[cfg(not(debug_assertions))]
+#[post("/new")]
+pub fn new_user() {}
 
+#[cfg(debug_assertions)]
 #[get("/graphiql")]
 pub fn graphiql() -> response::content::Html<String> {
     juniper_rocket::graphiql_source("/graphql")
 }
+
+#[cfg(not(debug_assertions))]
+#[get("/graphiql")]
+pub fn graphiql() {}
 
 #[get("/graphql?<request>")]
 pub fn graphql_query(

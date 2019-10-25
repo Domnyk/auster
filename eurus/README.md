@@ -24,8 +24,12 @@ that the path where the file will be created is present.
 
 | method 	|  endpoint 	|         arguments         	|                              description                             	|
 |:------:	|:---------:	|:-------------------------:	|:--------------------------------------------------------------------:	|
-|   GET  	|     /     	|    --------------------   	| Temporary main page listing all the users                            	|
-|   GET  	| /graphiql 	|    --------------------   	| Web application to send graphql requests to the api                  	|
+|   GET  	|     /dev     	|    --------------------   	| Temporary main page listing all the users                            	|
+|   GET  	| /dev/graphiql |    --------------------   	| Web application to send graphql requests to the api                  	|
 |   GET  	|  /graphql 	|      graphql request      	| GET graphql endpoint                                                 	|
 |  POST  	|  /graphql 	|      graphql request      	| POST graphql endpoint                                                	|
-|  POST  	|    /new   	| user_name:: Maybe\<String\> 	| Creates new user with the given name or empty name if none were sent 	|
+|  POST  	|   /dev/new   	| user_name:: Maybe\<String\> 	| Creates new user with the given name or empty name if none were sent 	|
+
+`/dev` endpoints are only available in the debug builds of the `eurus` (`cargo build`, `cargo run`).
+If building for release (`cargo build --release`, `cargo run --release`) no development endpoints will be dispatched
+(they won't even be compiled).
