@@ -21,7 +21,6 @@ fn main() {
     if cfg!(debug_assertions) {
         r = r.mount("/dev", routes![
             web_api::graphiql,
-            web_api::new_user,
             web_api::index,
         ]);
     }

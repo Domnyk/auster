@@ -1,7 +1,5 @@
 #[cfg(debug_assertions)]
 use diesel::prelude::*;
-#[cfg(debug_assertions)]
-use rand::prelude::*;
 
 use rocket::{
     get,
@@ -10,14 +8,13 @@ use rocket::{
 };
 
 #[cfg(debug_assertions)]
-use rocket::{
-    http::Status,
-    response,
-};
+use rocket::response;
 
 #[cfg(debug_assertions)]
 use crate::db;
 use crate::graphql;
+
+// TODO! Smth not working here
 
 #[cfg(debug_assertions)]
 #[get("/")]
@@ -35,24 +32,6 @@ pub fn index(db: db::Connection) -> String {
 pub fn index() {}
 
 #[cfg(debug_assertions)]
-#[post("/new", data = "<user_name>")]
-pub fn new_user(user_name: Option<String>, db: db::Connection) -> Status {
-    use db::schema::users::dsl::*;
-    let rnd_tok: String = thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
-        .take(64)
-        .collect();
-    diesel::insert_into(users)
-        .values(db::models::NewUser {
-            token: rnd_tok,
-            name: user_name,
-        })
-        .execute(&*db)
-        .expect("Error while creating new user");
-    Status::Accepted
-}
-
-#[cfg(debug_assertions)]
 fn get_all_users(db: &db::Connection) -> Vec<db::models::User> {
     use db::schema::users::dsl::*;
     let sql_db: &diesel::SqliteConnection = &*db;
@@ -61,9 +40,6 @@ fn get_all_users(db: &db::Connection) -> Vec<db::models::User> {
         .expect("Error loading posts")
 }
 
-#[cfg(not(debug_assertions))]
-#[post("/new")]
-pub fn new_user() {}
 
 #[cfg(debug_assertions)]
 #[get("/graphiql")]
