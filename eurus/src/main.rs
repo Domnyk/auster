@@ -6,7 +6,7 @@ extern crate diesel;
 
 pub mod db;
 pub mod graphql;
-pub mod rest_api;
+pub mod web_api;
 
 fn main() {
     dotenv::dotenv().ok();
@@ -15,14 +15,14 @@ fn main() {
             graphql::models::Query,
             graphql::models::Mutation))
         .mount("/", routes![
-            rest_api::graphql_query,
-            rest_api::graphql_mutation])
+            web_api::graphql_query,
+            web_api::graphql_mutation])
         .attach(db::Connection::fairing());
     if cfg!(debug_assertions) {
         r = r.mount("/dev", routes![
-            rest_api::graphiql,
-            rest_api::new_user,
-            rest_api::index,
+            web_api::graphiql,
+            web_api::new_user,
+            web_api::index,
         ]);
     }
     r.launch();
