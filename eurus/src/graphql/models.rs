@@ -48,6 +48,7 @@ impl MutationFields for Mutation {
     fn field_new_room(&self,
         executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Room, Walked>,
+        name: String,
         players: i32
     ) -> FieldResult<Room> {
         let db_conn = executor.context().db_conn();
@@ -74,6 +75,7 @@ impl MutationFields for Mutation {
         };
         Ok(Room{
             id,
+            name, 
             join_code,
             max_players: players,
             joined_players: 0,
@@ -172,6 +174,7 @@ impl UserFields for User {
 #[derive(Clone, Debug)]
 pub struct Room {
     pub id: i32,
+    pub name: String,
     pub join_code: String,
     pub max_players: i32,
     pub joined_players: i32,
@@ -186,6 +189,10 @@ impl RoomFields for Room {
 
     fn field_max_players(&self, _: &Executor<'_, Context>) -> FieldResult<i32> {
         Ok(self.max_players)
+    }
+
+    fn field_name(&self, _: &Executor<'_, Context>) -> FieldResult<String> {
+        Ok(self.name.clone())
     }
 
     fn field_joined_players(&self, executor: &Executor<'_, Context>) -> FieldResult<i32> {

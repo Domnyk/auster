@@ -74,6 +74,7 @@ impl Into<graphql::models::RoomState> for RoomState {
 
 pub struct Room {
     pub id: i32,
+    pub name: String,
     pub join_code: String,
     pub players: i32,
     pub curr_players: i32,
@@ -84,6 +85,7 @@ impl From<db::models::Room> for Room {
     fn from(room: db::models::Room) -> Self {
         Self {
             id: room.id,
+            name: room.name,
             join_code: room.join_code,
             players: room.players,
             curr_players: room.curr_players,
@@ -96,6 +98,7 @@ impl Into<db::models::Room> for Room {
     fn into(self) -> db::models::Room {
         db::models::Room {
             id: self.id,
+            name: self.name,
             join_code: self.join_code,
             players: self.players,
             curr_players: self.curr_players,
@@ -108,6 +111,7 @@ impl Into<graphql::models::Room> for Room {
     fn into(self) -> graphql::models::Room {
         graphql::models::Room {
             id: self.id,
+            name: self.name,
             join_code: self.join_code,
             max_players: self.players,
             joined_players: self.curr_players,

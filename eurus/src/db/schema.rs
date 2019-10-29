@@ -1,6 +1,7 @@
 table! {
     rooms (id) {
         id -> Integer,
+        name -> Text,
         join_code -> Text,
         players -> Integer,
         curr_players -> Integer,

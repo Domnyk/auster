@@ -20,6 +20,7 @@ pub struct NewUser {
 #[derive(Queryable)]
 pub struct Room {
     pub id: i32,
+    pub name: String,
     pub join_code: String,
     pub players: i32,
     pub curr_players: i32,
