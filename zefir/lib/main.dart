@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/room_list.dart';
-import 'package:zefir/services/github.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GraphQLProvider(
-        client: Github().client,
-        child: MaterialApp(
-          title: 'EGO mobile',
-          theme: ThemeData(primarySwatch: Colors.blue),
-          home: MyHomePage(title: 'EGO mobile'),
-        ));
+    return MaterialApp(
+      title: 'EGO mobile',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MyHomePage(title: 'EGO mobile'),
+    );
   }
 }
 

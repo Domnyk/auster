@@ -1,0 +1,1 @@
+enum RoomState { Joining, Dead }
