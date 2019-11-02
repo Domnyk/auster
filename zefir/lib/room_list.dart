@@ -18,7 +18,7 @@ class _RoomListState extends State<RoomList> {
   _RoomListState() {
     rooms = new List();
     eurus = new Eurus(
-        graphQlEndpoint: new HttpLink(uri: 'http://172.20.10.5:8000/graphql'));
+        graphQlEndpoint: new HttpLink(uri: 'http://localhost:8000/graphql'));
   }
 
   @override
@@ -42,12 +42,12 @@ class _RoomListState extends State<RoomList> {
                   List rooms = new List<Room>(); // result.data['users'];
 
                   return rooms.isEmpty
-                      ? buildBodyIfNoRooms()
+                      ? buildBodyIfNoRooms(eurus: eurus)
                       : buildIfAnyRooms(rooms);
                 })));
   }
 
-  Widget buildBodyIfNoRooms() {
+  Widget buildBodyIfNoRooms({@required Eurus eurus}) {
     final messageRow =
         Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
       Text(
@@ -64,8 +64,8 @@ class _RoomListState extends State<RoomList> {
           RaisedButton(
             child: Text('Załóż pokój'),
             onPressed: () => {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => NewRoom()))
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => NewRoom(eurus)))
             },
           )
         ]);
