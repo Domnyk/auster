@@ -4,31 +4,62 @@ schema {
 }
 
 type Query {
-	user(player_code: String!): User @juniper(ownership: "owned")
+	player(player_code: String!): Player @juniper(ownership: "owned")
 }
 
 type Mutation {
-	newRoom(name: String!, players: Int!): Room! @juniper(ownership: "owned")
-	joinRoom(room_code: String!, user_name: String!): User @juniper(ownership: "owned")
+	newRoom(name: String!, players: Int!, rounds: Int!): Room! @juniper(ownership: "owned")
+	joinRoom(room_code: String!, user_name: String!): Player @juniper(ownership: "owned")
+
+	sendQuestion(token: String!, content: String!): Question @junpier(ownership: "owned")
+	sendAnswer(token: String!, content: String!): Answer @juniper(onwership: "owned")
+	pollAnswer(token: String!, )
 }
 
 enum RoomState {
 	Joining
+	Collecting
+	Answering
+	Polling
 	Dead
+}
+
+type Question {
+	content: String! @juniper(ownership: "owned") 
+	player: User! @juniper(ownership: "owned")
+	picked: Bool! @juniper(ownership: "owned")
+}
+
+type Answer {
+	content: String! @juniper(ownerhsip: "owned")
+	player: Player! @juniper(ownerhsip: "owned")
+	question: Question! @juniper(ownership: "owned")
 }
 
 type Room {
 	name: String! @juniper(ownership: "owned")
 	joinCode: String! @juniper(ownership: "owned")
+
 	maxPlayers: Int! @juniper(ownership: "owned")
 	joinedPlayers: Int! @juniper(ownership: "owned")
-	state: RoomState! @juniper(ownership: "owned")
+	
+	maxRounds: Int! @juniper(ownership: "owned")
+	currRound: Int! @juniper(ownership: "owned")
 
-	players: [User!]! @juniper(ownership: "owned")
+	state: RoomState! @juniper(ownership: "owned")
+	curr_player: Player @juniper(onwership: "owned")
+
+	players: [Player!]! @juniper(ownership: "owned")
+
+	currQuestion: Question @juniper(onwership: "owned")
+	currAnswers: [Answer!] @juniper(ownerhsip: "owned")
 }
 
-type User {
+type Player {
 	token: String! @juniper(ownership: "owned") 
 	name: String @juniper(ownership: "owned")
 	room: Room! @juniper(ownership: "owned")
+
+	polled_answer: Answer @juniper(ownership: "owned")
+	points: Int! @juniper(onwership: "owned")
 }

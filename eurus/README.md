@@ -3,6 +3,7 @@
 * `rustup update && cargo update`
 * install database drivers which diesel supports (`libsqlite3-dev`, `libpq-dev`, `libmysql-dev`).
 * install diesel cli `cargo install diesel_cli`
+    * `cargo install diesel_cli --no-default-features --features sqlite`
 * fill environmental variables in the `.env` file in the
 **Auster** root directory
 * If you are using sqlite as your database make sure
