@@ -9,7 +9,7 @@ type Query {
 
 type Mutation {
 	newRoom(name: String!, players: Int!, rounds: Int!): Room! @juniper(ownership: "owned")
-	joinRoom(roomCode: String!, userName: String!): Player @juniper(ownership: "owned")
+	joinRoom(roomCode: String!, playerName: String!): Player @juniper(ownership: "owned")
 
 	sendQuestion(token: Int!, content: String!): Question @juniper(ownership: "owned")
 	sendAnswer(token: Int!, content: String!): Answer @juniper(ownership: "owned")
@@ -27,7 +27,7 @@ enum RoomState {
 
 type Question {
 	content: String! @juniper(ownership: "owned") 
-	player: User! @juniper(ownership: "owned")
+	player: Player! @juniper(ownership: "owned")
 	picked: Boolean! @juniper(ownership: "owned")
 }
 
@@ -43,7 +43,6 @@ type Room {
 	joinCode: String! @juniper(ownership: "owned")
 
 	maxPlayers: Int! @juniper(ownership: "owned")
-	joinedPlayers: Int! @juniper(ownership: "owned")
 	
 	maxRounds: Int! @juniper(ownership: "owned")
 	currRound: Int! @juniper(ownership: "owned")
@@ -58,7 +57,7 @@ type Room {
 }
 
 type Player {
-	token: String! @juniper(ownership: "owned") 
+	token: Int! @juniper(ownership: "owned") 
 	name: String @juniper(ownership: "owned")
 	room: Room! @juniper(ownership: "owned")
 

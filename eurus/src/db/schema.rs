@@ -23,7 +23,7 @@ table! {
         id -> Integer,
         question -> Text,
         was_picked -> Bool,
-        room_id -> Integer,
+        player_id -> Integer,
     }
 }
 
@@ -42,6 +42,8 @@ table! {
 }
 
 joinable!(answers -> questions (question_id));
+joinable!(questions -> players (player_id));
+joinable!(rooms -> questions (curr_question_id));
 
 allow_tables_to_appear_in_same_query!(
     answers,

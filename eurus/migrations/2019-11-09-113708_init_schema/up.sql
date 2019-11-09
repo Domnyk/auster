@@ -30,9 +30,9 @@ CREATE TABLE questions (
     id int NOT NULL CONSTRAINT questions_pk PRIMARY KEY,
     question varchar(512) NOT NULL,
     was_picked boolean NOT NULL,
-    room_id int NOT NULL,
-    CONSTRAINT questions_rooms FOREIGN KEY (room_id)
-    REFERENCES rooms (id)
+    player_id int NOT NULL,
+    CONSTRAINT questions_players FOREIGN KEY (player_id)
+    REFERENCES players (id)
 );
 
 -- Table: rooms

@@ -22,19 +22,19 @@ pub struct Query;
 
 impl QueryFields for Query {
 
-    fn field_player(
+    fn field_player (
         &self,
         executor: &Executor<'_, Context>,
-        _: &QueryTrail<'_, User, Walked>,
-        player_code: String,
-    ) -> FieldResult<Option<User>> {
-        use db::schema::users::dsl::{self, users};
+        _: &QueryTrail<'_, Player, Walked>,
+        player_code: i32,
+    ) -> FieldResult<Option<Player>> {
+        use db::schema::players::dsl::{self, players};
         let db_conn = executor.context().db_conn();
-        let mut u = users
+        let mut p = players
             .filter(dsl::token.eq(&player_code))
-            .load::<db::models::User>(&**db_conn)?;
-        if let Some(u) = u.pop() {
-            Ok(Some(adapters::User::adapt(u)))
+            .load::<db::models::Player>(&**db_conn)?;
+        if let Some(p) = p.pop() {
+            Ok(Some(adapters::Player::adapt(p)))
         } else {
             Ok(None)
         }
@@ -141,13 +141,15 @@ impl MutationFields for Mutation {
 }
 
 #[derive(Clone, Debug)]
-pub struct User {
-    pub token: String,
-    pub name: Option<String>,
+pub struct Player {
+    pub token: i32,
+    pub name: String,
     pub room_id: i32,
+    pub curr_answer_id: Option<i32>,
+    pub points: i32,
 }
 
-impl UserFields for User {
+impl PlayerFields for Player {
     fn field_token(&self, _: &Executor<'_, Context>) -> FieldResult<String> {
         Ok(self.token.clone())
     }
@@ -172,13 +174,30 @@ impl UserFields for User {
 }
 
 #[derive(Clone, Debug)]
-pub struct Room {
+pub struct Answer {
     pub id: i32,
+    pub content: String,
+    pub player_id: i32,
+    pub question_id: i32,
+}
+
+#[derive(Clone, Debug)]
+pub struct Question {
+    pub content: String,
+    pub player_id: i32,
+    pub picked: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct Room {
     pub name: String,
     pub join_code: String,
     pub max_players: i32,
-    pub joined_players: i32,
+    pub max_rounds: i32,
+    pub curr_round: i32,
     pub state: RoomState,
+    pub curr_player_id: Option<i32>,
+    pub curr_question_id: Option<i32>,
 }
 
 impl RoomFields for Room {

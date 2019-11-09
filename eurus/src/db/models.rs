@@ -2,7 +2,7 @@ use crate::db::schema::*;
 use diesel::{Insertable, Queryable};
 
 #[derive(Queryable)]
-pub struct Players {
+pub struct Player {
     pub id: i32,
     pub token: i32,
     pub name: String,
@@ -25,7 +25,7 @@ pub struct Answer {
     pub id: i32,
     pub answer: String,
     pub question_id: i32,
-    pub player_id: i32,
+    pub room_id: i32,
 }
 
 #[derive(Insertable, Clone)]
@@ -59,7 +59,7 @@ pub struct Room {
     pub max_players: i32,
     pub state: i32,
     pub join_code: String,
-    pub num_od_rounds: i32,
+    pub num_of_rounds: i32,
     pub curr_round: i32,
     pub curr_player_id: Option<i32>,
     pub curr_question_id: Option<i32>,

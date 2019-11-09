@@ -25,8 +25,11 @@ where
 
 
 pub enum RoomState {
-    Joining,
-    Dead,
+	Joining,
+	Collecting,
+	Answering,
+	Polling,
+	Dead,
 }
 
 impl From<i32> for RoomState {
@@ -34,7 +37,10 @@ impl From<i32> for RoomState {
         use RoomState::*;
         match val {
             0 => Joining,
-            1 => Dead,
+            1 => Collecting,
+            2 => Answering,
+            3 => Polling,
+            4 => Dead,
             // TODO: error not panic!
             _ => panic!("Unknown room state {}", val),
         }
@@ -48,6 +54,9 @@ impl From<graphql::models::RoomState> for RoomState {
         match s {
             Joining => Self::Joining,
             Dead => Self::Dead,
+            Answering => Self::Answering,
+            Polling => Self::Polling,
+            Collecting => Self::Collecting,
         }
     }
 }
@@ -57,7 +66,10 @@ impl Into<i32> for RoomState {
         use RoomState::*;
         match self {
             Joining => 0,
-            Dead => 1,
+            Collecting => 1,
+            Answering => 2,
+            Polling => 3,
+            Dead => 4,
         }
     }
 }
@@ -72,90 +84,83 @@ impl Into<graphql::models::RoomState> for RoomState {
 }
 
 
-pub struct Room {
-    pub id: i32,
-    pub name: String,
-    pub join_code: String,
-    pub players: i32,
-    pub curr_players: i32,
-    pub state: RoomState,
-}
+pub struct Room(db::models::Room);
 
 impl From<db::models::Room> for Room {
     fn from(room: db::models::Room) -> Self {
-        Self {
-            id: room.id,
-            name: room.name,
-            join_code: room.join_code,
-            players: room.players,
-            curr_players: room.curr_players,
-            state: RoomState::from(room.state),
-        }
-    }
-}
-
-impl Into<db::models::Room> for Room {
-    fn into(self) -> db::models::Room {
-        db::models::Room {
-            id: self.id,
-            name: self.name,
-            join_code: self.join_code,
-            players: self.players,
-            curr_players: self.curr_players,
-            state: self.state.into(),
-        }
+        Self(room)
     }
 }
 
 impl Into<graphql::models::Room> for Room {
     fn into(self) -> graphql::models::Room {
         graphql::models::Room {
-            id: self.id,
-            name: self.name,
-            join_code: self.join_code,
-            max_players: self.players,
-            joined_players: self.curr_players,
-            state: self.state.into(),
+            name: self.0.name,
+            join_code: self.0.join_code,
+            max_players: self.0.max_players,
+            max_rounds: self.0.num_of_rounds,
+            curr_round: self.0.curr_round,
+            state: RoomState::adapt(self.0.state),
+            curr_player_id: self.0.curr_player_id,
+            curr_question_id: self.0.curr_question_id,
         }
     }
 }
 
 
-pub struct User {
-    pub id: i32, 
-    pub token: String,
-    pub name: Option<String>,
-    pub room_id: i32,
+pub struct Player(db::models::Player);
+
+impl From<db::models::Player> for Player {
+    fn from(p: db::models::Player) -> Self {
+        Self(p)
+    }
 }
 
-impl From<db::models::User> for User {
-    fn from(u: db::models::User) -> Self {
-        Self {
-            id: u.id,
-            token: u.token,
-            name: u.name,
-            room_id: u.room_id,
+impl Into<graphql::models::Player> for Player {
+    fn into(self) -> graphql::models::Player {
+        graphql::models::Player {
+            token: self.0.token,
+            name: self.0.name,
+            points: self.0.score,
+            curr_answer_id: self.0.answer_id,
+            room_id: self.0.room_id,
         }
     }
 }
 
-impl Into<db::models::User> for User {
-    fn into(self) -> db::models::User {
-        db::models::User {
-            id: self.id,
-            token: self.token,
-            name: self.name,
-            room_id: self.room_id,
-        }
-    } 
+pub struct Answer(db::models::Answer);
+
+impl From<db::models::Answer> for Answer {
+    fn from(a: db::models::Answer) -> Self {
+        Self(a)
+    }
 }
 
-impl Into<graphql::models::User> for User {
-    fn into(self) -> graphql::models::User {
-        graphql::models::User {
-            token: self.token,
-            name: self.name,
-            room_id: self.room_id,
+impl Into<graphql::models::Answer> for Answer {
+    fn into(self) -> graphql::models::Answer {
+        graphql::models::Answer {
+            id: self.0.id,
+            content: self.0.answer,
+            player_id: self.0.player_id,
+            question_id: self.0.question_id,
+        }
+    }
+}
+
+pub struct Question(db::models::Question);
+
+impl From<db::models::Question> for Question {
+    fn from(q: db::models::Question) -> Self {
+        Self(q)
+    }
+}
+
+impl Into<graphql::models::Question> for Question {
+    fn into(self) -> graphql::models::Question {
+        graphql::models::Question {
+            content: self.0.question,
+            player_id: self.0.player_id,
+            picked: self.0.was_picked,
         }
     }
 }
