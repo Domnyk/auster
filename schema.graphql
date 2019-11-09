@@ -4,16 +4,17 @@ schema {
 }
 
 type Query {
-	player(player_code: String!): Player @juniper(ownership: "owned")
+	player(token: Int!): Player @juniper(ownership: "owned")
 }
 
 type Mutation {
 	newRoom(name: String!, players: Int!, rounds: Int!): Room! @juniper(ownership: "owned")
-	joinRoom(room_code: String!, user_name: String!): Player @juniper(ownership: "owned")
+	joinRoom(roomCode: String!, userName: String!): Player @juniper(ownership: "owned")
 
-	sendQuestion(token: String!, content: String!): Question @junpier(ownership: "owned")
-	sendAnswer(token: String!, content: String!): Answer @juniper(onwership: "owned")
-	pollAnswer(token: String!, )
+	sendQuestion(token: Int!, content: String!): Question @juniper(ownership: "owned")
+	sendAnswer(token: Int!, content: String!): Answer @juniper(ownership: "owned")
+	
+	pollAnswer(token: Int!, answer: Int!): Answer @juniper(ownership: "owned")
 }
 
 enum RoomState {
@@ -27,12 +28,13 @@ enum RoomState {
 type Question {
 	content: String! @juniper(ownership: "owned") 
 	player: User! @juniper(ownership: "owned")
-	picked: Bool! @juniper(ownership: "owned")
+	picked: Boolean! @juniper(ownership: "owned")
 }
 
 type Answer {
-	content: String! @juniper(ownerhsip: "owned")
-	player: Player! @juniper(ownerhsip: "owned")
+	id: Int! @juniper(ownership: "owned")
+	content: String! @juniper(ownership: "owned")
+	player: Player! @juniper(ownership: "owned")
 	question: Question! @juniper(ownership: "owned")
 }
 
@@ -47,12 +49,12 @@ type Room {
 	currRound: Int! @juniper(ownership: "owned")
 
 	state: RoomState! @juniper(ownership: "owned")
-	curr_player: Player @juniper(onwership: "owned")
+	currPlayer: Player @juniper(ownership: "owned")
 
 	players: [Player!]! @juniper(ownership: "owned")
 
-	currQuestion: Question @juniper(onwership: "owned")
-	currAnswers: [Answer!] @juniper(ownerhsip: "owned")
+	currQuestion: Question @juniper(ownership: "owned")
+	currAnswers: [Answer!] @juniper(ownership: "owned")
 }
 
 type Player {
@@ -60,6 +62,6 @@ type Player {
 	name: String @juniper(ownership: "owned")
 	room: Room! @juniper(ownership: "owned")
 
-	polled_answer: Answer @juniper(ownership: "owned")
-	points: Int! @juniper(onwership: "owned")
+	polledAnswer: Answer @juniper(ownership: "owned")
+	points: Int! @juniper(ownership: "owned")
 }

@@ -22,7 +22,7 @@ pub struct Query;
 
 impl QueryFields for Query {
 
-    fn field_user(
+    fn field_player(
         &self,
         executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, User, Walked>,
