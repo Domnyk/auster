@@ -1,4 +1,4 @@
--- tables
+-- Your SQL goes here-- tables
 -- Table: answers
 CREATE TABLE answers (
     id int NOT NULL CONSTRAINT answers_pk PRIMARY KEY,
@@ -14,11 +14,11 @@ CREATE TABLE answers (
 -- Table: players
 CREATE TABLE players (
     id int NOT NULL CONSTRAINT players_pk PRIMARY KEY,
+    token int NOT NULL,
     name varchar(256) NOT NULL,
     score int NOT NULL,
-    curr_answer_id int,
     room_id int NOT NULL,
-    answer_id int NOT NULL,
+    answer_id int,
     CONSTRAINT rooms_players FOREIGN KEY (room_id)
     REFERENCES rooms (id),
     CONSTRAINT players_answers FOREIGN KEY (answer_id)
@@ -43,9 +43,9 @@ CREATE TABLE rooms (
     state int NOT NULL,
     join_code varchar(8) NOT NULL,
     num_of_rounds int NOT NULL,
-    round_num int NOT NULL CHECK (round_num <= num_of_rounds),
-    curr_player_id int NOT NULL,
-    curr_question_id int NOT NULL,
+    curr_round int NOT NULL CHECK (curr_round <= num_of_rounds),
+    curr_player_id int,
+    curr_question_id int,
     CONSTRAINT players_rooms FOREIGN KEY (curr_player_id)
     REFERENCES players (id),
     CONSTRAINT rooms_questions FOREIGN KEY (curr_question_id)

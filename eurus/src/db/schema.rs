@@ -10,11 +10,11 @@ table! {
 table! {
     players (id) {
         id -> Integer,
+        token -> Integer,
         name -> Text,
         score -> Integer,
-        curr_answer_id -> Nullable<Integer>,
         room_id -> Integer,
-        answer_id -> Integer,
+        answer_id -> Nullable<Integer>,
     }
 }
 
@@ -35,9 +35,9 @@ table! {
         state -> Integer,
         join_code -> Text,
         num_of_rounds -> Integer,
-        round_num -> Integer,
-        curr_player_id -> Integer,
-        curr_question_id -> Integer,
+        curr_round -> Integer,
+        curr_player_id -> Nullable<Integer>,
+        curr_question_id -> Nullable<Integer>,
     }
 }
 
