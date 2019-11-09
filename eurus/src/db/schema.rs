@@ -1,26 +1,51 @@
 table! {
-    rooms (id) {
+    answers (id) {
         id -> Integer,
-        name -> Text,
-        join_code -> Text,
-        players -> Integer,
-        curr_players -> Integer,
-        state -> Integer,
+        answer -> Text,
+        question_id -> Integer,
+        player_id -> Integer,
     }
 }
 
 table! {
-    users (id) {
+    players (id) {
         id -> Integer,
-        token -> Text,
-        name -> Nullable<Text>,
+        name -> Text,
+        score -> Integer,
+        curr_answer_id -> Nullable<Integer>,
+        room_id -> Integer,
+        answer_id -> Integer,
+    }
+}
+
+table! {
+    questions (id) {
+        id -> Integer,
+        question -> Text,
+        was_picked -> Bool,
         room_id -> Integer,
     }
 }
 
-joinable!(users -> rooms (room_id));
+table! {
+    rooms (id) {
+        id -> Integer,
+        name -> Text,
+        max_players -> Integer,
+        state -> Integer,
+        join_code -> Text,
+        num_of_rounds -> Integer,
+        round_num -> Integer,
+        curr_player_id -> Integer,
+        curr_question_id -> Integer,
+    }
+}
+
+joinable!(answers -> questions (question_id));
 
 allow_tables_to_appear_in_same_query!(
+    answers,
+    players,
+    questions,
     rooms,
-    users,
 );
