@@ -4,14 +4,15 @@ use juniper_from_schema::graphql_schema_from_file;
 use diesel::prelude::*;
 use rand::prelude::*;
 
-use crate::db::{
+use crate::db;
+use crate::adapters::{
     self,
-    adapters::{
-        self,
-        Adapter,
-    },
+    Adapter,
 };
-use crate::graphql::Context;
+use crate::graphql::{
+    queries,
+    Context,
+};
 
 // TODO! THIS IS WIP FOR THE NEW GRAPHQL SCHEMA
 // TODO! REFACTOR BLOCKS INTO HELPER METHODS
@@ -33,15 +34,21 @@ impl QueryFields for Query {
         let mut p = players
             .filter(dsl::token.eq(&player_code))
             .load::<db::models::Player>(&**db_conn)?;
-        if let Some(p) = p.pop() {
-            Ok(Some(adapters::Player::adapt(p)))
-        } else {
-            Ok(None)
-        }
+        Ok(p.pop().map(adapters::Player::adapt))
     }
 }
 
 pub struct Mutation;
+
+impl Mutation {
+
+    fn gen_join_code(&self) -> String {
+        rand::thread_rng()
+            .sample_iter(&rand::distributions::Alphanumeric)
+            .take(8)
+            .collect()
+    }
+}
 
 impl MutationFields for Mutation {
 
@@ -49,55 +56,29 @@ impl MutationFields for Mutation {
         executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Room, Walked>,
         name: String,
-        players: i32
+        players: i32,
+        rounds: i32
     ) -> FieldResult<Room> {
         let db_conn = executor.context().db_conn();
-        let join_code: String = rand::thread_rng()
-            .sample_iter(&rand::distributions::Alphanumeric)
-            .take(8)
-            .collect();
         let r = db::models::NewRoom {
-            players,
-            join_code: join_code.clone(),
-        };
-        let id = {
-            use db::schema::rooms::dsl::*;
-            diesel::insert_into(rooms)
-                .values(r)
-                .execute(&**db_conn)?;
-            rooms.select(id)
-                .filter(join_code.eq(join_code.clone()))
-                .filter(state.eq(
-                    <adapters::RoomState as Adapter<RoomState, i32>>::adapt(RoomState::Joining)))
-                .load::<i32>(&**db_conn)?
-                .pop()
-                .expect("Empty query")
-        };
-        Ok(Room{
-            id,
-            name, 
-            join_code,
+            name,
             max_players: players,
-            joined_players: 0,
-            state: RoomState::Joining,
-        })
+            join_code: self.gen_join_code(),
+            num_of_rounds: rounds,
+        };
+        let r = queries::room::insert_and_return(r, db_conn)?;
+        Ok(adapters::Room::adapt(r))
     }
 
     fn field_join_room(&self,
         executor: &Executor<'_, Context>,
-        _: &QueryTrail<'_, User, Walked>,
+        _: &QueryTrail<'_, Player, Walked>,
         room_code: String,
-        user_name: String
-    ) -> FieldResult<Option<User>> {
+        player_name: String
+    ) -> FieldResult<Option<Player>> {
         let db_conn = executor.context().db_conn();
         let room = {
-            use db::schema::rooms::dsl::*;
-            match rooms.filter(join_code.eq(room_code))
-                .filter(state.eq(
-                    <adapters::RoomState as Adapter<RoomState, i32>>::adapt(RoomState::Joining)))
-                .load::<db::models::Room>(&**db_conn)?
-                .pop() 
-            {
+            match queries::room::get(&room_code, RoomState::Joining, db_conn) {
                 None => return Ok(None),
                 Some(r) => r,
             }

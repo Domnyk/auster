@@ -48,7 +48,7 @@ pub struct Question {
 #[table_name = "questions"]
 pub struct NewQuestion {
     pub question: String,
-    pub room_id: i32,
+    pub player_id: i32,
 }
 
 

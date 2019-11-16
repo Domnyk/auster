@@ -3,6 +3,7 @@ use rocket::request::{self, FromRequest, Request};
 use crate::db;
 
 pub mod models;
+mod queries;
 
 pub struct Context {
     db: db::Connection,
