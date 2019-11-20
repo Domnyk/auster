@@ -9,7 +9,14 @@ on: [push]
 #       - 'eurus/*'
 
 jobs:
-  build:
+  test:
+    runs-on: ubuntu-18.04
+    steps: actions/checkout@v1
+    - uses: actions/checkout@v1
+    - name: run all tests
+      run: cargo test 
+  
+  build prod:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v1
@@ -17,7 +24,10 @@ jobs:
       run: sudo apt-get update && sudo apt-get install sqlite3
     - name: build prod
       run: cd eurus && cargo build --release
-  # test:
-  #   runs-on: ubuntu-latest
+    - name: upload compilation artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: artifacts
+        path: cd eurus/target/release/eurus
   # deploy:
   #   runs-on: ubuntu-latest
