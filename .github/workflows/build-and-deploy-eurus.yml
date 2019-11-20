@@ -16,7 +16,7 @@ jobs:
     - name: run all tests
       run: cargo test 
   
-  build prod:
+  build-prod:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v1
