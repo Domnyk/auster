@@ -13,9 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: list
-      working-directory: ${{ github.workspace }}
-      run: ls -la
+    # - name: list
+    #   working-directory: ${{ github.workspace }}
+    #   run: ls -la
+    - name: cd to eurus
+      run: cd eurus
     - name: build prod
       run: cargo build --release
   # test:
