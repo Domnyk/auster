@@ -37,6 +37,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-18.04
+    needs: [test, build-prod]
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v1
