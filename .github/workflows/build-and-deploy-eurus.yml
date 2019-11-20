@@ -38,8 +38,8 @@ jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
-    - uses: appleboy/ssh-action@master
     - name: ssh into eurus
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EURUS_HOST }}
         username: ${{ secrets.EURUS_USER }}
