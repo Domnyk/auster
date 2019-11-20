@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v1
+    - name: install sqlite3
+      run: sudo apt-get update && sudo apt-get install sqlite3
     - name: run all tests
       working-directory: eurus
       run: cargo test 
