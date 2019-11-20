@@ -44,5 +44,5 @@ jobs:
         host: ${{ secrets.EURUS_HOST }}
         username: ${{ secrets.EURUS_USER }}
         key: ${{ secrets.EURUS_GITHUB_ACTIONS_PRIVATE_KEY }}
-        script: whoami
+        script: ls -al
       
