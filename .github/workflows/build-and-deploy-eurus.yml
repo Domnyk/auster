@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: list
-      run: ll
+      run: ls -l
     - name: build prod
       run: cargo build --release
   # test:
