@@ -19,6 +19,7 @@ jobs:
   
   build-prod:
     runs-on: ubuntu-18.04
+    needs: test
     steps:
     - uses: actions/checkout@v1
     - name: install sqlite3
@@ -31,5 +32,9 @@ jobs:
       with:
         name: artifacts
         path: eurus/target/release/eurus
+  
   # deploy:
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-18.04
+  #   needs: [test, build-prod]
+  #   steps:
+      
