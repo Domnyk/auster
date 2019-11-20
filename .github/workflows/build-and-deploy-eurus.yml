@@ -38,11 +38,24 @@ jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
-    - name: ssh into eurus
+    - name: Download artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: artifacts
+    - name: copy build to server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.EURUS_HOST }}
+        username: ${{ secrets.EURUS_USER }}
+        key: ${{ secrets.EURUS_GITHUB_ACTIONS_PRIVATE_KEY }}
+        source: "artifacts/eurus"
+        target: "/root/prod/"
+    - name: restart server
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EURUS_HOST }}
         username: ${{ secrets.EURUS_USER }}
         key: ${{ secrets.EURUS_GITHUB_ACTIONS_PRIVATE_KEY }}
-        script: ls -al
+        script: cd /root/prod && kill `pgrep -f eurus` && ./eurus
+        
       
