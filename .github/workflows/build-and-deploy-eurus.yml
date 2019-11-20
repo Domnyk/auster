@@ -49,7 +49,7 @@ jobs:
         host: ${{ secrets.EURUS_HOST }}
         username: ${{ secrets.EURUS_USER }}
         key: ${{ secrets.EURUS_GITHUB_ACTIONS_PRIVATE_KEY }}
-        source: "artifacts/eurus"
+        source: "eurus"
         target: "/root/prod/"
     - name: restart server
       uses: appleboy/ssh-action@master
