@@ -14,7 +14,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install sqlite3
+<<<<<<< Updated upstream
       run: sudo apt-get update && sudo apt-get install sqlite3
+=======
+      run: sudo apt-get update && sudo apt-get install sqlite3 libsqlite3-dev
+>>>>>>> Stashed changes
     - name: run all tests
       working-directory: eurus
       run: cargo test 
