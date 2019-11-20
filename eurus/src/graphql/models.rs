@@ -42,7 +42,7 @@ pub struct Mutation;
 
 impl Mutation {
 
-    fn gen_join_code(&self) -> String {
+    fn gen_join_code() -> String {
         rand::thread_rng()
             .sample_iter(&rand::distributions::Alphanumeric)
             .take(8)
@@ -63,7 +63,7 @@ impl MutationFields for Mutation {
         let r = db::models::NewRoom {
             name,
             max_players: players,
-            join_code: self.gen_join_code(),
+            join_code: Self::gen_join_code(),
             num_of_rounds: rounds,
         };
         let r = queries::room::insert_and_return(r, db_conn)?;
@@ -77,47 +77,14 @@ impl MutationFields for Mutation {
         player_name: String
     ) -> FieldResult<Option<Player>> {
         let db_conn = executor.context().db_conn();
-        let room = {
-            match queries::room::get(&room_code, RoomState::Joining, db_conn) {
-                None => return Ok(None),
-                Some(r) => r,
-            }
-        };
-        {
-            use db::schema::rooms::dsl::*;
-            let target = rooms.filter(id.eq(room.id));
-            if room.curr_players + 1 == room.players {
-                diesel::update(target).set((
-                    curr_players.eq(curr_players + 1),
-                    state.eq(<adapters::RoomState as Adapter<RoomState, i32>>::adapt(RoomState::Dead))
-                )).execute(&**db_conn)?;
-            } else {
-                diesel::update(target)
-                    .set(curr_players.eq(curr_players + 1))
-                    .execute(&**db_conn)?;
-            }
-        }
-        let u = {
-            use db::schema::users::dsl::*;
-            let rng_token: String = rand::thread_rng()
-                .sample_iter(&rand::distributions::Alphanumeric)
-                .take(16)
-                .collect();
-            let u = db::models::NewUser{
-                name: Some(user_name),
-                token: rng_token,
-                room_id: room.id,
-            };
-            diesel::insert_into(users)
-                .values(u.clone())
-                .execute(&**db_conn)?;
-            u
-        };
-        Ok(Some(User{
-            room_id: u.room_id,
-            name: u.name,
-            token: u.token,
-        }))
+        // XXX: match on error and return none
+        let room = queries::room::get(
+            &room_code, RoomState::Joining, db_conn)?;
+        let player = queries::room::add_player(
+            room,
+            player_name,
+            db_conn)?;
+        Ok(Some(adapters::Player::adapt(player)))
     }
 }
 
@@ -197,8 +164,8 @@ impl RoomFields for Room {
 
     fn field_joined_players(&self, executor: &Executor<'_, Context>) -> FieldResult<i32> {
         let db_conn = executor.context().db_conn();
-        use db::schema::users::dsl::*;
-        let res = users
+        use db::schema::players::dsl::*;
+        let res = players
             .filter(room_id.eq(self.id))
             .count()
             .load::<i64>(&**db_conn)?

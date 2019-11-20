@@ -51,4 +51,40 @@ pub mod room {
             .pop()
             .expect("Empty query"))
     }
+
+    pub fn add_player(
+        room: db::models::Room,
+        player_name: String,
+        db_conn: &db::Connection
+    ) -> QueryResult<db::models::Player> {
+        // XXX: Can be a race when 2 players
+        // want to join a near full room
+        use db::schema::players::dsl::*;
+        let players_count = players
+            .filter(room_id.eq(room.id))
+            .count()
+            .load::<i64>(&**db_conn)?
+            .pop()
+            .expect("Empty count query");
+        if players_count == ((room.max_players-1) as i64) {
+            use db::schema::rooms::dsl::*;
+            diesel::update(rooms.filter(id.eq(room.id))).set(
+                state.eq(adapters::RoomState::Collecting.into())
+            ).execute(&**db_conn);
+        }
+        let p_tok = rand::thread_rng().gen::<i32>();
+        let player = db::models::NewPlayer {
+            name: player_name,
+            room_id: room.id,
+            token: p_tok,
+        }
+        diesel::insert_into(players)
+            .values(player)
+            .execute(&**db_conn)?;
+        Ok(players
+            .filter(token.eq(p_tok))
+            .load::<db::models::Player>(&**db_conn)?
+            .pop()
+            .expect("Empty query")))
+    }
 }

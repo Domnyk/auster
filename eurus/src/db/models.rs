@@ -13,7 +13,7 @@ pub struct Player {
 
 #[derive(Insertable, Clone)]
 #[table_name = "players"]
-pub struct NewUser {
+pub struct NewPlayer {
     pub name: String,
     pub token: i32,
     pub room_id: i32,
