@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: list
-      run: ls -l
+      working-directory: ${{ github.workspace }}
+      run: ls -la
     - name: build prod
       run: cargo build --release
   # test:
