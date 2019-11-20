@@ -11,7 +11,7 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-18.04
-    steps: actions/checkout@v1
+    steps:
     - uses: actions/checkout@v1
     - name: run all tests
       run: cargo test 
