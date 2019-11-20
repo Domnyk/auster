@@ -34,9 +34,15 @@ jobs:
       with:
         name: artifacts
         path: eurus/target/release/eurus
-  
-  # deploy:
-  #   runs-on: ubuntu-18.04
-  #   needs: [test, build-prod]
-  #   steps:
+
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: appleboy/ssh-action@master
+    - name: ssh into eurus
+      with:
+        host: ${{ secrets.EURUS_HOST }}
+        username: ${{ secrets.EURUS_USER }}
+        key: ${{ secrets.EURUS_GITHUB_ACTIONS_PRIVATE_KEY }}
+        script: whoami
       
