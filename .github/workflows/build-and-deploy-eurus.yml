@@ -12,8 +12,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: cd to eurus
-      run: cd eurus
+    - name: list
+      run: ll
     - name: build prod
       run: cargo build --release
   # test:
