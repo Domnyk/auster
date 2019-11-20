@@ -12,9 +12,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Build prod
+    - name: cd to eurus
+      run: cd eurus
+    - name: build prod
       run: cargo build --release
-    - name: Run tests
-      run: cargo test
-#     - name: Deploy
-#       run: TODO
+  # test:
+  #   runs-on: ubuntu-latest
+  # deploy:
+  #   runs-on: ubuntu-latest
