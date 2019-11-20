@@ -16,10 +16,8 @@ jobs:
     # - name: list
     #   working-directory: ${{ github.workspace }}
     #   run: ls -la
-    - name: cd to eurus
-      run: cd eurus
     - name: build prod
-      run: cargo build --release
+      run: cd eurus && cargo build --release
   # test:
   #   runs-on: ubuntu-latest
   # deploy:
