@@ -85,6 +85,6 @@ pub mod room {
             .filter(token.eq(p_tok))
             .load::<db::models::Player>(&**db_conn)?
             .pop()
-            .expect("Empty query")))
+            .expect("Empty query"))
     }
 }
