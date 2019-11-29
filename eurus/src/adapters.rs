@@ -79,6 +79,9 @@ impl Into<graphql::models::RoomState> for RoomState {
         match self {
             RoomState::Joining => graphql::models::RoomState::Joining,
             RoomState::Dead => graphql::models::RoomState::Dead,
+            RoomState::Collecting => graphql::models::RoomState::Collecting,
+            RoomState::Polling => graphql::models::RoomState::Polling,
+            RoomState::Answering => graphql::models::RoomState::Answering,
         }
     }
 }
@@ -141,7 +144,7 @@ impl Into<graphql::models::Answer> for Answer {
         graphql::models::Answer {
             id: self.0.id,
             content: self.0.answer,
-            player_id: self.0.player_id,
+            player_id: self.0.id,
             question_id: self.0.question_id,
         }
     }
@@ -159,7 +162,7 @@ impl Into<graphql::models::Question> for Question {
     fn into(self) -> graphql::models::Question {
         graphql::models::Question {
             content: self.0.question,
-            player_id: self.0.player_id,
+            player_id: self.0.id,
             picked: self.0.was_picked,
         }
     }

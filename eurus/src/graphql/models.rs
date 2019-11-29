@@ -86,6 +86,33 @@ impl MutationFields for Mutation {
             db_conn)?;
         Ok(Some(adapters::Player::adapt(player)))
     }
+
+    fn field_send_question(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Question, Walked>,
+        _token: i32,
+        _content: String
+    ) -> FieldResult<Option<Question>> {
+        unimplemented!("Mutation send_question")
+    }
+
+    fn field_send_answer(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Answer, Walked>,
+        _token: i32,
+        _content: String
+    ) -> FieldResult<Option<Answer>> {
+        unimplemented!("mutation send_answer")
+    }
+
+    fn field_poll_answer(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Answer, Walked>,
+        _token: i32,
+        _answer: i32
+    ) -> FieldResult<Option<Answer>> {
+        unimplemented!("mutation poll asnwer")
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -98,12 +125,12 @@ pub struct Player {
 }
 
 impl PlayerFields for Player {
-    fn field_token(&self, _: &Executor<'_, Context>) -> FieldResult<String> {
-        Ok(self.token.clone())
+    fn field_token(&self, _: &Executor<'_, Context>) -> FieldResult<i32> {
+        Ok(self.token)
     }
 
     fn field_name(&self, _: &Executor<'_, Context>) -> FieldResult<Option<String>> {
-        Ok(self.name.clone())
+        Ok(Some(self.name.clone()))
     }
 
     fn field_room(&self,
@@ -119,6 +146,17 @@ impl PlayerFields for Player {
             .expect("Empty query result");
         Ok(adapters::Room::adapt(room))
     }
+
+    fn field_polled_answer(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Answer, Walked>
+    ) -> FieldResult<Option<Answer>> {
+        unimplemented!("player polled_answer");
+    }
+
+    fn field_points(&self, _: &Executor<'_, Context>) -> FieldResult<i32> {
+        Ok(self.points)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -129,11 +167,55 @@ pub struct Answer {
     pub question_id: i32,
 }
 
+impl AnswerFields for Answer {
+    
+    fn field_id(&self, _: &Executor<'_, Context>) -> FieldResult<i32> {
+        Ok(self.id)
+    }
+
+    fn field_content(&self, _: &Executor<'_, Context>) -> FieldResult<String> {
+        Ok(self.content.clone())
+    }
+
+    fn field_player(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Player, Walked>
+    ) -> FieldResult<Player> {
+        unimplemented!("Answer player")
+    }
+
+    fn field_question(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Question, Walked>
+    ) -> FieldResult<Question> {
+        unimplemented!("Answer question")
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Question {
     pub content: String,
     pub player_id: i32,
     pub picked: bool,
+}
+
+impl QuestionFields for Question {
+
+    fn field_content(&self, _: &Executor<'_, Context>) -> FieldResult<String> {
+        Ok(self.content.clone())
+    }
+
+    fn field_player(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Player, Walked>
+    ) -> FieldResult<Player> {
+        unimplemented!("question player")
+    }
+
+    fn field_picked(&self, _: &Executor<'_, Context>) -> FieldResult<bool> {
+        Ok(self.picked)
+    }
+
 }
 
 #[derive(Clone, Debug)]
@@ -162,34 +244,69 @@ impl RoomFields for Room {
         Ok(self.name.clone())
     }
 
-    fn field_joined_players(&self, executor: &Executor<'_, Context>) -> FieldResult<i32> {
-        let db_conn = executor.context().db_conn();
-        use db::schema::players::dsl::*;
-        let res = players
-            .filter(room_id.eq(self.id))
-            .count()
-            .load::<i64>(&**db_conn)?
-            .pop()
-            .expect("Empty query result");
-        Ok(res as i32)
+    fn field_max_rounds(&self, _: &Executor<'_, Context>) -> FieldResult<i32> {
+        Ok(self.max_rounds)
+    }
+
+    fn field_curr_round(&self, _: &Executor<'_, Context>) -> FieldResult<i32> {
+        Ok(self.curr_round)
     }
 
     fn field_state(&self, _: &Executor<'_, Context>) -> FieldResult<RoomState> {
         Ok(self.state)
     }
 
+
+    fn field_curr_player(&self,
+        executor: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Player, Walked>
+    ) -> FieldResult<Option<Player>> {
+        let db_conn = executor.context().db_conn();
+        Ok(self.curr_player_id.map(|player_id| {
+            use db::schema::players::dsl::*;
+            let p = players
+                .filter(id.eq(player_id))
+                .load::<db::models::Player>(&**db_conn)
+                .expect("Couldn't execute query")
+                .pop()
+                .expect("Empty query result");
+            adapters::Player::adapt(p)
+        }))
+    }
+
+
     fn field_players(&self,
         executor: &Executor<'_, Context>,
-        _: &QueryTrail<'_, User, Walked>
-    ) -> FieldResult<Vec<User>> {
+        _: &QueryTrail<'_, Player, Walked>
+    ) -> FieldResult<Vec<Player>> {
         let db_conn = executor.context().db_conn();
-        use db::schema::users::dsl::*;
-        let res = users
-            .filter(room_id.eq(self.id))
-            .load::<db::models::User>(&**db_conn)?;
+        use db::schema::players::dsl::*;
+        let r_id = queries::room::get_id(
+            &self.join_code,
+            &self.name,
+            self.state,
+            db_conn
+        )?;
+        let res = players
+            .filter(room_id.eq(r_id))
+            .load::<db::models::Player>(&**db_conn)?;
         Ok(res
             .into_iter()
-            .map(adapters::User::adapt)
+            .map(adapters::Player::adapt)
             .collect())
+    }
+
+    fn field_curr_answers(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Answer, Walked>
+    ) -> FieldResult<Option<Vec<Answer>>> {
+        unimplemented!("Room Curr Answer");
+    }
+
+    fn field_curr_question(&self,
+        _: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Question, Walked>
+    ) -> FieldResult<Option<Question>> {
+        unimplemented!("Romm Curr Question");
     }
 }
