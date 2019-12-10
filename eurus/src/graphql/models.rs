@@ -141,17 +141,23 @@ impl PlayerFields for Player {
         let db_conn = executor.context().db_conn();
         let room = rooms::dsl::rooms
             .filter(rooms::dsl::id.eq(self.room_id))
-            .load::<db::models::Room>(&**db_conn)?
-            .pop()
-            .expect("Empty query result");
+            .first::<db::models::Room>(&**db_conn)?
         Ok(adapters::Room::adapt(room))
     }
 
     fn field_polled_answer(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Answer, Walked>
     ) -> FieldResult<Option<Answer>> {
-        unimplemented!("player polled_answer");
+        let db_conn = executor.context().db_conn();
+        Ok(self.curr_answer_id.map(|answer_id| {
+            use db::schema::answers::dsl::*;
+            let a = answers
+                .filter(id.eq(answer_id))
+                .first::<db::models::Answer>(&**db_conn)
+                .expect("Couldn't execute query");
+            adapters::Answer::adapt(a)
+        }))
     }
 
     fn field_points(&self, _: &Executor<'_, Context>) -> FieldResult<i32> {
@@ -178,17 +184,21 @@ impl AnswerFields for Answer {
     }
 
     fn field_player(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Player, Walked>
     ) -> FieldResult<Player> {
-        unimplemented!("Answer player")
+        let db_conn = executor.context().db_conn();
+        let p = queries::player::get(self.player_id, db_conn)?;
+        Ok(adapters::Player::adapt(p))
     }
 
     fn field_question(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Question, Walked>
     ) -> FieldResult<Question> {
-        unimplemented!("Answer question")
+        let db_conn = executor.context().db_conn();
+        let q = queries::question::get(self.player_id, db_conn)?;
+        Ok(adapters::Question::adapt(q))
     }
 }
 
@@ -206,10 +216,12 @@ impl QuestionFields for Question {
     }
 
     fn field_player(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Player, Walked>
     ) -> FieldResult<Player> {
-        unimplemented!("question player")
+        let db_conn = executor.context().db_conn();
+        let p = queries::player::get(self.player_id, db_conn)?;
+        Ok(adapters::Player::adapt(p))
     }
 
     fn field_picked(&self, _: &Executor<'_, Context>) -> FieldResult<bool> {
@@ -266,10 +278,8 @@ impl RoomFields for Room {
             use db::schema::players::dsl::*;
             let p = players
                 .filter(id.eq(player_id))
-                .load::<db::models::Player>(&**db_conn)
-                .expect("Couldn't execute query")
-                .pop()
-                .expect("Empty query result");
+                .first::<db::models::Player>(&**db_conn)
+                .expect("Couldn't execute query");
             adapters::Player::adapt(p)
         }))
     }
@@ -289,24 +299,43 @@ impl RoomFields for Room {
         )?;
         let res = players
             .filter(room_id.eq(r_id))
-            .load::<db::models::Player>(&**db_conn)?;
-        Ok(res
+            .load::<db::models::Player>(&**db_conn)?
             .into_iter()
             .map(adapters::Player::adapt)
-            .collect())
+            .collect();
+        Ok(res)
     }
 
     fn field_curr_answers(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Answer, Walked>
     ) -> FieldResult<Option<Vec<Answer>>> {
-        unimplemented!("Room Curr Answer");
+        match self.state {
+            RoomState::Polling => (),
+            _ => return Ok(None),
+        }
+        let db_conn = executor.context().db_conn();
+        let answers = queries::room::answers(
+            &self.join_code,
+            db_conn)?
+            .into_iter()
+            .map(adapters::Answer::adapt)
+            .collect();
+        Ok(Some(answers))
     }
 
     fn field_curr_question(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Question, Walked>
     ) -> FieldResult<Option<Question>> {
-        unimplemented!("Romm Curr Question");
+        let db_conn = executor.context().db_conn();
+        Ok(self.curr_question_id.map(|question_id| {
+            use db::schema::questions::dsl::*;
+            let q = questions
+                .filter(id.eq(question_id))
+                .first::<db::models::Question>(&**db_conn)
+                .expect("Couldn't execute query");
+            adapters::Question::adapt(q)
+        }))
     }
 }

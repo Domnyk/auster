@@ -1,7 +1,12 @@
 use crate::db::schema::*;
-use diesel::{Insertable, Queryable};
+use diesel::{
+    Insertable,
+    Queryable,
+    Identifiable,
+};
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Associations)]
+#[belongs_to(Room)]
 pub struct Player {
     pub id: i32,
     pub token: i32,
@@ -20,12 +25,13 @@ pub struct NewPlayer {
 
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Associations)]
+#[belongs_to(Player)]
 pub struct Answer {
     pub id: i32,
     pub answer: String,
+    pub player_id: i32,
     pub question_id: i32,
-    pub room_id: i32,
 }
 
 #[derive(Insertable, Clone)]
@@ -36,12 +42,13 @@ pub struct NewAnswer {
     pub player_id: i32,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Associations)]
+#[belongs_to(Player)]
 pub struct Question {
     pub id: i32,
     pub question: String,
     pub was_picked: bool,
-    pub room_id: i32,
+    pub player_id: i32,
 }
 
 #[derive(Insertable, Clone)]
@@ -52,7 +59,7 @@ pub struct NewQuestion {
 }
 
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Associations)]
 pub struct Room {
     pub id: i32,
     pub name: String,

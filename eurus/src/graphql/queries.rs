@@ -12,40 +12,36 @@ use crate::graphql::models::RoomState;
 pub mod room {
     use super::*;
 
-    pub fn insert_and_return(
+    pub(crate) fn insert_and_return(
         v: db::models::NewRoom,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Room> {
-        use db::schema::rooms::dsl::rooms;
-        let join_code = v.join_code.clone();
+        use db::schema::rooms::dsl::{rooms, self};
+        let jc = v.join_code.clone();
         diesel::insert_into(rooms)
             .values(v)
             .execute(&**db_conn)?;
-        last_inserted(&join_code, db_conn)
+        Ok(rooms.filter(
+            dsl::join_code.eq(jc))
+            .filter(dsl::state.eq(
+                <adapters::RoomState as Adapter<RoomState, i32>>::adapt(RoomState::Joining)))
+            .first::<db::models::Room>(&**db_conn)?)
     }
 
-    pub fn last_inserted(
-        join_code: &str,
-        db_conn: &db::Connection
-    ) -> QueryResult<db::models::Room> {
-        get(join_code, RoomState::Joining, db_conn)
-    }
-
-    pub fn get(
+    pub(crate) fn get(
         join_code: &str,
         state: RoomState,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Room> {
         use db::schema::rooms::dsl;
-        Ok(dsl::rooms.filter(dsl::join_code.eq(join_code))
+        Ok(dsl::rooms.filter(
+            dsl::join_code.eq(join_code))
             .filter(dsl::state.eq(
                 <adapters::RoomState as Adapter<RoomState, i32>>::adapt(state)))
-            .load::<db::models::Room>(&**db_conn)?
-            .pop()
-            .expect("Empty query result"))
+            .first::<db::models::Room>(&**db_conn)?)
     }
 
-    pub fn get_id(
+    pub(crate) fn get_id(
         join_code: &str,
         name: &str,
         state: RoomState,
@@ -58,12 +54,10 @@ pub mod room {
             .filter(dsl::state.eq(
                 <adapters::RoomState as Adapter<RoomState, i32>>::adapt(state)))
             .filter(dsl::name.eq(name))
-            .load::<i32>(&**db_conn)?
-            .pop()
-            .expect("Empty query result"))
+            .first::<i32>(&**db_conn)?)
     }
 
-    pub fn add_player(
+    pub(crate) fn add_player(
         room: db::models::Room,
         player_name: String,
         db_conn: &db::Connection
@@ -74,9 +68,7 @@ pub mod room {
         let players_count = players
             .filter(room_id.eq(room.id))
             .count()
-            .load::<i64>(&**db_conn)?
-            .pop()
-            .expect("Empty count query");
+            .first::<i64>(&**db_conn)?;
         if players_count == ((room.max_players-1) as i64) {
             use db::schema::rooms::dsl::*;
             diesel::update(rooms.filter(id.eq(room.id))).set(
@@ -94,8 +86,45 @@ pub mod room {
             .execute(&**db_conn)?;
         Ok(players
             .filter(token.eq(p_tok))
-            .load::<db::models::Player>(&**db_conn)?
-            .pop()
-            .expect("Empty query"))
+            .first::<db::models::Player>(&**db_conn)?)
     }
+
+    pub(crate) fn answers(
+        join_code: &str,
+        db_conn: &db::Connection
+    ) -> QueryResult<Vec<db::models::Answer>> {
+        use db::schema::answers::dsl;
+        let room = get(join_code, RoomState::Polling, db_conn)?;
+        let players = db::models::Player::belonging_to(&room)
+            .load::<db::models::Player>(&**db_conn)?;
+        db::models::Answer::belonging_to(&players)
+            .filter(dsl::question_id.eq(room.curr_question_id.unwrap()))
+            .load::<db::models::Answer>(&**db_conn)
+
+    }
+}
+
+pub mod player {
+    use super::*;
+
+    pub(crate) fn get(
+        player_id: i32,
+        db_conn: &db::Connection
+    ) -> QueryResult<db::models::Player> {
+        use db::schema::players::dsl::*;
+        players.filter(id.eq(player_id)).first(&**db_conn)
+    }
+}
+
+pub mod question {
+    use super::*;
+
+    pub(crate) fn get(
+        question_id: i32,
+        db_conn: &db::Connection
+    ) -> QueryResult<db::models::Question> {
+        use db::schema::questions::dsl::*;
+        questions.filter(id.eq(question_id)).first(&**db_conn)
+    }
+
 }
