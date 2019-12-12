@@ -88,12 +88,14 @@ impl MutationFields for Mutation {
     }
 
     fn field_send_question(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Question, Walked>,
-        _token: i32,
-        _content: String
+        token: i32,
+        content: String
     ) -> FieldResult<Option<Question>> {
-        unimplemented!("Mutation send_question")
+        let db_conn = executor.context().db_conn();
+        Ok(Some(adapters::Question::adapt(queries::question::new(token, &content, db_conn)?)))
+
     }
 
     fn field_send_answer(&self,
@@ -102,6 +104,10 @@ impl MutationFields for Mutation {
         _token: i32,
         _content: String
     ) -> FieldResult<Option<Answer>> {
+        // get player if it desnt have an answer
+        // get room, be sure that its in the answering state
+        // if that was the last player to send an answer
+        // then change the room state to polling
         unimplemented!("mutation send_answer")
     }
 
@@ -111,6 +117,15 @@ impl MutationFields for Mutation {
         _token: i32,
         _answer: i32
     ) -> FieldResult<Option<Answer>> {
+        // choose answer
+        // if all have chosen then count points
+        // check the round number
+        // if the last then stop the game
+        // if not the last pick next question
+        // pick player that has not answered in the round yet (how?)
+        // change state to answering
+        // increment the round counter
+        // make all players chosen answer to null (important!)
         unimplemented!("mutation poll asnwer")
     }
 }
@@ -140,8 +155,8 @@ impl PlayerFields for Player {
         use db::schema::rooms;
         let db_conn = executor.context().db_conn();
         let room = rooms::dsl::rooms
-            .filter(rooms::dsl::id.eq(self.room_id))
-            .first::<db::models::Room>(&**db_conn)?
+            .find(self.room_id)
+            .first::<db::models::Room>(&**db_conn)?;
         Ok(adapters::Room::adapt(room))
     }
 
