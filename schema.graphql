@@ -11,9 +11,11 @@ type Mutation {
 	newRoom(name: String!, players: Int!, rounds: Int!): Room! @juniper(ownership: "owned")
 	joinRoom(roomCode: String!, playerName: String!): Player @juniper(ownership: "owned")
 
+	# Eurus not implemented
 	sendQuestion(token: Int!, content: String!): Question @juniper(ownership: "owned")
+	# Eurus not implemented
 	sendAnswer(token: Int!, content: String!): Answer @juniper(ownership: "owned")
-	
+	# Eururs not implemented
 	pollAnswer(token: Int!, answer: Int!): Answer @juniper(ownership: "owned")
 }
 

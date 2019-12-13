@@ -1,10 +1,10 @@
 -- Your SQL goes here-- tables
 -- Table: answers
 CREATE TABLE answers (
-    id int NOT NULL CONSTRAINT answers_pk PRIMARY KEY,
+    id INTEGER CONSTRAINT answers_pk PRIMARY KEY,
     answer varchar(256) NOT NULL,
-    question_id int NOT NULL,
-    player_id int NOT NULL,
+    question_id INTEGER NOT NULL,
+    player_id  INTEGER NOT NULL,
     CONSTRAINT answers_questions FOREIGN KEY (question_id)
     REFERENCES questions (id),
     CONSTRAINT answers_players FOREIGN KEY (player_id)
@@ -13,12 +13,12 @@ CREATE TABLE answers (
 
 -- Table: players
 CREATE TABLE players (
-    id int NOT NULL CONSTRAINT players_pk PRIMARY KEY,
-    token int NOT NULL,
+    id INTEGER CONSTRAINT players_pk PRIMARY KEY,
+    token  INTEGER NOT NULL,
     name varchar(256) NOT NULL,
-    score int NOT NULL,
-    room_id int NOT NULL,
-    answer_id int,
+    score  INTEGER NOT NULL DEFAULT 0,
+    room_id INTEGER NOT NULL,
+    answer_id  INTEGER DEFAULT NULL,
     CONSTRAINT rooms_players FOREIGN KEY (room_id)
     REFERENCES rooms (id),
     CONSTRAINT players_answers FOREIGN KEY (answer_id)
@@ -27,25 +27,25 @@ CREATE TABLE players (
 
 -- Table: questions
 CREATE TABLE questions (
-    id int NOT NULL CONSTRAINT questions_pk PRIMARY KEY,
+    id INTEGER CONSTRAINT questions_pk PRIMARY KEY,
     question varchar(512) NOT NULL,
-    was_picked boolean NOT NULL,
-    player_id int NOT NULL,
+    was_picked boolean NOT NULL DEFAULT 0,
+    player_id  INTEGER NOT NULL,
     CONSTRAINT questions_players FOREIGN KEY (player_id)
     REFERENCES players (id)
 );
 
 -- Table: rooms
 CREATE TABLE rooms (
-    id int NOT NULL CONSTRAINT rooms_pk PRIMARY KEY,
+    id INTEGER CONSTRAINT rooms_pk PRIMARY KEY,
     name varchar(256) NOT NULL,
-    max_players int NOT NULL,
-    state int NOT NULL,
+    max_players INTEGER NOT NULL,
+    state  INTEGER NOT NULL DEFAULT 0,
     join_code varchar(8) NOT NULL,
-    num_of_rounds int NOT NULL,
-    curr_round int NOT NULL CHECK (curr_round <= num_of_rounds),
-    curr_player_id int,
-    curr_question_id int,
+    num_of_rounds  INTEGER NOT NULL,
+    curr_round INTEGER NOT NULL CHECK (curr_round <= num_of_rounds) DEFAULT 0,
+    curr_player_id INTEGER DEFAULT NULL,
+    curr_question_id INTEGER DEFAULT NULL,
     CONSTRAINT players_rooms FOREIGN KEY (curr_player_id)
     REFERENCES players (id),
     CONSTRAINT rooms_questions FOREIGN KEY (curr_question_id)

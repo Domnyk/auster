@@ -199,6 +199,10 @@ pub mod question {
         content: &str,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Question> {
+        unimplemented!("queries::question::new");
+        // TODO: when picking a question remember to pick
+        // a player to ask the question to.
+        // Right now it just doesn't work
         let player = player::get_by_tok(p_token, db_conn)?;
         let room = room::get_by_player(&player, db_conn)?;
         let question = db::models::NewQuestion{

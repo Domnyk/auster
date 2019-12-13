@@ -45,11 +45,6 @@ joinable!(answers -> questions (question_id));
 joinable!(questions -> players (player_id));
 joinable!(rooms -> questions (curr_question_id));
 
-// Custom queris
-joinable!(players -> rooms (room_id));
-joinable!(answers -> players (player_id));
-// End of custom queries
-
 allow_tables_to_appear_in_same_query!(
     answers,
     players,
