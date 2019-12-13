@@ -94,21 +94,20 @@ impl MutationFields for Mutation {
         content: String
     ) -> FieldResult<Option<Question>> {
         let db_conn = executor.context().db_conn();
-        Ok(Some(adapters::Question::adapt(queries::question::new(token, &content, db_conn)?)))
+        let q = queries::question::new(token, &content, db_conn)?;
+        Ok(Some(adapters::Question::adapt(q)))
 
     }
 
     fn field_send_answer(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Answer, Walked>,
-        _token: i32,
-        _content: String
+        token: i32,
+        content: String
     ) -> FieldResult<Option<Answer>> {
-        // get player if it desnt have an answer
-        // get room, be sure that its in the answering state
-        // if that was the last player to send an answer
-        // then change the room state to polling
-        unimplemented!("mutation send_answer")
+        let db_conn = executor.context().db_conn();
+        let a = queries::answer::new(token, &content, db_conn)?;
+        Ok(Some(adapters::Answer::adapt(a)))
     }
 
     fn field_poll_answer(&self,

@@ -9,10 +9,10 @@ use crate::adapters::{
 use crate::graphql::models::RoomState;
 
 
-pub mod room {
+pub(crate) mod room {
     use super::*;
 
-    pub(crate) fn insert_and_return(
+    pub fn insert_and_return(
         v: db::models::NewRoom,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Room> {
@@ -28,7 +28,7 @@ pub mod room {
             .first(&**db_conn)
     }
 
-    pub(crate) fn get(
+    pub fn get(
         join_code: &str,
         state: RoomState,
         db_conn: &db::Connection
@@ -41,7 +41,7 @@ pub mod room {
             .first(&**db_conn)
     }
 
-    // pub(crate) fn get_by_id(
+    // pub fn get_by_id(
     //     room_id: i32,
     //     room_state: RoomState,
     //     db_conn: &db::Connection
@@ -53,7 +53,7 @@ pub mod room {
     //         .first(&**db_conn)
     // }
 
-    pub(crate) fn get_id(
+    pub fn get_id(
         join_code: &str,
         name: &str,
         state: RoomState,
@@ -69,7 +69,7 @@ pub mod room {
             .first(&**db_conn)?)
     }
 
-    pub(crate) fn get_by_player(
+    pub fn get_by_player(
         player: &db::models::Player,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Room> {
@@ -77,7 +77,7 @@ pub mod room {
         rooms.filter(id.eq(player.room_id)).first(&**db_conn)
     }
 
-    pub(crate) fn add_player(
+    pub fn add_player(
         room: db::models::Room,
         player_name: String,
         db_conn: &db::Connection
@@ -109,7 +109,7 @@ pub mod room {
             .first(&**db_conn)
     }
 
-    pub(crate) fn answers(
+    pub fn answers(
         join_code: &str,
         db_conn: &db::Connection
     ) -> QueryResult<Vec<db::models::Answer>> {
@@ -121,7 +121,7 @@ pub mod room {
             .load(&**db_conn)
     }
 
-    pub(crate) fn questions_count(
+    pub fn questions_count(
         join_code: &str,
         db_conn: &db::Connection
     ) -> QueryResult<i64> {
@@ -130,7 +130,7 @@ pub mod room {
         db::models::Question::belonging_to(&players).count().first(&**db_conn)
     }
 
-    pub(crate) fn not_picked_questions(
+    pub fn not_picked_questions(
         room_id: i32,
         db_conn: &db::Connection
     ) -> QueryResult<Vec<db::models::Question>> {
@@ -147,7 +147,7 @@ pub mod room {
             .filter(was_picked.eq(false)).load(&**db_conn)
     }
 
-    pub(crate) fn pick_question(
+    pub fn pick_question(
         room_id: i32,
         db_conn: &db::Connection
     ) -> QueryResult<i32> {
@@ -163,10 +163,10 @@ pub mod room {
     }
 }
 
-pub mod player {
+pub(crate) mod player {
     use super::*;
 
-    pub(crate) fn get(
+    pub fn get(
         player_id: i32,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Player> {
@@ -174,7 +174,7 @@ pub mod player {
         players.find(player_id).first(&**db_conn)
     }
 
-    pub(crate) fn get_by_tok(
+    pub fn get_by_tok(
         p_tok: i32,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Player> {
@@ -183,10 +183,10 @@ pub mod player {
     }
 }
 
-pub mod question {
+pub(crate) mod question {
     use super::*;
 
-    pub(crate) fn get(
+    pub fn get(
         question_id: i32,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Question> {
@@ -194,7 +194,7 @@ pub mod question {
         questions.filter(id.eq(question_id)).first(&**db_conn)
     }
 
-    pub(crate) fn new(
+    pub fn new(
         p_token: i32,
         content: &str,
         db_conn: &db::Connection
@@ -229,4 +229,74 @@ pub mod question {
         
     }
 
+}
+
+pub(crate) mod answer {
+    use super::*;
+
+    pub fn new(
+        p_tok: i32,
+        content: &str,
+        db_conn: &db::Connection
+    ) -> QueryResult<db::models::Answer> {
+        let player: db::models::Player = {
+            use db::schema::players::dsl::*;
+            players.filter(token.eq(p_tok)).first(&**db_conn)?
+        };
+        let room: db::models::Room = {
+            use db::schema::rooms::dsl::*;
+            rooms
+                .find(player.id)
+                .filter(state.eq::<i32>(adapters::RoomState::Answering.into()))
+                .first(&**db_conn)?
+        };
+        let curr_question_id = room.curr_question_id
+            .expect("Question id shouldn't be empty");
+        let answers_count: i64 = {
+            use db::schema::answers::dsl::*;
+            db::models::Answer::belonging_to(&player)
+                .filter(question_id.eq(curr_question_id))
+                .count()
+                .get_result(&**db_conn)?
+        };
+        if answers_count > 0 {
+            return Err(diesel::result::Error::NotFound);
+        }
+        let answer: db::models::Answer = {
+            use db::schema::answers::dsl::*;
+            diesel::insert_into(answers)
+                .values(db::models::NewAnswer{
+                    answer: String::from(content),
+                    player_id: player.id,
+                    question_id: curr_question_id,
+                })
+                .execute(&**db_conn)?;
+            let a: db::models::Answer = answers
+                .filter(player_id.eq(player.id))
+                .filter(question_id.eq(curr_question_id))
+                .first(&**db_conn)?;
+            use db::schema::players::dsl as pdsl;
+            diesel::update(&player)
+                .set(pdsl::answer_id.eq(Some(a.id)))
+                .execute(&**db_conn)?;
+            a
+        };
+        let players_left = {
+            use db::schema::answers::dsl::*;
+            let ps = db::models::Player::belonging_to(&room)
+                .load(&**db_conn)?;
+            let ans: i64 = db::models::Answer::belonging_to(&ps)
+                .filter(question_id.eq(curr_question_id))
+                .count()
+                .get_result(&**db_conn)?;
+            room.max_players as i64 - ans 
+        };
+        if players_left == 0 {
+            use db::schema::rooms::dsl::*;
+            diesel::update(&room)
+                .set(state.eq::<i32>(adapters::RoomState::Polling.into()))
+                .execute(&**db_conn)?;
+        }
+        Ok(answer)
+    }
 }
