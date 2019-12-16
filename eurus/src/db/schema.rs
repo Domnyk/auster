@@ -15,6 +15,7 @@ table! {
         score -> Integer,
         room_id -> Integer,
         answer_id -> Nullable<Integer>,
+        was_picked -> Bool,
     }
 }
 
@@ -44,6 +45,11 @@ table! {
 joinable!(answers -> questions (question_id));
 joinable!(questions -> players (player_id));
 joinable!(rooms -> questions (curr_question_id));
+
+// custom joins
+
+joinable!(players -> rooms (room_id));
+joinable!(answers -> players (player_id));
 
 allow_tables_to_appear_in_same_query!(
     answers,

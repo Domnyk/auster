@@ -14,6 +14,7 @@ pub struct Player {
     pub score: i32,
     pub room_id: i32,
     pub answer_id: Option<i32>,
+    pub was_picked: bool,
 }
 
 #[derive(Insertable, Clone)]
@@ -22,7 +23,6 @@ pub struct NewPlayer {
     pub name: String,
     pub token: i32,
     pub room_id: i32,
-
 }
 
 #[derive(Queryable, Identifiable, Associations)]

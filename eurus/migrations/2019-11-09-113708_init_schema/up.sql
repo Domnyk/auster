@@ -19,6 +19,7 @@ CREATE TABLE players (
     score  INTEGER NOT NULL DEFAULT 0,
     room_id INTEGER NOT NULL,
     answer_id  INTEGER DEFAULT NULL,
+    was_picked BOOLEAN NOT NULL DEFAULT 0,
     CONSTRAINT rooms_players FOREIGN KEY (room_id)
     REFERENCES rooms (id),
     CONSTRAINT players_answers FOREIGN KEY (answer_id)

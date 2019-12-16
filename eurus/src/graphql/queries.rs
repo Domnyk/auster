@@ -155,11 +155,56 @@ pub(crate) mod room {
             .first()
             .expect("No more questions to pick from")
             .id;
-        use db::schema::rooms::dsl::*;
-        diesel::update(rooms.find(room_id)).set(
-            curr_question_id.eq(Some(question_id)))
-            .execute(&**db_conn)?;
+        {
+            use db::schema::rooms::dsl::*;
+            diesel::update(rooms.find(room_id))
+                .set(curr_question_id.eq(Some(question_id)))
+                .execute(&**db_conn)?;
+        }
+        {
+            use db::schema::questions::dsl::*;
+            diesel::update(questions.find(question_id))
+                .set(was_picked.eq(true))
+                .execute(&**db_conn)?;
+        }
         Ok(question_id)
+    }
+
+    pub fn pick_player(
+        room_id: i32,
+        db_conn: &db::Connection
+    ) -> QueryResult<i32> {
+        let player_id = not_picked_players(room_id, db_conn)?
+            .first()
+            .expect("No more players to pick from")
+            .id;
+        {
+            use db::schema::rooms::dsl::*;
+            diesel::update(rooms.find(room_id)).set(
+                curr_player_id.eq(Some(player_id)))
+                .execute(&**db_conn)?;
+        }
+        {
+            use db::schema::players::dsl::*;
+            diesel::update(players.find(player_id))
+                .set(was_picked.eq(true))
+                .execute(&**db_conn)?;
+        }
+        Ok(player_id)
+    }
+
+    pub fn not_picked_players(
+        room_id: i32,
+        db_conn: &db::Connection
+    ) -> QueryResult<Vec<db::models::Player>> {
+        use db::schema::rooms::dsl::*;
+        let room = rooms.filter(id.eq(room_id)).load(&**db_conn)?;
+        {
+            use db::schema::players::dsl::*;
+            db::models::Player::belonging_to(&room)
+                .filter(was_picked.eq(false))
+                .load(&**db_conn)
+        }
     }
 }
 
@@ -181,7 +226,16 @@ pub(crate) mod player {
         use db::schema::players::dsl::*;
         players.filter(token.eq(p_tok)).first(&**db_conn)
     }
+
+    pub fn poll_ans(
+        p_tok: i32,
+        ans_id: i32,
+        db_conn: &db::Connection
+    ) -> QueryResult<db::models::Answer> {
+        unimplemented!("queries::poll_ans")
+    }
 }
+
 
 pub(crate) mod question {
     use super::*;
@@ -199,10 +253,6 @@ pub(crate) mod question {
         content: &str,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Question> {
-        unimplemented!("queries::question::new");
-        // TODO: when picking a question remember to pick
-        // a player to ask the question to.
-        // Right now it just doesn't work
         let player = player::get_by_tok(p_token, db_conn)?;
         let room = room::get_by_player(&player, db_conn)?;
         let question = db::models::NewQuestion{
@@ -221,6 +271,7 @@ pub(crate) mod question {
         if q_count >= (room.max_players * room.num_of_rounds) as i64 {
             use db::schema::rooms::dsl::*;
             room::pick_question(room.id, db_conn)?;
+            room::pick_player(room.id, db_conn)?;
             diesel::update(rooms.filter(id.eq(room.id))).set(
                 state.eq::<i32>(adapters::RoomState::Answering.into())
             ).execute(&**db_conn)?;
@@ -271,15 +322,9 @@ pub(crate) mod answer {
                     question_id: curr_question_id,
                 })
                 .execute(&**db_conn)?;
-            let a: db::models::Answer = answers
-                .filter(player_id.eq(player.id))
+            answers.filter(player_id.eq(player.id))
                 .filter(question_id.eq(curr_question_id))
-                .first(&**db_conn)?;
-            use db::schema::players::dsl as pdsl;
-            diesel::update(&player)
-                .set(pdsl::answer_id.eq(Some(a.id)))
-                .execute(&**db_conn)?;
-            a
+                .first(&**db_conn)?
         };
         let players_left = {
             use db::schema::answers::dsl::*;
