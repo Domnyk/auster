@@ -2,8 +2,8 @@ table! {
     answers (id) {
         id -> Integer,
         answer -> Text,
-        question_id -> Integer,
         player_id -> Integer,
+        question_id -> Integer,
     }
 }
 

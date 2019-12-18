@@ -216,6 +216,7 @@ pub(crate) mod player {
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Player> {
         use db::schema::players::dsl::*;
+        // players.filter(id.eq(player_id)).first(&**db_conn)
         players.find(player_id).first(&**db_conn)
     }
 
@@ -297,7 +298,7 @@ pub(crate) mod answer {
         let room: db::models::Room = {
             use db::schema::rooms::dsl::*;
             rooms
-                .find(player.id)
+                .find(player.room_id)
                 .filter(state.eq::<i32>(adapters::RoomState::Answering.into()))
                 .first(&**db_conn)?
         };

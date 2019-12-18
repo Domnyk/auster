@@ -144,7 +144,7 @@ impl Into<graphql::models::Answer> for Answer {
         graphql::models::Answer {
             id: self.0.id,
             content: self.0.answer,
-            player_id: self.0.id,
+            player_id: self.0.player_id,
             question_id: self.0.question_id,
         }
     }
@@ -162,7 +162,7 @@ impl Into<graphql::models::Question> for Question {
     fn into(self) -> graphql::models::Question {
         graphql::models::Question {
             content: self.0.question,
-            player_id: self.0.id,
+            player_id: self.0.player_id,
             picked: self.0.was_picked,
         }
     }
