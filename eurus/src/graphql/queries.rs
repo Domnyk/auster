@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use diesel::prelude::*;
 use rand::prelude::*;
 
@@ -7,7 +9,7 @@ use crate::adapters::{
     Adapter,
 };
 use crate::graphql::models::RoomState;
-
+use crate::data;
 
 pub(crate) mod room {
     use super::*;
@@ -40,18 +42,6 @@ pub(crate) mod room {
                 <adapters::RoomState as Adapter<RoomState, i32>>::adapt(state)))
             .first(&**db_conn)
     }
-
-    // pub fn get_by_id(
-    //     room_id: i32,
-    //     room_state: RoomState,
-    //     db_conn: &db::Connection
-    // ) -> QueryResult<db::models::Room> {
-    //     use db::schema::rooms::dsl::*;
-    //     rooms.filter(id.eq(room_id))
-    //         .filter(state.eq(
-    //             <adapters::RoomState as Adapter<RoomState, i32>>::adapt(room_state)))
-    //         .first(&**db_conn)
-    // }
 
     pub fn get_id(
         join_code: &str,
@@ -91,7 +81,7 @@ pub(crate) mod room {
             .first::<i64>(&**db_conn)?;
         if players_count == ((room.max_players-1) as i64) {
             use db::schema::rooms::dsl::*;
-            diesel::update(rooms.filter(id.eq(room.id))).set(
+            diesel::update(&room).set(
                 state.eq::<i32>(adapters::RoomState::Collecting.into())
             ).execute(&**db_conn)?;
         }
@@ -134,14 +124,23 @@ pub(crate) mod room {
         room_id: i32,
         db_conn: &db::Connection
     ) -> QueryResult<Vec<db::models::Question>> {
+        println!("Getting not picked questions");
         let room: db::models::Room = {
             use db::schema::rooms::dsl::*;
-            rooms.filter(id.eq(room_id))
-                .filter(state.eq::<i32>(adapters::RoomState::Collecting.into()))
-                .or_filter(state.eq::<i32>(adapters::RoomState::Polling.into()))
-                .first(&**db_conn)?
+            let q = rooms.find(room_id)
+                .filter(
+                    state.eq::<i32>(adapters::RoomState::Collecting.into())
+                    .or(state.eq::<i32>(adapters::RoomState::Polling.into())));
+            println!("Query for getting the room: {}", diesel::debug_query::<diesel::sqlite::Sqlite, _>(&q));
+            q.first(&**db_conn)?
         };
-        let players = db::models::Player::belonging_to(&room).load(&**db_conn)?;
+        println!("Room is {}: {}", room.id, room.join_code);
+        let players: Vec<db::models::Player> = 
+            db::models::Player::belonging_to(&room).load(&**db_conn)?;
+        println!("Printing rooms players");
+        for p in &players {
+            println!("Picked player {}: {}", p.id, p.name);
+        }
         use db::schema::questions::dsl::*;
         db::models::Question::belonging_to(&players)
             .filter(was_picked.eq(false)).load(&**db_conn)
@@ -151,8 +150,8 @@ pub(crate) mod room {
         room_id: i32,
         db_conn: &db::Connection
     ) -> QueryResult<i32> {
-        let question_id = not_picked_questions(room_id, db_conn)?
-            .first()
+        let questions = not_picked_questions(room_id, db_conn)?;
+        let question_id = questions.first()
             .expect("No more questions to pick from")
             .id;
         {
@@ -206,6 +205,27 @@ pub(crate) mod room {
                 .load(&**db_conn)
         }
     }
+
+    pub fn not_picked_players_count(
+        room: &db::models::Room,
+        db_conn: &db::Connection
+    ) -> QueryResult<i64> {
+        use db::schema::players::dsl::*;
+        db::models::Player::belonging_to(room)
+            .filter(was_picked.eq(false))
+            .count()
+            .get_result(&**db_conn)
+    }
+
+    pub fn increment_round(
+        room: &db::models::Room,
+        db_conn: &db::Connection
+    ) -> QueryResult<usize> {
+        use db::schema::rooms::dsl::*;
+        diesel::update(room)
+            .set(curr_round.eq(curr_round + 1))
+            .execute(&**db_conn)
+    }
 }
 
 pub(crate) mod player {
@@ -216,7 +236,6 @@ pub(crate) mod player {
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Player> {
         use db::schema::players::dsl::*;
-        // players.filter(id.eq(player_id)).first(&**db_conn)
         players.find(player_id).first(&**db_conn)
     }
 
@@ -233,7 +252,112 @@ pub(crate) mod player {
         ans_id: i32,
         db_conn: &db::Connection
     ) -> QueryResult<db::models::Answer> {
-        unimplemented!("queries::poll_ans")
+        let p = player::get_by_tok(p_tok, db_conn)?;
+        let r = {
+            use db::schema::rooms::dsl::*;
+            rooms.find(p.room_id)
+                .filter(state.eq::<i32>(adapters::RoomState::Polling.into()))
+                .first(&**db_conn)?
+        };
+        answer::can_be_polled(&r, ans_id, db_conn)?;
+        {
+            use db::schema::players::dsl::*;
+            let p: db::models::Player = players
+                .filter(token.eq(p_tok))
+                .filter(answer_id.is_null())
+                .filter(id.ne(r.curr_player_id.unwrap()))
+                .first(&**db_conn)?;
+            diesel::update(&p)
+                .set(answer_id.eq(ans_id))
+                .execute(&**db_conn)?;
+        };
+        let a_count: i64 = {
+            use db::schema::players::dsl::*;
+            db::models::Player::belonging_to(&r)
+                .filter(answer_id.is_not_null())
+                .count()
+                .get_result(&**db_conn)?
+        };
+        let mut game_ended = false;
+        if (a_count + 1) == r.max_players as i64 {
+            allocate_points(&r, db_conn)?;
+            clear_players_answers(&r, db_conn)?;
+            if room::not_picked_players_count(&r, db_conn)? == 0 {
+                room::increment_round(&r, db_conn)?;
+                clear_players_picked(&r, db_conn)?;
+                if (r.curr_round+1) == r.num_of_rounds {
+                    use db::schema::rooms::dsl::*;
+                    diesel::update(&r).set(
+                        state.eq::<i32>(adapters::RoomState::Dead.into()))
+                        .execute(&**db_conn)?;
+                    game_ended = true;
+                }
+            }
+            if !game_ended {
+                use db::schema::rooms::dsl::*;
+                room::pick_question(r.id, db_conn)?;
+                room::pick_player(r.id, db_conn)?;
+                diesel::update(&r).set(
+                    state.eq::<i32>(adapters::RoomState::Answering.into())
+                ).execute(&**db_conn)?;
+            }
+        }
+        use db::schema::answers::dsl as adsl;
+        adsl::answers.find(ans_id).first(&**db_conn)
+    }
+
+    pub fn allocate_points(
+        r: &db::models::Room,
+        db_conn: &db::Connection
+    ) -> QueryResult<()> {
+        let mut ps: Vec<db::models::Player> = 
+            db::models::Player::belonging_to(r).load(&**db_conn)?;
+        let ans: db::models::Answer = {
+            use db::schema::answers::dsl::*;
+            answers
+                .filter(question_id.eq(r.curr_question_id.unwrap()))
+                .filter(player_id.eq(r.curr_player_id.unwrap()))
+                .first(&**db_conn)?
+        };
+        let mut points_delta: HashMap<i32, i32> = HashMap::new();
+        for p in ps.iter().filter(|player| player.id != r.curr_player_id.unwrap()) {
+            if p.answer_id.unwrap() == ans.id {
+                let delta = points_delta.entry(p.id).or_default();
+                *delta += data::points::CORRECT_ANS;
+            } else {
+                use db::schema::answers::dsl::*;
+                let a: db::models::Answer = answers.find(p.answer_id.unwrap()).first(&**db_conn)?;
+                let delta = points_delta.entry(a.player_id).or_default();
+                *delta += data::points::ANSWER_CHOSEN;
+            }
+        }
+        for p in &mut ps {
+            use db::schema::players::dsl::*;
+            diesel::update(players.find(p.id))
+                .set(score.eq(score + *points_delta.entry(p.id).or_default()))
+                .execute(&**db_conn)?;
+        }
+        Ok(())
+    }
+
+    pub fn clear_players_answers(
+        r: &db::models::Room,
+        db_conn: &db::Connection
+    ) -> QueryResult<usize> {
+        use db::schema::players::dsl::*;
+        diesel::update(players.filter(room_id.eq(r.id)))
+            .set(answer_id.eq::<Option<i32>>(None))
+            .execute(&**db_conn)
+    }
+
+    pub fn clear_players_picked(
+        r: &db::models::Room,
+        db_conn: &db::Connection
+    ) -> QueryResult<usize> {
+        use db::schema::players::dsl::*;
+        diesel::update(players.filter(room_id.eq(r.id)))
+            .set(was_picked.eq(false))
+            .execute(&**db_conn)
     }
 }
 
@@ -273,7 +397,7 @@ pub(crate) mod question {
             use db::schema::rooms::dsl::*;
             room::pick_question(room.id, db_conn)?;
             room::pick_player(room.id, db_conn)?;
-            diesel::update(rooms.filter(id.eq(room.id))).set(
+            diesel::update(&room).set(
                 state.eq::<i32>(adapters::RoomState::Answering.into())
             ).execute(&**db_conn)?;
         }
@@ -344,5 +468,20 @@ pub(crate) mod answer {
                 .execute(&**db_conn)?;
         }
         Ok(answer)
+    }
+
+    pub fn can_be_polled(
+        r: &db::models::Room,
+        ans_id: i32,
+        db_conn: &db::Connection
+    ) -> QueryResult<()> {
+        use db::schema::answers::dsl::*;
+        let ps: Vec<db::models::Player> = 
+            db::models::Player::belonging_to(r).load(&**db_conn)?;
+        db::models::Answer::belonging_to(&ps)
+            .filter(question_id.eq(r.curr_question_id.unwrap()))
+            .filter(id.eq(ans_id))
+            .first::<db::models::Answer>(&**db_conn)?;
+        Ok(())
     }
 }

@@ -8,6 +8,7 @@ mod db;
 mod graphql;
 mod web_api;
 mod adapters;
+mod data;
 
 fn main() {
     dotenv::dotenv().ok();

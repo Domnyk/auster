@@ -106,28 +106,19 @@ impl MutationFields for Mutation {
         content: String
     ) -> FieldResult<Option<Answer>> {
         let db_conn = executor.context().db_conn();
-        println!("dupa200");
         let a = queries::answer::new(token, &content, db_conn)?;
-        println!("dupa201");
         Ok(Some(adapters::Answer::adapt(a)))
     }
 
     fn field_poll_answer(&self,
-        _: &Executor<'_, Context>,
+        executor: &Executor<'_, Context>,
         _: &QueryTrail<'_, Answer, Walked>,
-        _token: i32,
-        _answer: i32
+        token: i32,
+        answer: i32
     ) -> FieldResult<Option<Answer>> {
-        // choose answer
-        // if all have chosen then count points
-        // check the round number
-        // if the last then stop the game
-        // if not the last pick next question
-        // pick player that has not answered in the round yet (how?)
-        // change state to answering
-        // increment the round counter
-        // make all players chosen answer to null (important!)
-        unimplemented!("mutation poll asnwer");
+        let db_conn = executor.context().db_conn();
+        let a = queries::player::poll_ans(token, answer, db_conn)?;
+        Ok(Some(adapters::Answer::adapt(a)))
     }
 }
 
@@ -204,10 +195,7 @@ impl AnswerFields for Answer {
         _: &QueryTrail<'_, Player, Walked>
     ) -> FieldResult<Player> {
         let db_conn = executor.context().db_conn();
-        println!("dupa90");
-        println!("Player ID is {}", self.player_id);
         let p = queries::player::get(self.player_id, db_conn)?;
-        println!("dupa91");
         Ok(adapters::Player::adapt(p))
     }
 
@@ -216,9 +204,7 @@ impl AnswerFields for Answer {
         _: &QueryTrail<'_, Question, Walked>
     ) -> FieldResult<Question> {
         let db_conn = executor.context().db_conn();
-        println!("dupa100");
         let q = queries::question::get(self.question_id, db_conn)?;
-        println!("dupa101");
         Ok(adapters::Question::adapt(q))
     }
 }
@@ -241,10 +227,7 @@ impl QuestionFields for Question {
         _: &QueryTrail<'_, Player, Walked>
     ) -> FieldResult<Player> {
         let db_conn = executor.context().db_conn();
-        println!("Dupa17");
-        println!("ID is: {}", self.player_id);
         let p = queries::player::get(self.player_id, db_conn)?;
-        println!("Dupa20");
         Ok(adapters::Player::adapt(p))
     }
 
