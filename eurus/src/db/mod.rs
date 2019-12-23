@@ -3,7 +3,8 @@ use rocket_contrib::database;
 
 pub mod models;
 pub mod schema;
-pub mod adapters;
+
+pub(crate) type ConnectionType = diesel::SqliteConnection;
 
 #[database("eurus_db")]
-pub struct Connection(diesel::SqliteConnection);
+pub struct Connection(ConnectionType);
