@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:zefir/join_room.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/new_room.dart';
 import 'package:zefir/services/eurus.dart';
@@ -18,7 +19,7 @@ class _RoomListState extends State<RoomList> {
   _RoomListState() {
     rooms = new List();
     eurus = new Eurus(
-        graphQlEndpoint: new HttpLink(uri: 'http://localhost:8000/graphql'));
+        graphQlEndpoint: new HttpLink(uri: 'https://eurus-13.pl:8000/graphql'));
   }
 
   @override
@@ -59,7 +60,10 @@ class _RoomListState extends State<RoomList> {
         children: <Widget>[
           RaisedButton(
             child: Text('Dołącz do pokoju'),
-            onPressed: () => {},
+            onPressed: () => {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => JoinRoom(eurus)))
+            },
           ),
           RaisedButton(
             child: Text('Załóż pokój'),
