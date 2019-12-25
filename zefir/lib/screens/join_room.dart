@@ -57,7 +57,7 @@ class _JoinRoomState extends State<JoinRoom> {
 
   TextFormField _buildPlayerNameField(TextEditingController controller) {
     final validator =
-        (String val) => val.isEmpty ? 'nazwa gracza nie może być pusta' : null;
+        (String val) => val.isEmpty ? 'Nazwa gracza nie może być pusta' : null;
     final decoration = InputDecoration(
         border: OutlineInputBorder(), labelText: 'Nazwa graczza');
 
@@ -67,7 +67,7 @@ class _JoinRoomState extends State<JoinRoom> {
 
   TextFormField _buildJoinCodeField(TextEditingController controller) {
     final validator =
-        (String val) => val.isEmpty ? 'kod nie może być pusty' : null;
+        (String val) => val.isEmpty ? 'Kod nie może być pusty' : null;
     final decoration =
         InputDecoration(border: OutlineInputBorder(), labelText: 'Kod');
 
@@ -89,28 +89,43 @@ class _JoinRoomState extends State<JoinRoom> {
     );
   }
 
-  void _joinRoom(BuildContext ctx) {
-    showErrorDialog(err) {
-      showDialog(
-          context: ctx,
-          builder: (BuildContext _) {
-            return AlertDialog(
-              title: Text("Wystąpił błąd"),
-              content:
-                  Text("Nie udało dołączyć się do pokoju. Spróbuj ponownie"),
-            );
-          });
-    }
+  /* Object err will be used later in the future */
+  Widget _buildErrorDialog(BuildContext ctx, Object err) {
+    Widget closeButton = FlatButton(
+      child: Text('Zamknij'),
+      onPressed: () => Navigator.pop(ctx),
+    );
 
-    void navigateToWaitForPlayersScreen(_) {
-      Navigator.push(
-          ctx, MaterialPageRoute(builder: (context) => WaitForPlayers()));
+    return AlertDialog(
+      title: Text("Wystąpił błąd"),
+      content: Text("Nie udało dołączyć się do pokoju. Spróbuj ponownie"),
+      actions: <Widget>[closeButton],
+    );
+  }
+
+  void _joinRoom(BuildContext ctx) {
+    bool isFormValid = _formKey.currentState.validate();
+    if (isFormValid == false) {
+      return;
     }
 
     this
         ._eurus
         .joinRoom(roomCode: _joinCode, playerName: _playerName)
-        .then(navigateToWaitForPlayersScreen)
-        .catchError(showErrorDialog);
+        .then((_) => _navigateToWaitForPlayersScreen(ctx))
+        .catchError((err) => _showErrorDialog(ctx, err));
+  }
+
+  void _navigateToWaitForPlayersScreen(BuildContext ctx) {
+    Navigator.push(ctx, MaterialPageRoute(builder: (_) => WaitForPlayers()));
+  }
+
+  /* Object err will be used later in the future */
+  void _showErrorDialog(BuildContext ctx, Object err) {
+    showDialog(
+        context: ctx,
+        builder: (BuildContext _) {
+          return _buildErrorDialog(ctx, err);
+        });
   }
 }
