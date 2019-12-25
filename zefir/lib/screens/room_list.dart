@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:zefir/join_room.dart';
+import 'package:zefir/screens/join_room.dart';
 import 'package:zefir/model/room.dart';
-import 'package:zefir/new_room.dart';
-import 'package:zefir/services/eurus.dart';
+import 'package:zefir/screens/new_room.dart';
+import 'package:zefir/services/eurus/eurus.dart';
 import 'dart:developer' as developer;
 
 class RoomList extends StatefulWidget {

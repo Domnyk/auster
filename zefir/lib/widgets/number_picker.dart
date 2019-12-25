@@ -6,6 +6,7 @@ class NumberPicker extends FormField<int> {
       {@required BuildContext context,
       @required int initialValue,
       @required TextEditingController controller,
+      @required String labelText,
       FormFieldSetter<int> onSaved,
       FormFieldValidator<int> validator,
       bool autovalidate = false})
@@ -34,7 +35,7 @@ class NumberPicker extends FormField<int> {
                 controller: controller,
                 readOnly: true,
                 decoration: InputDecoration(
-                    labelText: 'Liczba graczy', border: OutlineInputBorder()),
+                    labelText: labelText, border: OutlineInputBorder()),
               );
             }) {
     controller.text = getVal(controller, initialValue).toString();
