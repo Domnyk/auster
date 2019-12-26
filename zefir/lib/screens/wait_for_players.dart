@@ -16,14 +16,14 @@ class _WaitForPlayersState extends State<WaitForPlayers> {
   Widget build(BuildContext ctx) {
     return Scaffold(
         appBar: AppBar(title: Text('Oczekiwanie na graczy')),
-        body: _buildBody());
+        body: _buildBody(ctx));
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext ctx) {
     List<Widget> widgets = [
       _buildRoomName(this._roomName),
       _buildJoinCode('MXCu23jk'),
-      _buildListOfPlayers(),
+      _buildListOfPlayers(ctx),
       _buildNumOfMissingPlayers(),
       _buildLeaveRoom()
     ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList();
@@ -47,18 +47,33 @@ class _WaitForPlayersState extends State<WaitForPlayers> {
     );
   }
 
-  Widget _buildListOfPlayers() {
+  Widget _buildListOfPlayers(BuildContext ctx) {
     List<String> players = ['Stefan', 'Roman', 'Jadwiga'];
 
     Widget _buildItem(BuildContext ctx, int index) {
-      return ListTile(title: Text(players[index]));
+      return ListTile(
+        title: Text(
+          players[index],
+          style: TextStyle(fontSize: Theme.of(ctx).textTheme.body1.fontSize),
+        ),
+        contentPadding: EdgeInsets.all(0),
+        dense: true,
+      );
     }
 
-    return ListView.builder(
+    Text heading = Text(
+      'Lista graczy w pokoju',
+      style: TextStyle(fontSize: Theme.of(ctx).textTheme.headline.fontSize),
+    );
+    ListView listOfPlayers = ListView.builder(
         itemCount: players.length,
         itemBuilder: _buildItem,
         scrollDirection: Axis.vertical,
         shrinkWrap: true);
+
+    return Column(
+      children: <Widget>[heading, listOfPlayers],
+    );
   }
 
   Widget _buildNumOfMissingPlayers() {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/screens/wait_for_players.dart';
 import 'package:zefir/services/eurus/eurus.dart';
+import 'package:zefir/widgets/error_dialog.dart';
+import 'dart:developer' as developer;
 
 class JoinRoom extends StatefulWidget {
   final Eurus eurus;
@@ -89,28 +91,13 @@ class _JoinRoomState extends State<JoinRoom> {
     );
   }
 
-  /* Object err will be used later in the future */
-  Widget _buildErrorDialog(BuildContext ctx, Object err) {
-    Widget closeButton = FlatButton(
-      child: Text('Zamknij'),
-      onPressed: () => Navigator.pop(ctx),
-    );
-
-    return AlertDialog(
-      title: Text("Wystąpił błąd"),
-      content: Text("Nie udało dołączyć się do pokoju. Spróbuj ponownie"),
-      actions: <Widget>[closeButton],
-    );
-  }
-
   void _joinRoom(BuildContext ctx) {
     bool isFormValid = _formKey.currentState.validate();
     if (isFormValid == false) {
       return;
     }
 
-    this
-        ._eurus
+    _eurus
         .joinRoom(roomCode: _joinCode, playerName: _playerName)
         .then((_) => _navigateToWaitForPlayersScreen(ctx))
         .catchError((err) => _showErrorDialog(ctx, err));
@@ -120,12 +107,11 @@ class _JoinRoomState extends State<JoinRoom> {
     Navigator.push(ctx, MaterialPageRoute(builder: (_) => WaitForPlayers()));
   }
 
-  /* Object err will be used later in the future */
-  void _showErrorDialog(BuildContext ctx, Object err) {
+  void _showErrorDialog(BuildContext ctx, Exception err) {
     showDialog(
         context: ctx,
         builder: (BuildContext _) {
-          return _buildErrorDialog(ctx, err);
+          return ErrorDialog.build(ctx, err);
         });
   }
 }

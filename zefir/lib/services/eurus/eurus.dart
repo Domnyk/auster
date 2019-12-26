@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:meta/meta.dart';
+import 'package:zefir/model/room_preview.dart';
+import 'package:zefir/model/room_preview.dart' as prefix0;
+import 'package:zefir/services/eurus/exceptions/no_such_room_exception.dart';
 import 'dart:developer' as developer;
 import 'mutations.dart';
 
@@ -39,7 +42,10 @@ class Eurus {
       throw ('Creating new room failed with ' + _createErrorMsg(qr));
     }
 
-    return qr.data['newRoom']['joinCode'] as String;
+    final String joinCode = qr.data['newRoom']['joinCode'] as String;
+    developer.log('Sucessfully created room $name with join code $joinCode',
+        name: 'eurus._createNewRoomWithoutJoining');
+    return joinCode;
   }
 
   Future<void> joinRoom(
@@ -52,8 +58,42 @@ class Eurus {
     if (qr.hasErrors) {
       String errorMsg = 'Joing room failed with ' + _createErrorMsg(qr);
       developer.log(errorMsg);
+      // throw (errorMsg);
+      throw NoSuchRoomException(roomCode);
+    }
+
+    developer.log('Successfully joined room using room code $roomCode',
+        name: 'eurus.joinRoom');
+  }
+
+  Stream<RoomPreview> fetchRoomsPreview({@required List<int> tokens}) async* {
+    for (final token in tokens) {
+      final roomPreview = await _fetchRoom(token);
+      developer.log('Received room name: $roomPreview',
+          name: 'eurus.fetchRooms');
+      yield roomPreview;
+    }
+  }
+
+  Future<RoomPreview> _fetchRoom(token) async {
+    final mutationOptions =
+        MutationOptions(document: Mutations.FETCH_ROOM_PREVIEW, variables: {
+      'token': token,
+    });
+
+    QueryResult qr = await client.value.mutate(mutationOptions);
+    if (qr.hasErrors) {
+      String errorMsg =
+          'Fetching room with token $token failed with ' + _createErrorMsg(qr);
+      developer.log(errorMsg);
       throw (errorMsg);
     }
+
+    RoomPreview roomPreview =
+        RoomPreview.parse(qr.data['player']['room'] as Map<String, dynamic>);
+    developer.log(
+        'Successfully fetched room preview with following data $roomPreview',
+        name: 'eurus._fetchRoom');
   }
 
   String _createErrorMsg(QueryResult qr) {

@@ -15,4 +15,25 @@ class Mutations {
     }
   }
   """;
+
+  static const String FETCH_ROOM = """
+  query fetchRoom(\$token: Int!) {
+    player(token: \$token) {
+      room {
+        name
+      }
+    }
+  }
+  """;
+
+  static const String FETCH_ROOM_PREVIEW = """
+  query fetchRoom(\$token: Int!) {
+    player(token: \$token) {
+      room {
+        name,
+        state
+      }
+    }
+  }
+  """;
 }

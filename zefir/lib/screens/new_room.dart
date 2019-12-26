@@ -113,34 +113,8 @@ class _NewRoomState extends State<NewRoom> {
   }
 
   Widget _buildCreateRoomButton(BuildContext ctx) {
-    void showErrorDialog(err) {
-      showDialog(
-          context: ctx,
-          builder: (BuildContext _) {
-            return AlertDialog(
-              title: Text("Wystąpił błąd"),
-              content: Text(
-                  "Nie udało się utworzyć pokoju. Spróbuj ponownie później"),
-            );
-          });
-    }
-
-    void navigateToWaitForPlayersScreen(_) {
-      Navigator.push(
-          ctx, MaterialPageRoute(builder: (context) => WaitForPlayers()));
-    }
-
     final button = RaisedButton(
-        onPressed: () {
-          eurus
-              .createNewRoom(
-                  roomName: roomName,
-                  playerName: _nameOfPlayer,
-                  numOfPlayers: numOfPlayers,
-                  numOfRounds: _numOfRounds)
-              .then(navigateToWaitForPlayersScreen)
-              .catchError(showErrorDialog);
-        },
+        onPressed: () => _createRoom(ctx),
         color: Colors.green,
         textColor: Colors.white,
         child: Text('Załóż pokój'));
@@ -149,5 +123,38 @@ class _NewRoomState extends State<NewRoom> {
       child: button,
       width: double.infinity,
     );
+  }
+
+  void _createRoom(BuildContext ctx) {
+    bool isFormValid = _formKey.currentState.validate();
+    if (isFormValid == false) {
+      return;
+    }
+
+    eurus
+        .createNewRoom(
+            roomName: roomName,
+            playerName: _nameOfPlayer,
+            numOfPlayers: numOfPlayers,
+            numOfRounds: _numOfRounds)
+        .then((_) => _navigateToWaitForPlayersScreen(ctx))
+        .catchError((err) => _showErrorDialog(ctx, err));
+  }
+
+  void _navigateToWaitForPlayersScreen(BuildContext ctx) {
+    Navigator.push(
+        ctx, MaterialPageRoute(builder: (context) => WaitForPlayers()));
+  }
+
+  void _showErrorDialog(BuildContext ctx, Exception err) {
+    showDialog(
+        context: ctx,
+        builder: (BuildContext _) {
+          return AlertDialog(
+            title: Text("Wystąpił błąd"),
+            content:
+                Text("Nie udało się utworzyć pokoju. Spróbuj ponownie później"),
+          );
+        });
   }
 }
