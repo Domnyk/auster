@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:zefir/services/eurus/eurus.dart';
+import 'package:zefir/services/storage/token.dart';
 import 'join_room.dart';
 import 'new_room.dart';
 
 class NoRooms extends StatelessWidget {
   final Eurus _eurus;
+  final TokenStorage _storage;
 
-  NoRooms({@required Eurus eurus}) : _eurus = eurus;
+  NoRooms({@required Eurus eurus, @required TokenStorage storage})
+      : _eurus = eurus,
+        _storage = storage;
 
   @override
   Widget build(BuildContext ctx) {
@@ -46,7 +50,12 @@ class NoRooms extends StatelessWidget {
       color: Colors.white,
       onPressed: () => {
         Navigator.push(
-            ctx, MaterialPageRoute(builder: (context) => JoinRoom(_eurus)))
+            ctx,
+            MaterialPageRoute(
+                builder: (context) => JoinRoom(
+                      eurus: _eurus,
+                      storage: _storage,
+                    )))
       },
     );
   }

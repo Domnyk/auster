@@ -38,7 +38,7 @@ class Eurus {
         });
 
     QueryResult qr = await client.value.mutate(mutationOptions);
-    if (qr.hasErrors) {
+    if (qr.hasException) {
       throw ('Creating new room failed with ' + _createErrorMsg(qr));
     }
 
@@ -48,29 +48,33 @@ class Eurus {
     return joinCode;
   }
 
-  Future<void> joinRoom(
+  Future<int> joinRoom(
       {@required String roomCode, @required String playerName}) async {
     final mutationOptions = MutationOptions(
         document: Mutations.JOIN_ROOM,
         variables: {'roomCode': roomCode, 'playerName': playerName});
 
     QueryResult qr = await client.value.mutate(mutationOptions);
-    if (qr.hasErrors) {
-      String errorMsg = 'Joing room failed with ' + _createErrorMsg(qr);
+    if (qr.hasException) {
+      String errorMsg =
+          'Joing room using code $roomCode failed with ' + _createErrorMsg(qr);
       developer.log(errorMsg);
       // throw (errorMsg);
       throw NoSuchRoomException(roomCode);
     }
 
-    developer.log('Successfully joined room using room code $roomCode',
+    int token = qr.data['joinRoom']['token'] as int;
+    developer.log(
+        'Successfully joined room using room code $roomCode. Received token $token',
         name: 'eurus.joinRoom');
+    return token;
   }
 
   Stream<RoomPreview> fetchRoomsPreview({@required List<int> tokens}) async* {
     for (final token in tokens) {
       final roomPreview = await _fetchRoom(token);
-      developer.log('Received room name: $roomPreview',
-          name: 'eurus.fetchRooms');
+      developer.log('Received room preview: $roomPreview',
+          name: 'eurus.fetchRoomsPreview');
       yield roomPreview;
     }
   }
@@ -82,7 +86,7 @@ class Eurus {
     });
 
     QueryResult qr = await client.value.mutate(mutationOptions);
-    if (qr.hasErrors) {
+    if (qr.hasException) {
       String errorMsg =
           'Fetching room with token $token failed with ' + _createErrorMsg(qr);
       developer.log(errorMsg);
@@ -94,10 +98,11 @@ class Eurus {
     developer.log(
         'Successfully fetched room preview with following data $roomPreview',
         name: 'eurus._fetchRoom');
+    return roomPreview;
   }
 
   String _createErrorMsg(QueryResult qr) {
-    return qr.errors
+    return qr.exception.graphqlErrors
         .toList()
         .map((e) => e.message)
         .reduce((acc, val) => acc + val + '\n');

@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/screens/wait_for_players.dart';
 import 'package:zefir/services/eurus/eurus.dart';
+import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/widgets/error_dialog.dart';
 import 'dart:developer' as developer;
 
 class JoinRoom extends StatefulWidget {
-  final Eurus eurus;
+  final Eurus _eurus;
+  final TokenStorage _storage;
 
-  JoinRoom(this.eurus);
+  JoinRoom({@required Eurus eurus, @required TokenStorage storage})
+      : _eurus = eurus,
+        _storage = storage;
 
   @override
-  _JoinRoomState createState() => _JoinRoomState(eurus: eurus);
+  _JoinRoomState createState() =>
+      _JoinRoomState(eurus: _eurus, storage: _storage);
 }
 
 class _JoinRoomState extends State<JoinRoom> {
@@ -22,11 +27,12 @@ class _JoinRoomState extends State<JoinRoom> {
   String _joinCode;
   String _playerName;
 
-  Eurus _eurus;
+  final Eurus _eurus;
+  final TokenStorage _storage;
 
-  _JoinRoomState({@required Eurus eurus}) {
-    this._eurus = eurus;
-
+  _JoinRoomState({@required Eurus eurus, @required TokenStorage storage})
+      : _eurus = eurus,
+        _storage = storage {
     _joinCodeController.addListener(() {
       _joinCode = _joinCodeController.value.text.trim();
     });
@@ -99,8 +105,14 @@ class _JoinRoomState extends State<JoinRoom> {
 
     _eurus
         .joinRoom(roomCode: _joinCode, playerName: _playerName)
+        .then(_addTokenToStorage)
         .then((_) => _navigateToWaitForPlayersScreen(ctx))
         .catchError((err) => _showErrorDialog(ctx, err));
+  }
+
+  void _addTokenToStorage(int token) async {
+    developer.log('Adding $token to DB', name: 'JoinRoom');
+    await _storage.insert(token);
   }
 
   void _navigateToWaitForPlayersScreen(BuildContext ctx) {
