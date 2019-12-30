@@ -28,6 +28,7 @@ eurus/resources
 **/doc/api/
 zefir/.dart_tool/
 zefir/.flutter-plugins
+zefir/.flutter-plugins-dependencies
 zefir/.packages
 zefir/.pub-cache/
 zefir/.pub/
