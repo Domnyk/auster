@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:zefir/main.dart';
 import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room_list.dart';
@@ -9,25 +9,24 @@ import 'dart:developer' as developer;
 
 import 'package:zefir/services/storage/token.dart';
 
-class CheckRooms extends StatefulWidget {
+class CheckRoomsWidget extends StatefulWidget {
   @override
-  _CheckRoomsState createState() => _CheckRoomsState();
+  _CheckRoomsWidgetState createState() => _CheckRoomsWidgetState();
 }
 
-class _CheckRoomsState extends State<CheckRooms> {
-  final TokenStorage _storage;
+class _CheckRoomsWidgetState extends State<CheckRoomsWidget> {
   final List<RoomPreview> _rooms;
-  Eurus eurus;
 
-  _CheckRoomsState()
-      : _rooms = [],
-        _storage = TokenStorage() {
-    eurus = new Eurus(
-        graphQlEndpoint: new HttpLink(uri: 'https://eurus-13.pl:8000/graphql'));
-  }
+  TokenStorage _storage;
+  Eurus _eurus;
+
+  _CheckRoomsWidgetState() : _rooms = [];
 
   @override
   Widget build(BuildContext ctx) {
+    _eurus = Zefir.of(ctx).eurus;
+    _storage = Zefir.of(ctx).storage;
+
     return FutureBuilder<List<int>>(
         future: _storage.fetchAll(), builder: _buildFromFuture);
   }
@@ -38,7 +37,7 @@ class _CheckRoomsState extends State<CheckRooms> {
           name: 'CheckRooms');
 
       return StreamBuilder<RoomPreview>(
-        stream: eurus.fetchRoomsPreview(tokens: snapshot.data),
+        stream: _eurus.fetchRoomsPreview(tokens: snapshot.data),
         builder: _buildFromStream,
       );
     } else {
@@ -67,9 +66,7 @@ class _CheckRoomsState extends State<CheckRooms> {
   }
 
   Widget _buildIfDone(BuildContext ctx, List<RoomPreview> rooms) {
-    return rooms.isEmpty
-        ? NoRooms(eurus: eurus, storage: _storage)
-        : RoomList(rooms: rooms, eurus: eurus, storage: _storage);
+    return rooms.isEmpty ? NoRooms() : RoomList(rooms: _rooms);
   }
 
   void _handleSnapshotData(AsyncSnapshot<RoomPreview> snapshot) {

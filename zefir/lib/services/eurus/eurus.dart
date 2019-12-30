@@ -10,9 +10,9 @@ import 'mutations.dart';
 class Eurus {
   ValueNotifier<GraphQLClient> client;
 
-  Eurus({@required Link graphQlEndpoint}) {
-    client = ValueNotifier(
-        GraphQLClient(cache: InMemoryCache(), link: graphQlEndpoint));
+  Eurus({@required String endpoint}) {
+    client = ValueNotifier(GraphQLClient(
+        cache: InMemoryCache(), link: new HttpLink(uri: endpoint)));
   }
 
   Future<void> createNewRoom(

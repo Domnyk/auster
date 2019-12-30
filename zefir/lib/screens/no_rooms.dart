@@ -5,13 +5,6 @@ import 'join_room.dart';
 import 'new_room.dart';
 
 class NoRooms extends StatelessWidget {
-  final Eurus _eurus;
-  final TokenStorage _storage;
-
-  NoRooms({@required Eurus eurus, @required TokenStorage storage})
-      : _eurus = eurus,
-        _storage = storage;
-
   @override
   Widget build(BuildContext ctx) {
     return Scaffold(
@@ -49,13 +42,7 @@ class NoRooms extends StatelessWidget {
       child: Text('Dołącz do pokoju'),
       color: Colors.white,
       onPressed: () => {
-        Navigator.push(
-            ctx,
-            MaterialPageRoute(
-                builder: (context) => JoinRoom(
-                      eurus: _eurus,
-                      storage: _storage,
-                    )))
+        Navigator.push(ctx, MaterialPageRoute(builder: (context) => JoinRoom()))
       },
     );
   }
@@ -65,8 +52,7 @@ class NoRooms extends StatelessWidget {
       child: Text('Załóż pokój'),
       color: Colors.white,
       onPressed: () => {
-        Navigator.push(
-            ctx, MaterialPageRoute(builder: (context) => NewRoom(_eurus)))
+        Navigator.push(ctx, MaterialPageRoute(builder: (context) => NewRoom()))
       },
     );
   }

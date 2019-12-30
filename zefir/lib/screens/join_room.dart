@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:zefir/main.dart';
 import 'package:zefir/screens/wait_for_players.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/token.dart';
@@ -7,16 +8,8 @@ import 'package:zefir/widgets/error_dialog.dart';
 import 'dart:developer' as developer;
 
 class JoinRoom extends StatefulWidget {
-  final Eurus _eurus;
-  final TokenStorage _storage;
-
-  JoinRoom({@required Eurus eurus, @required TokenStorage storage})
-      : _eurus = eurus,
-        _storage = storage;
-
   @override
-  _JoinRoomState createState() =>
-      _JoinRoomState(eurus: _eurus, storage: _storage);
+  _JoinRoomState createState() => _JoinRoomState();
 }
 
 class _JoinRoomState extends State<JoinRoom> {
@@ -27,12 +20,10 @@ class _JoinRoomState extends State<JoinRoom> {
   String _joinCode;
   String _playerName;
 
-  final Eurus _eurus;
-  final TokenStorage _storage;
+  Eurus _eurus;
+  TokenStorage _storage;
 
-  _JoinRoomState({@required Eurus eurus, @required TokenStorage storage})
-      : _eurus = eurus,
-        _storage = storage {
+  _JoinRoomState() {
     _joinCodeController.addListener(() {
       _joinCode = _joinCodeController.value.text.trim();
     });
@@ -44,6 +35,9 @@ class _JoinRoomState extends State<JoinRoom> {
 
   @override
   Widget build(BuildContext context) {
+    _eurus = Zefir.of(context).eurus;
+    _storage = Zefir.of(context).storage;
+
     return Scaffold(
         appBar: AppBar(title: Text('Dołącz do pokoju')),
         body: _buildForm(context, _formKey));

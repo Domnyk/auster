@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:zefir/main.dart';
 import 'package:zefir/screens/wait_for_players.dart';
 import 'package:zefir/widgets/number_picker.dart';
 import 'dart:developer' as developer;
 import 'package:zefir/services/eurus/eurus.dart';
 
 class NewRoom extends StatefulWidget {
-  final Eurus eurus;
-
-  NewRoom(this.eurus);
-
   @override
-  _NewRoomState createState() => _NewRoomState(eurus: eurus);
+  _NewRoomState createState() => _NewRoomState();
 }
 
 class _NewRoomState extends State<NewRoom> {
@@ -19,15 +16,13 @@ class _NewRoomState extends State<NewRoom> {
   TextEditingController numOfPlayersController = new TextEditingController();
   TextEditingController numOfRoundsController = new TextEditingController();
   TextEditingController nameOfPlayerController = new TextEditingController();
-  Eurus eurus;
+  Eurus _eurus;
   String roomName;
   int numOfPlayers;
   int _numOfRounds;
   String _nameOfPlayer;
 
-  _NewRoomState({@required Eurus eurus}) {
-    this.eurus = eurus;
-
+  _NewRoomState() {
     numOfPlayersController.addListener(() {
       numOfPlayers = int.parse(numOfPlayersController.text);
     });
@@ -41,6 +36,8 @@ class _NewRoomState extends State<NewRoom> {
 
   @override
   Widget build(BuildContext ctx) {
+    _eurus = Zefir.of(ctx).eurus;
+
     final numOfPlayersField = buildNumOfPlayersField(
         context: ctx, initialValue: 4, controller: numOfPlayersController);
     final numOfRoundsField = _buildNumOfRoundsField(
@@ -131,7 +128,7 @@ class _NewRoomState extends State<NewRoom> {
       return;
     }
 
-    eurus
+    _eurus
         .createNewRoom(
             roomName: roomName,
             playerName: _nameOfPlayer,
