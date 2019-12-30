@@ -95,9 +95,6 @@ class Eurus {
 
     RoomPreview roomPreview =
         RoomPreview.parse(qr.data['player']['room'] as Map<String, dynamic>);
-    developer.log(
-        'Successfully fetched room preview with following data $roomPreview',
-        name: 'eurus._fetchRoom');
     return roomPreview;
   }
 
