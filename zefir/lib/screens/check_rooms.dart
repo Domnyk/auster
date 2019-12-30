@@ -2,79 +2,60 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room_preview.dart';
+import 'package:zefir/screens/loading.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
+import 'package:zefir/services/storage/token.dart';
 import 'dart:developer' as developer;
 
-import 'package:zefir/services/storage/token.dart';
-
-class CheckRoomsWidget extends StatefulWidget {
-  @override
-  _CheckRoomsWidgetState createState() => _CheckRoomsWidgetState();
-}
-
-class _CheckRoomsWidgetState extends State<CheckRoomsWidget> {
-  final List<RoomPreview> _rooms;
-
-  TokenStorage _storage;
-  Eurus _eurus;
-
-  _CheckRoomsWidgetState() : _rooms = [];
-
+class CheckRoomsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
-    _eurus = Zefir.of(ctx).eurus;
-    _storage = Zefir.of(ctx).storage;
+    final Eurus _eurus = Zefir.of(ctx).eurus;
+    final TokenStorage _storage = Zefir.of(ctx).storage;
 
     return FutureBuilder<List<int>>(
-        future: _storage.fetchAll(), builder: _buildFromFuture);
+        future: _storage.fetchAll(),
+        builder: (ctx, snapshot) => _buildFromFuture(ctx, snapshot, _eurus));
   }
 
-  Widget _buildFromFuture(BuildContext ctx, AsyncSnapshot<List<int>> snapshot) {
+  Widget _buildFromFuture(
+      BuildContext ctx, AsyncSnapshot<List<int>> snapshot, final Eurus eurus) {
     if (snapshot.hasData) {
-      developer.log('List of token in DB: ${snapshot.data}',
-          name: 'CheckRooms');
+      final List<RoomPreview> rooms = [];
 
       return StreamBuilder<RoomPreview>(
-        stream: _eurus.fetchRoomsPreview(tokens: snapshot.data),
-        builder: _buildFromStream,
+        stream: eurus.fetchRoomsPreview(tokens: snapshot.data),
+        builder: (ctx, snapshot) => _buildFromStream(ctx, snapshot, rooms),
       );
     } else {
-      return Text('Waiting');
+      return LoadingWidget();
     }
   }
 
-  Widget _buildFromStream(
-      BuildContext ctx, AsyncSnapshot<RoomPreview> snapshot) {
+  Widget _buildFromStream(BuildContext ctx, AsyncSnapshot<RoomPreview> snapshot,
+      final List<RoomPreview> rooms) {
     if (snapshot.hasError) {
-      return _buildIfError(context, snapshot.error);
+      return _buildIfError(ctx, snapshot.error);
     }
     switch (snapshot.connectionState) {
       case ConnectionState.done:
-        _handleSnapshotData(snapshot);
-        return _buildIfDone(context, this._rooms);
+        if (snapshot.hasData) rooms.add(snapshot.data);
+        return _buildIfDone(ctx, rooms);
       case ConnectionState.active:
-        _handleSnapshotData(snapshot);
-        return Text('Waiting with new value ${snapshot.data}');
+        if (snapshot.hasData) rooms.add(snapshot.data);
+        return LoadingWidget();
       case ConnectionState.none:
-        return Text('None');
+        return Text('None'); // TODO: Error widget ?
       case ConnectionState.waiting:
-        return Text('Waiting');
+        return LoadingWidget();
     }
     return null;
   }
 
   Widget _buildIfDone(BuildContext ctx, List<RoomPreview> rooms) {
-    return rooms.isEmpty ? NoRooms() : RoomList(rooms: _rooms);
-  }
-
-  void _handleSnapshotData(AsyncSnapshot<RoomPreview> snapshot) {
-    if (snapshot.hasData) {
-      developer.log('Received new data: ${snapshot.data}',
-          name: 'CheckRooms._handleSnapshotData');
-      this._rooms.addAll([snapshot.data]);
-    }
+    return rooms.isEmpty ? NoRooms() : RoomList(rooms: rooms);
   }
 
   Widget _buildIfError(BuildContext ctx, Exception err) {
