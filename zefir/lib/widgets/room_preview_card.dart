@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/model/room_state.dart';
 
-class RoomPreviewWidget extends StatelessWidget {
+class RoomPreviewCard extends StatelessWidget {
   final RoomPreview _room;
 
-  RoomPreviewWidget({Key key, @required RoomPreview room})
+  RoomPreviewCard({Key key, @required RoomPreview room})
       : _room = room,
         super(key: key);
 
