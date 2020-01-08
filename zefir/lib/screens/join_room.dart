@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/main.dart';
-import 'package:zefir/screens/wait_for_players.dart';
+import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/widgets/error_dialog.dart';
