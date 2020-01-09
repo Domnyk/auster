@@ -41,9 +41,7 @@ class NoRooms extends StatelessWidget {
     return RaisedButton(
       child: Text('Dołącz do pokoju'),
       color: Colors.white,
-      onPressed: () => {
-        Navigator.push(ctx, MaterialPageRoute(builder: (context) => JoinRoom()))
-      },
+      onPressed: () => Navigator.pushNamed(ctx, '/joinRoom'),
     );
   }
 
@@ -51,9 +49,7 @@ class NoRooms extends StatelessWidget {
     return RaisedButton(
       child: Text('Załóż pokój'),
       color: Colors.white,
-      onPressed: () => {
-        Navigator.push(ctx, MaterialPageRoute(builder: (context) => NewRoom()))
-      },
+      onPressed: () => Navigator.pushNamed(ctx, '/newRoom'),
     );
   }
 }

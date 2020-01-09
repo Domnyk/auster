@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zefir/main.dart';
+import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/screens/loading.dart';
 import 'package:zefir/screens/no_rooms.dart';
@@ -16,6 +17,7 @@ class CheckRoomsWidget extends StatelessWidget {
     final TokenStorage _storage = Zefir.of(ctx).storage;
 
     return FutureBuilder<List<int>>(
+        key: UniqueKey(),
         future: _storage.fetchAll(),
         builder: (ctx, snapshot) => _buildFromFuture(ctx, snapshot, _eurus));
   }
@@ -23,10 +25,10 @@ class CheckRoomsWidget extends StatelessWidget {
   Widget _buildFromFuture(
       BuildContext ctx, AsyncSnapshot<List<int>> snapshot, final Eurus eurus) {
     if (snapshot.hasData) {
-      final List<RoomPreview> rooms = [];
+      final List<Room> rooms = [];
 
-      return StreamBuilder<RoomPreview>(
-        stream: eurus.fetchRoomsPreview(tokens: snapshot.data),
+      return StreamBuilder<Room>(
+        stream: eurus.fetchRooms(tokens: snapshot.data),
         builder: (ctx, snapshot) => _buildFromStream(ctx, snapshot, rooms),
       );
     } else {
@@ -34,8 +36,8 @@ class CheckRoomsWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildFromStream(BuildContext ctx, AsyncSnapshot<RoomPreview> snapshot,
-      final List<RoomPreview> rooms) {
+  Widget _buildFromStream(
+      BuildContext ctx, AsyncSnapshot<Room> snapshot, final List<Room> rooms) {
     if (snapshot.hasError) {
       return _buildIfError(ctx, snapshot.error);
     }
@@ -54,7 +56,7 @@ class CheckRoomsWidget extends StatelessWidget {
     return null;
   }
 
-  Widget _buildIfDone(BuildContext ctx, List<RoomPreview> rooms) {
+  Widget _buildIfDone(BuildContext ctx, List<Room> rooms) {
     return rooms.isEmpty ? NoRooms() : RoomList(rooms: rooms);
   }
 

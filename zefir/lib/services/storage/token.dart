@@ -31,6 +31,12 @@ class TokenStorage {
     await _database.insert('tokens', {'id': token});
   }
 
+  Future<void> delete(int token) async {
+    await _openDatabaseIfNecessary();
+
+    await _database.delete('tokens', where: 'id = ?', whereArgs: [token]);
+  }
+
   Future<void> _openDatabaseIfNecessary() async {
     String dbsDir = await getDatabasesPath();
 

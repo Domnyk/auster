@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/main.dart';
+import 'package:zefir/model/room.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/token.dart';
@@ -100,17 +101,19 @@ class _JoinRoomState extends State<JoinRoom> {
     _eurus
         .joinRoom(roomCode: _joinCode, playerName: _playerName)
         .then(_addTokenToStorage)
-        .then((_) => _navigateToWaitForPlayersScreen(ctx))
+        .then((room) => _navigateToWaitForPlayersScreen(ctx, room))
         .catchError((err) => _showErrorDialog(ctx, err));
   }
 
-  void _addTokenToStorage(int token) async {
-    developer.log('Adding $token to DB', name: 'JoinRoom');
-    await _storage.insert(token);
+  Future<Room> _addTokenToStorage(Room room) async {
+    developer.log('Adding ${room.deviceToken} to DB', name: 'JoinRoom');
+    await _storage.insert(room.deviceToken);
+    return room;
   }
 
-  void _navigateToWaitForPlayersScreen(BuildContext ctx) {
-    Navigator.push(ctx, MaterialPageRoute(builder: (_) => WaitForPlayers()));
+  void _navigateToWaitForPlayersScreen(BuildContext ctx, Room room) {
+    Navigator.pushNamed(ctx, '/waitForPlayers',
+        arguments: WaitForPlayersRouteParams(room));
   }
 
   void _showErrorDialog(BuildContext ctx, Exception err) {

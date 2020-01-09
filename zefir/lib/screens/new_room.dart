@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:zefir/main.dart';
+import 'package:zefir/model/room.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
+import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/widgets/number_picker.dart';
 import 'dart:developer' as developer;
 import 'package:zefir/services/eurus/eurus.dart';
@@ -128,19 +130,20 @@ class _NewRoomState extends State<NewRoom> {
       return;
     }
 
+    final TokenStorage storage = Zefir.of(ctx).storage;
     _eurus
-        .createNewRoom(
+        .createNewRoom(storage,
             roomName: roomName,
             playerName: _nameOfPlayer,
             numOfPlayers: numOfPlayers,
             numOfRounds: _numOfRounds)
-        .then((_) => _navigateToWaitForPlayersScreen(ctx))
+        .then((token) => _navigateToWaitForPlayersScreen(ctx, token))
         .catchError((err) => _showErrorDialog(ctx, err));
   }
 
-  void _navigateToWaitForPlayersScreen(BuildContext ctx) {
-    Navigator.push(
-        ctx, MaterialPageRoute(builder: (context) => WaitForPlayers()));
+  void _navigateToWaitForPlayersScreen(BuildContext ctx, Room room) {
+    Navigator.pushNamed(ctx, '/waitForPlayers',
+        arguments: WaitForPlayersRouteParams(room));
   }
 
   void _showErrorDialog(BuildContext ctx, Exception err) {

@@ -11,27 +11,39 @@ class Mutations {
   mutation joinRoomM(\$roomCode: String!, \$playerName: String!) {
     joinRoom(roomCode:\$roomCode, playerName:\$playerName) {
       name,
-      token
-    }
-  }
-  """;
-
-  static const String FETCH_ROOM = """
-  query fetchRoom(\$token: Int!) {
-    player(token: \$token) {
+      token,
       room {
-        name
+        name,
+        joinCode,
+        maxRounds,
+        currRound,
+        currPlayer {
+          name,
+          token
+        },
+        currAnswers {
+          id
+        },
+        currQuestion {
+          content
+        },
+        state,
+        players {
+          name,
+          token
+        }
       }
     }
   }
   """;
 
-  static const String FETCH_ROOM_PREVIEW = """
-  query fetchRoom(\$token: Int!) {
-    player(token: \$token) {
-      room {
+  static const String ADD_QUESTION = """
+  mutation AddQuestion(\$token: Int!, \$content: String!) {
+    sendQuestion(token: \$token, content: \$content) {
+      content,
+      player { 
         name,
-        state
+        token 
       }
     }
   }

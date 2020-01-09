@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:zefir/model/room_preview.dart';
+import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/add_question.dart';
+import 'package:zefir/screens/room/wait_for_players.dart';
 
 class RoomPreviewCard extends StatelessWidget {
-  final RoomPreview _room;
+  final Room _room;
 
-  RoomPreviewCard({Key key, @required RoomPreview room})
+  RoomPreviewCard({Key key, @required Room room})
       : _room = room,
         super(key: key);
 
@@ -27,10 +29,29 @@ class RoomPreviewCard extends StatelessWidget {
     return Card(
       child: InkWell(
         child: paddedRow,
-        onTap: () => {},
+        onTap: () => navigateToRoom(ctx),
       ),
       margin: EdgeInsets.fromLTRB(5, 10, 5, 10),
     );
+  }
+
+  Future navigateToRoom(BuildContext ctx) {
+    String url;
+    Object arguments;
+
+    switch (_room.state) {
+      case RoomState.JOINING:
+        url = '/waitForPlayers';
+        arguments = WaitForPlayersRouteParams(_room);
+        break;
+      case RoomState.COLLECTING:
+        url = '/addQuestion';
+        arguments = AddQuestionRouteParams(_room);
+        break;
+      default:
+    }
+
+    return Navigator.pushNamed(ctx, url, arguments: arguments);
   }
 
   Widget _buildMoreAcctionsColumn(BuildContext ctx) {
