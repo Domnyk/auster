@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question.dart';
+import 'package:zefir/screens/room/answering/answering_screen.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 
 class RoomPreviewCard extends StatelessWidget {
@@ -47,6 +48,14 @@ class RoomPreviewCard extends StatelessWidget {
       case RoomState.COLLECTING:
         url = '/addQuestion';
         arguments = AddQuestionRouteParams(_room);
+        break;
+      case RoomState.ANSWERING:
+        url = '/answering';
+        arguments = AnsweringRouteParams(_room.deviceToken);
+        break;
+      case RoomState.POLLING:
+        url = '/polling';
+        arguments = null;
         break;
       default:
     }
@@ -115,7 +124,7 @@ class RoomPreviewCard extends StatelessWidget {
       case RoomState.ANSWERING:
         return 'dodawanie odpowiedzi na pytanie';
       case RoomState.POLLING:
-        return 'odpowiadanie na pytanie';
+        return 'głosowanie';
       case RoomState.DEAD:
         return 'koniec gry';
       default:

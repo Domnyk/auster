@@ -1,19 +1,16 @@
-import 'dart:io';
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:zefir/services/storage/SQLs.dart';
 import 'dart:developer' as developer;
 
 class TokenStorage {
-  static String file = 'zefir.db';
+  final Future<Database> _database;
 
-  Database _database;
+  TokenStorage(this._database);
 
   Future<List<int>> fetchAll() async {
-    await _openDatabaseIfNecessary();
+    Database db = await _database;
 
-    List<int> tokens = (await _database.query('tokens'))
-        .map((Map<String, dynamic> map) => map['id'] as int)
+    List<int> tokens = (await db.query('rooms'))
+        .map((Map<String, dynamic> map) => map['token'] as int)
         .toList();
 
     developer.log('Tokens fetched from database: $tokens',
@@ -22,33 +19,16 @@ class TokenStorage {
   }
 
   Future<void> insert(int token) async {
-    await _openDatabaseIfNecessary();
-
-    final Map<String, dynamic> map = {'id': token};
+    final db = await _database;
+    final Map<String, dynamic> map = {'token': token, 'state': null};
     developer.log('Inserting following map into database: ${map.toString()}',
         name: 'TokenStorage');
 
-    await _database.insert('tokens', {'id': token});
+    await db.insert('rooms', map);
   }
 
   Future<void> delete(int token) async {
-    await _openDatabaseIfNecessary();
-
-    await _database.delete('tokens', where: 'id = ?', whereArgs: [token]);
-  }
-
-  Future<void> _openDatabaseIfNecessary() async {
-    String dbsDir = await getDatabasesPath();
-
-    await Directory(dbsDir).create(recursive: true);
-
-    if (_database == null) {
-      _database = await openDatabase(join(dbsDir, TokenStorage.file),
-          onCreate: _createTokensTable, version: 1);
-    }
-  }
-
-  Future<void> _createTokensTable(Database db, int version) async {
-    return await db.execute(SQL.CREATE_TOKENS_TABLE);
+    final db = await _database;
+    await db.delete('rooms', where: 'token = ?', whereArgs: [token]);
   }
 }

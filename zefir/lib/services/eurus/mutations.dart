@@ -39,12 +39,27 @@ class Mutations {
   """;
 
   static const String ADD_QUESTION = """
-  mutation AddQuestion(\$token: Int!, \$content: String!) {
-    sendQuestion(token: \$token, content: \$content) {
+  mutation AddQuestion(\$token: Int!, \$question: String!) {
+    sendQuestion(token: \$token, content: \$question) {
       content,
       player { 
         name,
         token 
+      }
+    }
+  }
+  """;
+
+  static const String SEND_ANSWER = """
+  mutation sendAnswer(\$token:Int!, \$answer:String!) {
+    sendAnswer(token: \$token, content: \$answer) {
+      id, 
+      content,
+      question {
+        content
+      },
+      player {
+        name
       }
     }
   }

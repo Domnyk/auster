@@ -18,6 +18,24 @@ enum RoomState {
   DEAD
 }
 
+extension Stringer on RoomState {
+  // TODO: I should override toString method of RoomState. Yet, for some reason dart throws syntax errors
+  String toMyString() {
+    if (this == RoomState.JOINING) {
+      return 'Joining';
+    } else if (this == RoomState.COLLECTING) {
+      return 'Collecting';
+    } else if (this == RoomState.ANSWERING) {
+      return 'Answering';
+    } else if (this == RoomState.POLLING) {
+      return 'Polling';
+    } else if (this == RoomState.DEAD) {
+      return 'Dead';
+    } else
+      return 'WaitForOtherQuestions';
+  }
+}
+
 class RoomStateParser {
   static RoomState parse(final String roomState) {
     if (roomState == 'Joining') {

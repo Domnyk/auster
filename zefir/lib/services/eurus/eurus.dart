@@ -128,11 +128,11 @@ class Eurus {
       BuildContext ctx, QueryResult result, ErrorBuilder errorBuilder) {
     String msg = _createErrorMsg(result);
     developer.log('An exception occured $msg');
-    return errorBuilder(context: ctx, exception: result.exception);
+    return errorBuilder(ctx, result.exception);
   }
 
   Future<void> leaveRoom(BuildContext ctx, int token) async {
-    final TokenStorage storage = Zefir.of(ctx).storage;
+    final TokenStorage storage = Zefir.of(ctx).storage.token;
     await storage.delete(token);
   }
 

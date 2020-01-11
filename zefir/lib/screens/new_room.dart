@@ -130,7 +130,7 @@ class _NewRoomState extends State<NewRoom> {
       return;
     }
 
-    final TokenStorage storage = Zefir.of(ctx).storage;
+    final TokenStorage storage = Zefir.of(ctx).storage.token;
     _eurus
         .createNewRoom(storage,
             roomName: roomName,

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
-import 'package:zefir/screens/room/wait_for_other_questions.dart';
+import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/services/eurus/mutations.dart';
+import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/utils.dart';
 
 class AddQuestionScreen extends StatelessWidget {
@@ -75,14 +78,18 @@ class AddQuestionScreen extends StatelessWidget {
   Widget _buildSubmitButton(BuildContext ctx) {
     final int token =
         (Utils.routeArgs(ctx) as AddQuestionRouteParams).room.deviceToken;
+    final StateStorage stateStorage = Zefir.of(ctx).storage.state;
     final btn = Mutation(
       options: _buildMutationOptions(ctx),
       builder: (RunMutation runMutation, QueryResult result) {
         return RaisedButton(
             onPressed: () {
-              // runMutation({'token': token, 'content': _question});
-              Navigator.of(ctx).pushNamed('/waitForOtherQuestions',
-                  arguments: WaitForOtherQuestionsRouteParams(token));
+              runMutation({'token': token, 'content': _question});
+              stateStorage
+                  .update(token, RoomState.WAIT_FOR_OTHER_QUESTIONS)
+                  .then((_) => Navigator.of(ctx).pushNamed(
+                      '/waitForOtherQuestions',
+                      arguments: WaitForOtherQuestionsRouteParams(token)));
             },
             color: Colors.green,
             textColor: Colors.white,

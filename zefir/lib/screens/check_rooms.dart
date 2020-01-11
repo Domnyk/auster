@@ -14,7 +14,7 @@ class CheckRoomsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     final Eurus _eurus = Zefir.of(ctx).eurus;
-    final TokenStorage _storage = Zefir.of(ctx).storage;
+    final TokenStorage _storage = Zefir.of(ctx).storage.token;
 
     return FutureBuilder<List<int>>(
         key: UniqueKey(),

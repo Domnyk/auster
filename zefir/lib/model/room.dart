@@ -1,5 +1,8 @@
 import 'package:zefir/model/player.dart';
+import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room_state.dart';
+
+import 'answer.dart';
 
 class Room {
   RoomState state;
@@ -9,8 +12,8 @@ class Room {
   int maxPlayers;
   int currRound;
   Player currPlayer;
-  dynamic currAnswers;
-  dynamic currQuestion;
+  List<Answer> currAnswers;
+  Question currQuestion;
   List<Player> players;
   int deviceToken;
 
@@ -33,8 +36,13 @@ class Room {
           .toList();
     } else {
       currPlayer = Player.fromGraphQL(data['currPlayer']);
-      currAnswers = data['currAnswers'];
-      currQuestion = data['currQuestion'];
+      if (currAnswers != null) {
+        currAnswers = (data['currAnswers'] as List<dynamic>)
+            .map((a) => Answer.fromGraphQl(a))
+            .toList();
+      }
+
+      currQuestion = Question.fromGraphQl(data['currQuestion']);
     }
   }
 

@@ -7,11 +7,13 @@ import 'package:zefir/screens/join_room.dart';
 import 'package:zefir/screens/new_room.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room/add_question.dart';
-import 'package:zefir/screens/room/wait_for_other_questions.dart';
+import 'package:zefir/screens/room/answering/answering_screen.dart';
+import 'package:zefir/screens/room/polling/polling_screen.dart';
+import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
-import 'package:zefir/services/storage/token.dart';
+import 'package:zefir/services/storage/storage.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,14 +34,12 @@ class Zefir extends InheritedWidget {
     '/waitForPlayers': (ctx) => WaitForPlayersScreen(),
     '/addQuestion': (ctx) => AddQuestionScreen(),
     '/waitForOtherQuestions': (ctx) => WaitForOtherQuestionsScreen(),
-    '/answering': (ctx) =>
-        throw Exception('AnsweringScreen is not yet implemented'),
+    '/answering': (ctx) => AnsweringScreen(),
     '/waitForOtherAnswers': (ctx) =>
         throw Exception('WaitForOtherAnswersScreen is not yet implemented'),
-    '/polling': (ctx) =>
-        throw Exception('PollingScreen is not yet implemented'),
-    '/waitForPoll': (ctx) =>
-        throw Exception('WaitForPollScreen is not yet implemented'),
+    '/polling': (ctx) => PollignScreen(),
+    '/waitForOtherPolls': (ctx) =>
+        throw Exception('WaitForOtherPollsScreen is not yet implemented'),
     '/pollResult': (ctx) =>
         throw Exception('PollResultScreen is not yet implemented'),
     '/endGame': (ctx) =>
@@ -67,11 +67,11 @@ class Zefir extends InheritedWidget {
   }
 
   final Eurus eurus;
-  final TokenStorage storage;
+  final Storage storage;
 
   Zefir()
       : eurus = Eurus(client: client),
-        storage = TokenStorage(),
+        storage = Storage(),
         super(child: buildMaterialApp(client));
 
   @override

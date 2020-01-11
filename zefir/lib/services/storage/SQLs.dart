@@ -1,5 +1,5 @@
 class SQL {
-  static const String CREATE_TOKENS_TABLE = """
-    CREATE TABLE tokens(id INTEGER PRIMARY KEY);
+  static const String CREATE_ROOMS_TABLE = """
+    CREATE TABLE rooms(token INTEGER PRIMARY KEY, state VARCHAR(50));
     """;
 }
