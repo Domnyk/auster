@@ -5,6 +5,9 @@ enum RoomState {
   /// Players can add question(s)
   COLLECTING,
 
+  /// Player has added his question but is still waiting for other players
+  WAIT_FOR_OTHER_QUESTIONS,
+
   /// Players answer question
   ANSWERING,
 
@@ -27,6 +30,8 @@ class RoomStateParser {
       return RoomState.POLLING;
     } else if (roomState == 'Dead') {
       return RoomState.DEAD;
+    } else if (roomState == 'WaitForOtherQuestions') {
+      return RoomState.WAIT_FOR_OTHER_QUESTIONS;
     } else {
       throw ArgumentError('Can\'t parse unkown room state: $roomState');
     }

@@ -50,4 +50,14 @@ class Queries {
     }
   }
   """;
+
+  static const String FEETCH_ROOM_STATE = """
+  query fetchRoom(\$token: Int!) {
+    player(token: \$token) {
+      room {
+        state
+      }
+    }
+  }
+  """;
 }

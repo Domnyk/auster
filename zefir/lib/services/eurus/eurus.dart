@@ -136,6 +136,7 @@ class Eurus {
     await storage.delete(token);
   }
 
+  // TODO: move to utils
   String _createErrorMsg(QueryResult qr) {
     return qr.exception.graphqlErrors
         .toList()

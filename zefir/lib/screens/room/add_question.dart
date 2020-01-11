@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/model/room.dart';
+import 'package:zefir/screens/room/wait_for_other_questions.dart';
+import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/services/eurus/mutations.dart';
 import 'package:zefir/utils.dart';
 
@@ -79,7 +81,8 @@ class AddQuestionScreen extends StatelessWidget {
         return RaisedButton(
             onPressed: () {
               // runMutation({'token': token, 'content': _question});
-              Navigator.of(ctx).pushNamed('/waitForOtherQuestions');
+              Navigator.of(ctx).pushNamed('/waitForOtherQuestions',
+                  arguments: WaitForOtherQuestionsRouteParams(token));
             },
             color: Colors.green,
             textColor: Colors.white,
