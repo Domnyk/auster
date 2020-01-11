@@ -77,8 +77,10 @@ class AddQuestionScreen extends StatelessWidget {
       options: _buildMutationOptions(ctx),
       builder: (RunMutation runMutation, QueryResult result) {
         return RaisedButton(
-            onPressed: () =>
-                runMutation({'token': token, 'content': _question}),
+            onPressed: () {
+              // runMutation({'token': token, 'content': _question});
+              Navigator.of(ctx).pushNamed('/waitForOtherQuestions');
+            },
             color: Colors.green,
             textColor: Colors.white,
             child: Text('Dodaj pytanie'));

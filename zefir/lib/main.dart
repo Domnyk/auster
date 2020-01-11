@@ -7,6 +7,7 @@ import 'package:zefir/screens/join_room.dart';
 import 'package:zefir/screens/new_room.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room/add_question.dart';
+import 'package:zefir/screens/room/wait_for_other_questions.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
@@ -30,6 +31,19 @@ class Zefir extends InheritedWidget {
     '/roomList': (ctx) => RoomList(),
     '/waitForPlayers': (ctx) => WaitForPlayersScreen(),
     '/addQuestion': (ctx) => AddQuestionScreen(),
+    '/waitForOtherQuestions': (ctx) => WaitForOtherQuestionsScreen(),
+    '/answering': (ctx) =>
+        throw Exception('AnsweringScreen is not yet implemented'),
+    '/waitForOtherAnswers': (ctx) =>
+        throw Exception('WaitForOtherAnswersScreen is not yet implemented'),
+    '/polling': (ctx) =>
+        throw Exception('PollingScreen is not yet implemented'),
+    '/waitForPoll': (ctx) =>
+        throw Exception('WaitForPollScreen is not yet implemented'),
+    '/pollResult': (ctx) =>
+        throw Exception('PollResultScreen is not yet implemented'),
+    '/endGame': (ctx) =>
+        throw Exception('endGameScreen is not yet implemented'),
     '/newRoom': (ctx) => NewRoom(),
     '/joinRoom': (ctx) => JoinRoom(),
   };
