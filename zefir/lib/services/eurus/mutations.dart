@@ -16,6 +16,7 @@ class Mutations {
         name,
         joinCode,
         maxRounds,
+        maxPlayers,
         currRound,
         currPlayer {
           name,

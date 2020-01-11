@@ -137,7 +137,7 @@ class _NewRoomState extends State<NewRoom> {
             playerName: _nameOfPlayer,
             numOfPlayers: numOfPlayers,
             numOfRounds: _numOfRounds)
-        .then((token) => _navigateToWaitForPlayersScreen(ctx, token))
+        .then((room) => _navigateToWaitForPlayersScreen(ctx, room))
         .catchError((err) => _showErrorDialog(ctx, err));
   }
 
