@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:zefir/model/player.dart';
 import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room_state.dart';
@@ -36,10 +37,13 @@ class Room {
           .toList();
     } else {
       currPlayer = Player.fromGraphQL(data['currPlayer']);
-      if (currAnswers != null) {
+
+      if (data['currAnswers'] != null) {
         currAnswers = (data['currAnswers'] as List<dynamic>)
             .map((a) => Answer.fromGraphQl(a))
             .toList();
+      } else {
+        currAnswers = [];
       }
 
       currQuestion = Question.fromGraphQl(data['currQuestion']);

@@ -29,7 +29,7 @@ class AnsweringSerice {
             },
             color: Colors.green,
             textColor: Colors.white,
-            child: Text('Dodaj pytanie'));
+            child: Text('Dodaj odpowiedź'));
       },
     );
   }

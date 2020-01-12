@@ -13,7 +13,8 @@ class Queries {
           token
         },
         currAnswers {
-          id
+          id,
+          content
         },
         currQuestion {
           content

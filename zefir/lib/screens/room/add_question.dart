@@ -9,6 +9,7 @@ import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/services/eurus/mutations.dart';
 import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/utils.dart';
+import 'dart:developer' as developer;
 
 class AddQuestionScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -80,11 +81,22 @@ class AddQuestionScreen extends StatelessWidget {
         (Utils.routeArgs(ctx) as AddQuestionRouteParams).room.deviceToken;
     final StateStorage stateStorage = Zefir.of(ctx).storage.state;
     final btn = Mutation(
-      options: _buildMutationOptions(ctx),
+      options: MutationOptions(
+          document: Mutations.ADD_QUESTION,
+          onError: (OperationException exception) {
+            developer.log(
+                'Exception occured when sending question ${exception.graphqlErrors[0].toString()}');
+          },
+          onCompleted: (data) {
+            developer
+                .log('Sending of question has ended. Resp: ${data.toString()}');
+          }),
       builder: (RunMutation runMutation, QueryResult result) {
         return RaisedButton(
             onPressed: () {
-              runMutation({'token': token, 'content': _question});
+              runMutation({'token': token, 'question': _question});
+              developer.log('Send question $_question with token $token',
+                  name: 'AddQuestionScreen');
               stateStorage
                   .update(token, RoomState.WAIT_FOR_OTHER_QUESTIONS)
                   .then((_) => Navigator.of(ctx).pushNamed(
@@ -101,10 +113,6 @@ class AddQuestionScreen extends StatelessWidget {
       child: btn,
       width: double.infinity,
     );
-  }
-
-  MutationOptions _buildMutationOptions(BuildContext ctx) {
-    return MutationOptions(document: Mutations.ADD_QUESTION);
   }
 }
 

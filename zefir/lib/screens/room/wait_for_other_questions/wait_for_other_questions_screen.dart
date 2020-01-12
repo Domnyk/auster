@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/answering/answering_screen.dart';
 import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_service.dart';
 import 'dart:developer' as developer;
 import 'package:zefir/services/eurus/queries.dart';
@@ -41,12 +42,19 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
   }
 
   Widget _builder(BuildContext ctx, bool isInWaitingState) {
-    if (isInWaitingState) {
-      return Text('Proszę czakać aż pozostali gracze dodadzą pytania');
-    } else {
-      // Navigator.of(ctx).pushNamed('/answering');
-      return Text('Przechodzimy do pokoju');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      if (isInWaitingState == false) {
+        developer.log(
+            'All players have add questions, navigation to AnsweringScreen',
+            name: 'WaitForOtherQuestionsScreen');
+        Navigator.of(ctx).pushNamed('/answering',
+            arguments: AnsweringRouteParams(
+                (Utils.routeArgs(ctx) as WaitForOtherQuestionsRouteParams)
+                    .token));
+      }
+    });
+
+    return Text('Proszę czakać aż pozostali gracze dodadzą pytania');
   }
 }
 

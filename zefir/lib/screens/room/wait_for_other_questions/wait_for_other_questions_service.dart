@@ -14,10 +14,17 @@ class WaitForOtherQuestionsService {
         options: _buildQueryOptions(token),
         builder: (QueryResult result, {Refetch refetch, FetchMore fetchMore}) {
           if (result.hasException) {
-            final exceptions = Utils.parseExceptions(result);
+            final exceptions = Utils.parseExceptions(result.exception);
             developer
                 .log('Exception occured when fetching room state: $exceptions');
             return errorBuilder();
+          }
+
+          developer.log('result is: ${result.data.toString()}',
+              name: 'WaitForOtherQuestionsService');
+
+          if (result.loading) {
+            return Text('Loading');
           }
 
           final StateStorage stateStorage = Zefir.of(ctx).storage.state;
@@ -28,10 +35,14 @@ class WaitForOtherQuestionsService {
                 return errorBuilder();
               }
 
-              final RoomState stateFromBackend = parseData(result);
-              final bool isInWaitingState =
-                  _isInWaitingState(stateFromBackend, snapshot.data);
-              return builder(context, isInWaitingState);
+              if (snapshot.hasData) {
+                final RoomState stateFromBackend = parseData(result);
+                final bool isInWaitingState =
+                    _isInWaitingState(stateFromBackend, snapshot.data);
+                return builder(context, isInWaitingState);
+              }
+
+              return Text('Loading in progress');
             },
           );
         });

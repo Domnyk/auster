@@ -64,4 +64,16 @@ class Mutations {
     }
   }
   """;
+
+  static const String POLL_ANSWER = """
+  mutation chooseAnswer(\$token: Int!, \$answerId: Int!) {
+    pollAnswer(token: \$token, answer: \$answerId) {
+      id,
+      content,
+      question {
+        content
+      }
+    }
+  }
+  """;
 }

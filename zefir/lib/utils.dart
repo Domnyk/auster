@@ -6,12 +6,12 @@ class Utils {
     return ModalRoute.of(ctx).settings.arguments;
   }
 
-  static String parseExceptions(QueryResult result) {
-    final List<String> errors = result.exception.graphqlErrors
+  static String parseExceptions(OperationException exception) {
+    final List<String> errors = exception.graphqlErrors
         .toList()
         .map((e) => e.message)
         .toList()
-          ..add(result.exception.clientException.message);
+          ..add(exception.clientException.message);
 
     return errors.reduce((acc, val) => acc + val);
   }

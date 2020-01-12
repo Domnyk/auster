@@ -3,6 +3,7 @@ import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question.dart';
 import 'package:zefir/screens/room/answering/answering_screen.dart';
+import 'package:zefir/screens/room/polling/polling_screen.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 
 class RoomPreviewCard extends StatelessWidget {
@@ -55,7 +56,7 @@ class RoomPreviewCard extends StatelessWidget {
         break;
       case RoomState.POLLING:
         url = '/polling';
-        arguments = null;
+        arguments = PollingRouteParams(_room.deviceToken);
         break;
       default:
     }
