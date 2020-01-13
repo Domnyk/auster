@@ -77,8 +77,7 @@ class AddQuestionScreen extends StatelessWidget {
   }
 
   Widget _buildSubmitButton(BuildContext ctx) {
-    final int token =
-        (Utils.routeArgs(ctx) as AddQuestionRouteParams).room.deviceToken;
+    final int token = (Utils.routeArgs(ctx) as AddQuestionRouteParams).token;
     final StateStorage stateStorage = Zefir.of(ctx).storage.state;
     final btn = Mutation(
       options: MutationOptions(
@@ -99,7 +98,7 @@ class AddQuestionScreen extends StatelessWidget {
                   name: 'AddQuestionScreen');
               stateStorage
                   .update(token, RoomState.WAIT_FOR_OTHER_QUESTIONS)
-                  .then((_) => Navigator.of(ctx).pushNamed(
+                  .then((_) => Navigator.of(ctx).pushReplacementNamed(
                       '/waitForOtherQuestions',
                       arguments: WaitForOtherQuestionsRouteParams(token)));
             },
@@ -117,7 +116,7 @@ class AddQuestionScreen extends StatelessWidget {
 }
 
 class AddQuestionRouteParams {
-  final Room room;
+  final int token;
 
-  AddQuestionRouteParams(this.room);
+  AddQuestionRouteParams(this.token);
 }

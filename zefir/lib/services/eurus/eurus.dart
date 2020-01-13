@@ -4,8 +4,10 @@ import 'package:meta/meta.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_preview.dart';
+import 'package:zefir/model/room_state.dart';
 import 'package:zefir/services/eurus/exceptions/no_such_room_exception.dart';
 import 'package:zefir/services/eurus/queries.dart';
+import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/typedefs.dart';
 import 'dart:developer' as developer;
@@ -71,16 +73,17 @@ class Eurus {
     return room;
   }
 
-  Stream<Room> fetchRooms({@required List<int> tokens}) async* {
+  Stream<Room> fetchRooms(
+      {@required List<int> tokens, StateStorage stateStorage}) async* {
     for (final token in tokens) {
-      final roomPreview = await _fetchRoom(token);
+      final roomPreview = await _fetchRoom(token, stateStorage);
       developer.log('Received room preview: $roomPreview',
           name: 'eurus.fetchRoomsPreview');
       yield roomPreview;
     }
   }
 
-  Future<Room> _fetchRoom(token) async {
+  Future<Room> _fetchRoom(token, StateStorage stateStorage) async {
     final mutationOptions =
         MutationOptions(document: Queries.FETCH_ROOM, variables: {
       'token': token,
@@ -94,7 +97,13 @@ class Eurus {
       throw (errorMsg);
     }
 
-    return Room.fromGraphQL(qr.data['player']['room'], token);
+    RoomState stateFromDatabase = await stateStorage.fetch(token);
+    RoomState stateFromBackend =
+        RoomStateUtils.parse(qr.data['player']['room']['state'] as String);
+
+    final room = Room.fromGraphQL(qr.data['player']['room'], token);
+    room.state = RoomStateUtils.merge(stateFromDatabase, stateFromBackend);
+    return room;
   }
 
   Widget buildRoom(

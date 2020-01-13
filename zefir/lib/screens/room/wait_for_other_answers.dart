@@ -3,18 +3,16 @@ import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room_state.dart';
-import 'package:zefir/screens/room/answering/answering_screen.dart';
-import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_service.dart';
+import 'package:zefir/screens/room/polling/polling_screen.dart';
 import 'package:zefir/services/eurus/queries.dart';
-import 'dart:developer' as developer;
 import 'package:zefir/utils.dart';
+import 'dart:developer' as developer;
 
-class WaitForOtherQuestionsScreen extends StatelessWidget {
-  static const String waitText =
-      'Proszę czekać aż pozostali gracze dodadzą pytania';
-  static const String appBarText = 'Oczekiwanie na pytania';
+class WaitForOtherAnswersScreen extends StatelessWidget {
+  static const String pleaseWait = 'Proszę czekać na odpowiedzi innych graczy';
+  static const String appBarText = 'Oczekiwanie na odpowiedzi';
 
-  const WaitForOtherQuestionsScreen();
+  const WaitForOtherAnswersScreen();
 
   @override
   Widget build(BuildContext ctx) {
@@ -29,8 +27,8 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
           builder: (BuildContext context, AsyncSnapshot<RoomState> snapshot) {
             if (snapshot.hasData &&
                 !snapshot.hasError &&
-                snapshot.data == RoomState.ANSWERING) {
-              navigateToAnsweringScreen(ctx);
+                snapshot.data == RoomState.POLLING) {
+              navigateToPollingScreen(ctx);
             }
             return _buildBody(context);
           },
@@ -39,7 +37,7 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
 
   Stream<RoomState> _buildStateStream(BuildContext ctx) {
     final token =
-        (Utils.routeArgs(ctx) as WaitForOtherQuestionsRouteParams).token;
+        (Utils.routeArgs(ctx) as WaitForOtherAnswersRouteParams).token;
     final client = Zefir.of(ctx).eurus.client.value;
     final options = WatchQueryOptions(
       fetchResults: true,
@@ -56,7 +54,11 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
         final stateFromBackend = RoomStateUtils.parse(
             result.data['player']['room']['state'] as String);
 
-        return calculateProperState(stateFromBackend, stateFromDb);
+        developer.log(
+            'State from DB for token $token is: ${stateFromDb.toString()}',
+            name: 'WaitForOtherAnswersScreen');
+
+        return RoomStateUtils.merge(stateFromDb, stateFromBackend);
       } else {
         return null;
       }
@@ -65,16 +67,18 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext ctx) {
     final spinner = _buildSpinner(ctx);
-    final text = _buildText(ctx, waitText);
+    final text = _buildText(ctx, pleaseWait);
+
+    List<Widget> padded = [spinner, text]
+        .map((w) => Padding(
+              child: w,
+              padding: EdgeInsets.all(10),
+            ))
+        .toList();
 
     return Column(
+      children: padded,
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [spinner, text]
-          .map((w) => Padding(
-                child: w,
-                padding: EdgeInsets.all(10),
-              ))
-          .toList(),
     );
   }
 
@@ -96,33 +100,20 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
     );
   }
 
-  RoomState calculateProperState(RoomState fromBackend, RoomState fromDb) {
-    if (fromBackend == RoomState.COLLECTING &&
-        fromDb == RoomState.WAIT_FOR_OTHER_QUESTIONS) {
-      return RoomState.WAIT_FOR_OTHER_QUESTIONS;
-    } else if (fromBackend == RoomState.ANSWERING) {
-      return RoomState.ANSWERING;
-    } else {
-      throw Exception(
-          'Illegal combination of states. FromDb: $fromDb, from backedn: $fromBackend');
-    }
-  }
-
-  void navigateToAnsweringScreen(BuildContext ctx) {
+  void navigateToPollingScreen(BuildContext ctx) {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       final int token =
-          (Utils.routeArgs(ctx) as WaitForOtherQuestionsRouteParams).token;
-      developer.log(
-          'All players have add questions, navigation to AnsweringScreen',
-          name: 'WaitForOtherQuestionsScreen');
-      Navigator.of(ctx).pushReplacementNamed('/answering',
-          arguments: AnsweringRouteParams(token));
+          (Utils.routeArgs(ctx) as WaitForOtherAnswersRouteParams).token;
+      developer.log('All players have add answers, navigation to PollingScreen',
+          name: 'PollingScreen');
+      Navigator.of(ctx).pushReplacementNamed('/polling',
+          arguments: PollingRouteParams(token));
     });
   }
 }
 
-class WaitForOtherQuestionsRouteParams {
+class WaitForOtherAnswersRouteParams {
   final int token;
 
-  const WaitForOtherQuestionsRouteParams(this.token);
+  WaitForOtherAnswersRouteParams(this.token);
 }

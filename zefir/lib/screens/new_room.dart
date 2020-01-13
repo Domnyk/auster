@@ -93,6 +93,7 @@ class _NewRoomState extends State<NewRoom> {
     return new NumberPicker(
       context: context,
       initialValue: initialValue,
+      minValue: 1,
       controller: controller,
       labelText: 'Liczba rund',
     );
@@ -142,7 +143,7 @@ class _NewRoomState extends State<NewRoom> {
   }
 
   void _navigateToWaitForPlayersScreen(BuildContext ctx, Room room) {
-    Navigator.pushNamed(ctx, '/waitForPlayers',
+    Navigator.pushReplacementNamed(ctx, '/waitForPlayers',
         arguments: WaitForPlayersRouteParams(room));
   }
 

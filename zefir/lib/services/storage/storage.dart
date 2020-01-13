@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:zefir/services/storage/SQLs.dart';
@@ -8,15 +9,15 @@ import 'dart:developer' as developer;
 import 'package:zefir/services/storage/token.dart';
 
 class Storage {
-  static String databaseFile = 'zefir6.db';
+  static String databaseFile = 'zefir8.db';
 
   final Future<Database> _database;
   StateStorage _state;
   TokenStorage _token;
 
-  Storage() : _database = _createDatabase() {
+  Storage(GraphQLClient graphQLClient) : _database = _createDatabase() {
     _token = TokenStorage(_database);
-    _state = StateStorage(_database);
+    _state = StateStorage(_database, graphQLClient);
   }
 
   get token => _token;

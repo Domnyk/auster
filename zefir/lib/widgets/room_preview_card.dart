@@ -4,6 +4,8 @@ import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question.dart';
 import 'package:zefir/screens/room/answering/answering_screen.dart';
 import 'package:zefir/screens/room/polling/polling_screen.dart';
+import 'package:zefir/screens/room/wait_for_other_answers.dart';
+import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 
 class RoomPreviewCard extends StatelessWidget {
@@ -48,11 +50,19 @@ class RoomPreviewCard extends StatelessWidget {
         break;
       case RoomState.COLLECTING:
         url = '/addQuestion';
-        arguments = AddQuestionRouteParams(_room);
+        arguments = AddQuestionRouteParams(_room.deviceToken);
+        break;
+      case RoomState.WAIT_FOR_OTHER_QUESTIONS:
+        url = '/waitForOtherQuestions';
+        arguments = WaitForOtherQuestionsRouteParams(_room.deviceToken);
         break;
       case RoomState.ANSWERING:
         url = '/answering';
         arguments = AnsweringRouteParams(_room.deviceToken);
+        break;
+      case RoomState.WAIT_FOR_OTHER_ANSWERS:
+        url = '/waitForOtherAnswers';
+        arguments = WaitForOtherAnswersRouteParams(_room.deviceToken);
         break;
       case RoomState.POLLING:
         url = '/polling';
@@ -122,8 +132,12 @@ class RoomPreviewCard extends StatelessWidget {
         return 'oczekiwanie na graczy';
       case RoomState.COLLECTING:
         return 'dodawanie pytań';
+      case RoomState.WAIT_FOR_OTHER_QUESTIONS:
+        return 'oczekiwanie na pytania innych graczy';
       case RoomState.ANSWERING:
         return 'dodawanie odpowiedzi na pytanie';
+      case RoomState.WAIT_FOR_OTHER_ANSWERS:
+        return 'oczekiwanie na odpowiedzi innych graczy';
       case RoomState.POLLING:
         return 'głosowanie';
       case RoomState.DEAD:

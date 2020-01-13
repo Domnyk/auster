@@ -19,7 +19,7 @@ class Room {
   int deviceToken;
 
   Room.fromGraphQL(dynamic data, int deviceToken)
-      : state = RoomStateParser.parse(data['state']),
+      : state = RoomStateUtils.parse(data['state']),
         name = data['name'],
         joinCode = data['joinCode'],
         maxRounds = data['maxRounds'],
@@ -28,6 +28,7 @@ class Room {
         deviceToken = deviceToken {
     if (state == RoomState.JOINING ||
         state == RoomState.COLLECTING ||
+        state == RoomState.WAIT_FOR_OTHER_QUESTIONS ||
         state == RoomState.DEAD) {
       currPlayer = null;
       currAnswers = null;

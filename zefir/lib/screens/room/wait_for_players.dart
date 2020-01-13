@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
+import 'package:zefir/screens/room/add_question.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/eurus/queries.dart';
 import 'package:zefir/utils.dart';
@@ -46,6 +47,17 @@ class WaitForPlayersScreen extends StatelessWidget {
     return Query(
       options: _buildQueryOptions(ctx, token),
       builder: (QueryResult result, {fetchMore, refetch}) {
+        //   WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+        // if (isInWaitingState == false) {
+        //   developer.log(
+        //       'All players have add questions, navigation to AnsweringScreen',
+        //       name: 'WaitForOtherQuestionsScreen');
+        //   Navigator.of(ctx).pushNamed('/answering',
+        //       arguments: AnsweringRouteParams(
+        //           (Utils.routeArgs(ctx) as WaitForOtherQuestionsRouteParams)
+        //               .token));
+        // }
+
         if (result.hasException) developer.log('Result has exception');
         if (result.loading) return Text('Proszę czekać, trwa ładowanie');
 
@@ -53,6 +65,13 @@ class WaitForPlayersScreen extends StatelessWidget {
             (result.data['player']['room']['players'] as List<dynamic>)
                 .map((p) => p['name'] as String)
                 .toList();
+
+        WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+          if (playersNames.length == maxPlayers) {
+            Navigator.pushReplacementNamed(ctx, '/addQuestion',
+                arguments: AddQuestionRouteParams(token));
+          }
+        });
 
         return Column(
           children: <Widget>[

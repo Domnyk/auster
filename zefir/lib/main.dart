@@ -9,6 +9,7 @@ import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room/add_question.dart';
 import 'package:zefir/screens/room/answering/answering_screen.dart';
 import 'package:zefir/screens/room/polling/polling_screen.dart';
+import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/screens/room_list.dart';
@@ -35,8 +36,7 @@ class Zefir extends InheritedWidget {
     '/addQuestion': (ctx) => AddQuestionScreen(),
     '/waitForOtherQuestions': (ctx) => WaitForOtherQuestionsScreen(),
     '/answering': (ctx) => AnsweringScreen(),
-    '/waitForOtherAnswers': (ctx) =>
-        throw Exception('WaitForOtherAnswersScreen is not yet implemented'),
+    '/waitForOtherAnswers': (ctx) => WaitForOtherAnswersScreen(),
     '/polling': (ctx) => PollignScreen(),
     '/waitForOtherPolls': (ctx) =>
         throw Exception('WaitForOtherPollsScreen is not yet implemented'),
@@ -71,7 +71,7 @@ class Zefir extends InheritedWidget {
 
   Zefir()
       : eurus = Eurus(client: client),
-        storage = Storage(),
+        storage = Storage(client.value),
         super(child: buildMaterialApp(client));
 
   @override

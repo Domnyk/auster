@@ -16,7 +16,7 @@ class RoomPreview {
 
   RoomPreview.parse(final Map<String, dynamic> data, int deviceToken) {
     _name = data['name'];
-    _state = RoomStateParser.parse(data['state']);
+    _state = RoomStateUtils.parse(data['state']);
     _deviceToken = deviceToken;
   }
 

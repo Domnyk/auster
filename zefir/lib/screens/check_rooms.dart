@@ -28,7 +28,8 @@ class CheckRoomsWidget extends StatelessWidget {
       final List<Room> rooms = [];
 
       return StreamBuilder<Room>(
-        stream: eurus.fetchRooms(tokens: snapshot.data),
+        stream: eurus.fetchRooms(
+            tokens: snapshot.data, stateStorage: Zefir.of(ctx).storage.state),
         builder: (ctx, snapshot) => _buildFromStream(ctx, snapshot, rooms),
       );
     } else {
