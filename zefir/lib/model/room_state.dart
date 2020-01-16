@@ -91,6 +91,9 @@ class RoomStateUtils {
     } else if (fromBackend == RoomState.POLLING &&
         fromDb == RoomState.WAIT_FOR_OTHER_POLLS) {
       return RoomState.WAIT_FOR_OTHER_POLLS;
+    } else if (fromBackend == RoomState.ANSWERING &&
+        fromDb == RoomState.WAIT_FOR_OTHER_POLLS) {
+      return RoomState.POLL_RESULT;
     } else {
       return fromBackend;
     }

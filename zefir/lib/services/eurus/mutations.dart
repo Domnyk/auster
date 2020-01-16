@@ -53,13 +53,31 @@ class Mutations {
   static const String SEND_ANSWER = """
   mutation sendAnswer(\$token:Int!, \$answer:String!) {
     sendAnswer(token: \$token, content: \$answer) {
-      id, 
-      content,
-      question {
-        content
-      },
       player {
-        name
+        room {
+          name,
+          joinCode,
+          maxRounds,
+          maxPlayers,
+          currRound,
+          currPlayer {
+            name,
+            token
+          },
+          currAnswers {
+            id,
+            content
+          },
+          currQuestion {
+            content
+          },
+          state,
+          players {
+            name,
+            token,
+            points
+          }
+        }
       }
     }
   }

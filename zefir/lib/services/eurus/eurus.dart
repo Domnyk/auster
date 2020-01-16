@@ -26,7 +26,7 @@ class Eurus {
     String joinCode = await _createNewRoomWithoutJoining(
         name: roomName, numOfPlayers: numOfPlayers, numOfRounds: numOfRounds);
     Room room = await joinRoom(roomCode: joinCode, playerName: playerName);
-    storage.insert(room.deviceToken);
+    storage.insert(room.deviceToken, initialState: RoomState.JOINING);
     return room;
   }
 
@@ -67,9 +67,6 @@ class Eurus {
     int token = qr.data['joinRoom']['token'] as int;
     Room room = Room.fromGraphQL(qr.data['joinRoom']['room'], token);
 
-    developer.log(
-        'Successfully joined room using room code $roomCode. Received token $token',
-        name: 'eurus.joinRoom');
     return room;
   }
 
@@ -77,8 +74,6 @@ class Eurus {
       {@required List<int> tokens, StateStorage stateStorage}) async* {
     for (final token in tokens) {
       final roomPreview = await _fetchRoom(token, stateStorage);
-      developer.log('Received room preview: $roomPreview',
-          name: 'eurus.fetchRoomsPreview');
       yield roomPreview;
     }
   }
@@ -129,6 +124,7 @@ class Eurus {
   QueryOptions _buildFetchRoomOptions(int token) {
     return QueryOptions(
         document: Queries.FETCH_ROOM,
+        fetchPolicy: FetchPolicy.networkOnly,
         variables: {'token': token},
         pollInterval: 5);
   }

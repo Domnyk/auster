@@ -4,6 +4,8 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/answer.dart';
 import 'package:zefir/model/room.dart';
+import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/services/eurus/mutations.dart';
 import 'package:zefir/utils.dart';
 import 'dart:developer' as developer;
@@ -16,24 +18,19 @@ class PollignScreen extends StatefulWidget {
 }
 
 class _PollignScreenState extends State<PollignScreen> {
+  static const appBartTitle = 'Zagłosuj na odpowiedź';
+
   Answer _choosedAnswer;
 
   _PollignScreenState(this._choosedAnswer);
 
   @override
   Widget build(BuildContext ctx) {
-    return Scaffold(
-      body: _buildBody(ctx),
-      appBar: AppBar(
-        title: Text('Zagłosuj na odpowiedź'),
-        leading: _buildLeading(ctx),
-      ),
-    );
-  }
+    final Room room = (Utils.routeArgs(ctx) as PollingRouteParams).room;
 
-  Widget _buildLeading(BuildContext ctx) {
-    return BackButton(
-      onPressed: () => Navigator.of(ctx).popUntil(ModalRoute.withName('/')),
+    return Scaffold(
+      body: room != null ? _builder(ctx, room) : _buildBody(ctx),
+      appBar: AppBar(title: Text(appBartTitle)),
     );
   }
 
@@ -47,8 +44,32 @@ class _PollignScreenState extends State<PollignScreen> {
         );
   }
 
-  Widget _buildQuestion(BuildContext ctx, String question) {
-    return Text(question);
+  Widget _builder(BuildContext ctx, Room room) {
+    final List<Widget> childen = [
+      _buildQuestion(ctx, room.currPlayer.name, room.currQuestion.content),
+      _buildAnswers(ctx, room.currAnswers),
+      _buildSubmitButton(ctx),
+    ]
+        .map((w) => Padding(
+              child: w,
+              padding: EdgeInsets.all(10),
+            ))
+        .toList();
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: childen,
+    );
+  }
+
+  Widget _buildQuestion(BuildContext ctx, String playerName, String question) {
+    final q =
+        question[0].toLowerCase() + question.substring(1, question.length - 1);
+
+    return Text(
+      'Odpowiedz tak jak $playerName: $q',
+      style: TextStyle(fontSize: Theme.of(ctx).textTheme.headline.fontSize),
+    );
   }
 
   Widget _buildAnswers(BuildContext ctx, List<Answer> answers) {
@@ -56,17 +77,17 @@ class _PollignScreenState extends State<PollignScreen> {
       shrinkWrap: true,
       itemCount: answers.length,
       itemBuilder: (BuildContext ctx, int index) {
-        return CheckboxListTile(
+        return RadioListTile(
+          value: answers[index].id,
+          groupValue: _choosedAnswer == null ? null : _choosedAnswer.id,
           key: ObjectKey(index),
           title: Text(answers[index].content),
-          value:
-              _choosedAnswer != null && _choosedAnswer.id == answers[index].id,
-          onChanged: (bool value) {
+          onChanged: (int value) {
             setState(() {
               _choosedAnswer = answers[index];
             });
           },
-          secondary: Text((index + 1).toString()),
+          // secondary: Text((index + 1).toString()),
         );
       },
     );
@@ -79,9 +100,9 @@ class _PollignScreenState extends State<PollignScreen> {
       runM({'token': token, 'answerId': _choosedAnswer.id});
       developer.log('Send answerId ${_choosedAnswer.id} for token $token',
           name: 'PollingScreen');
-      // stateStorage.update(token, RoomState.WAIT_FOR_OTHER_QUESTIONS).then((_) =>
-      //     Navigator.of(ctx).pushNamed('/waitForOtherQuestions',
-      //         arguments: WaitForOtherQuestionsRouteParams(token)));
+      stateStorage.update(token, RoomState.WAIT_FOR_OTHER_POLLS).then((_) =>
+          Navigator.of(ctx).pushReplacementNamed('/waitForOtherPolls',
+              arguments: WaitForOtherPollsRouteParams(token)));
     };
     return SizedBox(
         child: Mutation(
@@ -106,23 +127,11 @@ class _PollignScreenState extends State<PollignScreen> {
     developer.log(Utils.parseExceptions(exception), name: 'PollingScreen');
     return Text('Error occured');
   }
-
-  Widget _builder(BuildContext ctx, Room room) {
-    final List<Widget> childen = [
-      _buildQuestion(ctx, room.currQuestion.content),
-      _buildAnswers(ctx, room.currAnswers),
-      _buildSubmitButton(ctx),
-    ];
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: childen,
-    );
-  }
 }
 
 class PollingRouteParams {
   final int token;
+  final Room room;
 
-  PollingRouteParams(this.token);
+  PollingRouteParams(this.token, {Room room}) : room = room;
 }

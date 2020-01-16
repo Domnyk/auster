@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'dart:developer' as developer;
 
+import 'package:zefir/model/room_state.dart';
+
 class TokenStorage {
   final Future<Database> _database;
 
@@ -18,9 +20,12 @@ class TokenStorage {
     return tokens;
   }
 
-  Future<void> insert(int token) async {
+  Future<void> insert(int token, {RoomState initialState}) async {
     final db = await _database;
-    final Map<String, dynamic> map = {'token': token, 'state': null};
+    final Map<String, dynamic> map = {
+      'token': token,
+      'state': initialState.toMyString()
+    };
     developer.log('Inserting following map into database: ${map.toString()}',
         name: 'TokenStorage');
 

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question.dart';
-import 'package:zefir/screens/room/answering/answering_screen.dart';
+import 'package:zefir/screens/room/answering_screen.dart';
+import 'package:zefir/screens/room/dead.dart';
+import 'package:zefir/screens/room/poll_result.dart';
 import 'package:zefir/screens/room/polling/polling_screen.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
+import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
+import 'package:zefir/services/storage/token.dart';
 
 class RoomPreviewCard extends StatelessWidget {
   final Room _room;
@@ -68,6 +73,18 @@ class RoomPreviewCard extends StatelessWidget {
         url = '/polling';
         arguments = PollingRouteParams(_room.deviceToken);
         break;
+      case RoomState.WAIT_FOR_OTHER_POLLS:
+        url = '/waitForOtherPolls';
+        arguments = WaitForOtherPollsRouteParams(_room.deviceToken);
+        break;
+      case RoomState.POLL_RESULT:
+        url = '/pollResult';
+        arguments = PollResultRouteParams(_room);
+        break;
+      case RoomState.DEAD:
+        url = '/dead';
+        arguments = DeadRouteParams(_room);
+        break;
       default:
     }
 
@@ -81,7 +98,32 @@ class RoomPreviewCard extends StatelessWidget {
           context: ctx, builder: (context) => _buildMoreActionsDialog(context)),
     );
 
-    return Column(children: [btn]);
+    return Column(
+        children: _room.state == RoomState.JOINING
+            ? [_buildActionsInJoingingState(ctx)]
+            : [btn]);
+  }
+
+  Widget _buildActionsInJoingingState(BuildContext ctx) {
+    final TokenStorage tokenStorage = Zefir.of(ctx).storage.token;
+
+    Widget confirm = FlatButton(
+      child: Text('Tak'),
+      onPressed: () => tokenStorage
+          .delete(_room.deviceToken)
+          .then((_) => Navigator.pop(ctx)),
+    );
+
+    return FlatButton(
+      child: Icon(Icons.clear),
+      onPressed: () => showDialog(
+          context: ctx,
+          builder: (context) => AlertDialog(
+                title: Text('Opuść pokój'),
+                content: Text('Czy jesteś pewien, że chcesz opuścić pokój?'),
+                actions: [confirm],
+              )),
+    );
   }
 
   Widget _buildMoreActionsDialog(BuildContext ctx) {
@@ -140,6 +182,10 @@ class RoomPreviewCard extends StatelessWidget {
         return 'oczekiwanie na odpowiedzi innych graczy';
       case RoomState.POLLING:
         return 'głosowanie';
+      case RoomState.WAIT_FOR_OTHER_POLLS:
+        return 'oczekiwanie na głosy innych graczy';
+      case RoomState.POLL_RESULT:
+        return 'wyniki rundy';
       case RoomState.DEAD:
         return 'koniec gry';
       default:

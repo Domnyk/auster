@@ -22,7 +22,8 @@ class Queries {
         state,
         players {
           name,
-          token
+          token,
+          points
         }
       }
     }

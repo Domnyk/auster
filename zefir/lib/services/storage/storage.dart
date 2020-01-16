@@ -9,7 +9,7 @@ import 'dart:developer' as developer;
 import 'package:zefir/services/storage/token.dart';
 
 class Storage {
-  static String databaseFile = 'zefir8.db';
+  static String databaseFile = 'zefir11.db';
 
   final Future<Database> _database;
   StateStorage _state;

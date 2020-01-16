@@ -4,7 +4,13 @@ class Player {
   final int points;
   // TODO: Add polled answers field
 
-  Player.fromGraphQL(dynamic data)
+  Player(
+    this.token,
+    this.name,
+    this.points,
+  );
+
+  Player.fromGraphQl(dynamic data)
       : token = data['token'],
         name = data['name'],
         points = data['points'];

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
+import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/add_question.dart';
 import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/token.dart';
@@ -100,20 +102,31 @@ class _JoinRoomState extends State<JoinRoom> {
 
     _eurus
         .joinRoom(roomCode: _joinCode, playerName: _playerName)
-        .then(_addTokenToStorage)
-        .then((room) => _navigateToWaitForPlayersScreen(ctx, room))
+        .then((room) => _navigateToNextScreen(ctx, room))
         .catchError((err) => _showErrorDialog(ctx, err));
   }
 
-  Future<Room> _addTokenToStorage(Room room) async {
-    developer.log('Adding ${room.deviceToken} to DB', name: 'JoinRoom');
-    await _storage.insert(room.deviceToken);
-    return room;
+  Future<void> _navigateToNextScreen(
+      BuildContext ctx, Room roomAfterJoining) async {
+    if (roomAfterJoining.state == RoomState.COLLECTING) {
+      await _navigatToAddQuestion(ctx, roomAfterJoining.deviceToken);
+    } else if (roomAfterJoining.state == RoomState.JOINING) {
+      await _navigateToWaitForPlayers(ctx, roomAfterJoining);
+    }
   }
 
-  void _navigateToWaitForPlayersScreen(BuildContext ctx, Room room) {
-    Navigator.pushNamed(ctx, '/waitForPlayers',
+  Future<void> _navigateToWaitForPlayers(BuildContext ctx, Room room) async {
+    await _storage.insert(room.deviceToken, initialState: RoomState.JOINING);
+
+    Navigator.pushReplacementNamed(ctx, '/waitForPlayers',
         arguments: WaitForPlayersRouteParams(room));
+  }
+
+  Future<void> _navigatToAddQuestion(BuildContext ctx, int token) async {
+    await _storage.insert(token, initialState: RoomState.COLLECTING);
+
+    Navigator.pushReplacementNamed(ctx, '/addQuestion',
+        arguments: AddQuestionRouteParams(token));
   }
 
   void _showErrorDialog(BuildContext ctx, Exception err) {

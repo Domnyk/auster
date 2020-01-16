@@ -23,7 +23,6 @@ class StateStorage {
     }
 
     RoomState fromDb = RoomStateUtils.parse(rawState);
-    developer.log('State from db: $fromDb');
     RoomState fromBackend = await _fetchFromBackend(token);
     RoomState state = fromDb == null
         ? fromBackend
@@ -32,7 +31,8 @@ class StateStorage {
     developer.log(
         'State fetched from database for $token: ${state.toMyString()}',
         name: 'StateStorage');
-    return fromDb;
+    // return fromDb;
+    return state;
   }
 
   Future<void> insert(int token, RoomState state) async {
@@ -42,8 +42,6 @@ class StateStorage {
       'token': token,
       'state': state.toMyString()
     };
-    developer.log('Inserting following map into database: ${map.toString()}',
-        name: 'StateStorage');
 
     await db.insert('rooms', map);
   }
@@ -55,15 +53,11 @@ class StateStorage {
       'token': token,
       'state': newState.toMyString(),
     };
-    developer.log(
-        'Updating state of a room with token $token to following: ${newState.toString()}',
-        name: 'StateStorage');
 
-    int x = await db.update('rooms', map,
+    await db.update('rooms', map,
         where: "token = ?",
         whereArgs: [token],
         conflictAlgorithm: ConflictAlgorithm.replace);
-    developer.log('Answer from state update is: $x', name: 'StateStorage');
   }
 
   Future<RoomState> _fetchFromBackend(int token) async {

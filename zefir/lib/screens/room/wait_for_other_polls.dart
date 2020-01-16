@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/main.dart';
+import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
-import 'package:zefir/screens/room/polling/polling_screen.dart';
+import 'package:zefir/screens/room/poll_result.dart';
 import 'package:zefir/services/eurus/queries.dart';
 import 'package:zefir/utils.dart';
 import 'dart:developer' as developer;
 
-class WaitForOtherAnswersScreen extends StatelessWidget {
-  static const String pleaseWait = 'Proszę czekać na odpowiedzi innych graczy';
-  static const String appBarText = 'Oczekiwanie na odpowiedzi';
+class WaitForOtherPollsScreen extends StatelessWidget {
+  static const String pleaseWait = 'Proszę czekać na głosy innych graczy';
+  static const String appBarText = 'Oczekiwanie na głosy';
 
-  const WaitForOtherAnswersScreen();
+  const WaitForOtherPollsScreen();
 
   @override
   Widget build(BuildContext ctx) {
@@ -24,25 +25,25 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
         ),
         body: StreamBuilder(
           stream: _buildStateStream(ctx),
-          builder: (BuildContext context, AsyncSnapshot<RoomState> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
             if (snapshot.hasData &&
                 !snapshot.hasError &&
-                snapshot.data == RoomState.POLLING) {
-              navigateToPollingScreen(ctx);
+                snapshot.data.state == RoomState.POLL_RESULT &&
+                snapshot.data.deviceToken != snapshot.data.currPlayer.token) {
+              navigateToPollResultScreen(ctx, snapshot.data);
             }
             return _buildBody(context);
           },
         ));
   }
 
-  Stream<RoomState> _buildStateStream(BuildContext ctx) {
-    final token =
-        (Utils.routeArgs(ctx) as WaitForOtherAnswersRouteParams).token;
+  Stream<Room> _buildStateStream(BuildContext ctx) {
+    final token = (Utils.routeArgs(ctx) as WaitForOtherPollsRouteParams).token;
     final client = Zefir.of(ctx).eurus.client.value;
     final options = WatchQueryOptions(
       fetchResults: true,
       pollInterval: 5,
-      document: Queries.FEETCH_ROOM_STATE,
+      document: Queries.FETCH_ROOM,
       fetchPolicy: FetchPolicy.networkOnly,
       errorPolicy: ErrorPolicy.all,
       variables: {'token': token},
@@ -50,15 +51,11 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
 
     return client.watchQuery(options).stream.asyncMap((result) async {
       if (result.hasException == false && result.data != null) {
+        final room = Room.fromGraphQL(result.data['player']['room'], token);
         final stateFromDb = await Zefir.of(ctx).storage.state.fetch(token);
-        final stateFromBackend = RoomStateUtils.parse(
-            result.data['player']['room']['state'] as String);
+        room.state = RoomStateUtils.merge(stateFromDb, room.state);
 
-        developer.log(
-            'State from DB for token $token is: ${stateFromDb.toString()}',
-            name: 'WaitForOtherAnswersScreen');
-
-        return RoomStateUtils.merge(stateFromDb, stateFromBackend);
+        return room;
       } else {
         return null;
       }
@@ -100,20 +97,21 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
     );
   }
 
-  void navigateToPollingScreen(BuildContext ctx) {
+  void navigateToPollResultScreen(BuildContext ctx, Room room) {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-      final int token =
-          (Utils.routeArgs(ctx) as WaitForOtherAnswersRouteParams).token;
-      developer.log('All players have add answers, navigation to PollingScreen',
-          name: 'WaitForOtherAnswers');
-      Navigator.of(ctx).pushReplacementNamed('/polling',
-          arguments: PollingRouteParams(token));
+      final stateStorage = Zefir.of(ctx).storage.state;
+      developer.log('All polls present, navigating to PollResult',
+          name: 'WaitForOtherPolls');
+
+      stateStorage.update(room.deviceToken, RoomState.POLL_RESULT).then((_) =>
+          Navigator.of(ctx).pushReplacementNamed('/pollResult',
+              arguments: PollResultRouteParams(room)));
     });
   }
 }
 
-class WaitForOtherAnswersRouteParams {
+class WaitForOtherPollsRouteParams {
   final int token;
 
-  WaitForOtherAnswersRouteParams(this.token);
+  const WaitForOtherPollsRouteParams(this.token);
 }
