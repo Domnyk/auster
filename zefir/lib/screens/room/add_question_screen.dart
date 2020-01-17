@@ -11,7 +11,11 @@ import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/utils.dart';
 import 'dart:developer' as developer;
 
+import 'package:zefir/widgets/confirm_button.dart';
+
 class AddQuestionScreen extends StatelessWidget {
+  static const String _addQuestionText = 'Dodaj pytanie';
+
   final _formKey = GlobalKey<FormState>();
   final _questionController = TextEditingController();
 
@@ -90,20 +94,10 @@ class AddQuestionScreen extends StatelessWidget {
                 .log('Sending of question has ended. Resp: ${data.toString()}');
           }),
       builder: (RunMutation runMutation, QueryResult result) {
-        return RaisedButton(
-            onPressed: () {
-              runMutation({'token': token, 'question': _question});
-              developer.log('Send question $_question with token $token',
-                  name: 'AddQuestionScreen');
-              stateStorage
-                  .update(token, RoomState.WAIT_FOR_OTHER_QUESTIONS)
-                  .then((_) => Navigator.of(ctx).pushReplacementNamed(
-                      '/waitForOtherQuestions',
-                      arguments: WaitForOtherQuestionsRouteParams(token)));
-            },
-            color: Colors.green,
-            textColor: Colors.white,
-            child: Text('Dodaj pytanie'));
+        return ConfirmButton(
+          text: _addQuestionText,
+          onPressed: () => _addQuestion(ctx, runMutation),
+        );
       },
     );
 
@@ -111,6 +105,21 @@ class AddQuestionScreen extends StatelessWidget {
       child: btn,
       width: double.infinity,
     );
+  }
+
+  void _addQuestion(
+    BuildContext ctx,
+    RunMutation runMutation,
+  ) {
+    final int token = (Utils.routeArgs(ctx) as AddQuestionRouteParams).token;
+    final StateStorage stateStorage = Zefir.of(ctx).storage.state;
+
+    runMutation({'token': token, 'question': _question});
+    developer.log('Send question $_question with token $token',
+        name: 'AddQuestionScreen');
+    stateStorage.update(token, RoomState.WAIT_FOR_OTHER_QUESTIONS).then((_) =>
+        Navigator.of(ctx).pushReplacementNamed('/waitForOtherQuestions',
+            arguments: WaitForOtherQuestionsRouteParams(token)));
   }
 }
 

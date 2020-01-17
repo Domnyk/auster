@@ -92,16 +92,16 @@ class RoomPreviewCard extends StatelessWidget {
   }
 
   Widget _buildMoreAcctionsColumn(BuildContext ctx) {
-    FlatButton btn = FlatButton(
-      child: Icon(Icons.more_vert),
-      onPressed: () => showDialog(
-          context: ctx, builder: (context) => _buildMoreActionsDialog(context)),
-    );
-
     return Column(
-        children: _room.state == RoomState.JOINING
-            ? [_buildActionsInJoingingState(ctx)]
-            : [btn]);
+      children: [
+        FlatButton(
+          child: Icon(Icons.more_vert),
+          onPressed: () => showDialog(
+              context: ctx,
+              builder: (context) => _buildMoreActionsDialog(context)),
+        )
+      ],
+    );
   }
 
   Widget _buildActionsInJoingingState(BuildContext ctx) {

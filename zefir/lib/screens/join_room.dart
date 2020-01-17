@@ -7,6 +7,7 @@ import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/token.dart';
+import 'package:zefir/widgets/confirm_button.dart';
 import 'package:zefir/widgets/error_dialog.dart';
 import 'dart:developer' as developer;
 
@@ -16,6 +17,8 @@ class JoinRoom extends StatefulWidget {
 }
 
 class _JoinRoomState extends State<JoinRoom> {
+  static const String _joinButtonText = 'Dołącz';
+
   final _formKey = GlobalKey<FormState>();
   final _joinCodeController = TextEditingController();
   final _playerNameController = TextEditingController();
@@ -46,11 +49,14 @@ class _JoinRoomState extends State<JoinRoom> {
         body: _buildForm(context, _formKey));
   }
 
-  Form _buildForm(BuildContext context, GlobalKey<FormState> formKey) {
+  Form _buildForm(BuildContext ctx, GlobalKey<FormState> formKey) {
     final widgestWithPaddings = [
       _buildJoinCodeField(_joinCodeController),
       _buildPlayerNameField(_playerNameController),
-      _buildSubmitButton(context)
+      ConfirmButton(
+        text: _joinButtonText,
+        onPressed: () => _joinRoom(ctx),
+      )
     ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList();
 
     return Form(
@@ -76,20 +82,6 @@ class _JoinRoomState extends State<JoinRoom> {
 
     return TextFormField(
         validator: validator, decoration: decoration, controller: controller);
-  }
-
-  Widget _buildSubmitButton(BuildContext ctx) {
-    final button = RaisedButton(
-      child: Text('Dołącz'),
-      onPressed: () => _joinRoom(ctx),
-      color: Colors.green,
-      textColor: Colors.white,
-    );
-
-    return SizedBox(
-      child: button,
-      width: double.infinity,
-    );
   }
 
   void _joinRoom(BuildContext ctx) {

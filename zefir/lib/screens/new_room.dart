@@ -3,6 +3,7 @@ import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/storage/token.dart';
+import 'package:zefir/widgets/confirm_button.dart';
 import 'package:zefir/widgets/number_picker.dart';
 import 'dart:developer' as developer;
 import 'package:zefir/services/eurus/eurus.dart';
@@ -13,6 +14,8 @@ class NewRoom extends StatefulWidget {
 }
 
 class _NewRoomState extends State<NewRoom> {
+  static const String _createRoomText = 'Załóż pokój';
+
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController numOfPlayersController = new TextEditingController();
@@ -49,7 +52,7 @@ class _NewRoomState extends State<NewRoom> {
       buildRoomNameField(),
       numOfPlayersField,
       numOfRoundsField,
-      _buildCreateRoomButton(ctx)
+      ConfirmButton(text: _createRoomText, onPressed: () => _createRoom(ctx)),
     ]
         .map((widget) => Padding(child: widget, padding: EdgeInsets.all(10)))
         .toList();
@@ -107,19 +110,6 @@ class _NewRoomState extends State<NewRoom> {
       validator: (value) {
         return value.isEmpty ? 'Wprowadź nazwę pokoju' : null;
       },
-    );
-  }
-
-  Widget _buildCreateRoomButton(BuildContext ctx) {
-    final button = RaisedButton(
-        onPressed: () => _createRoom(ctx),
-        color: Colors.green,
-        textColor: Colors.white,
-        child: Text('Załóż pokój'));
-
-    return SizedBox(
-      child: button,
-      width: double.infinity,
     );
   }
 
