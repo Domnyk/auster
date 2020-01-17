@@ -86,7 +86,6 @@ class Zefir extends InheritedWidget {
         client: client,
         child: MaterialApp(
             title: 'EGO mobile',
-            // theme: ThemeData(primarySwatch: Colors.blue),
             theme: ZefirTheme().themeData,
             initialRoute: '/',
             routes: routes));
