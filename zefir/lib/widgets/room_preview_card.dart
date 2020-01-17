@@ -16,9 +16,7 @@ import 'package:zefir/services/storage/token.dart';
 class RoomPreviewCard extends StatelessWidget {
   final Room _room;
 
-  RoomPreviewCard({Key key, @required Room room})
-      : _room = room,
-        super(key: key);
+  RoomPreviewCard({@required Room room}) : _room = room;
 
   @override
   Widget build(BuildContext ctx) {
@@ -31,16 +29,13 @@ class RoomPreviewCard extends StatelessWidget {
     );
 
     Padding paddedRow = Padding(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.fromLTRB(10, 12.5, 10, 12.5),
       child: row,
     );
 
-    return Card(
-      child: InkWell(
-        child: paddedRow,
-        onTap: () => navigateToRoom(ctx),
-      ),
-      margin: EdgeInsets.fromLTRB(5, 10, 5, 10),
+    return InkWell(
+      child: paddedRow,
+      onTap: () => navigateToRoom(ctx),
     );
   }
 
