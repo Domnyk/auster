@@ -15,7 +15,15 @@ class WaitForPlayersScreen extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final Room room = (Utils.routeArgs(ctx) as WaitForPlayersRouteParams).room;
 
-    return Scaffold(appBar: _buildAppBar(ctx), body: _buildBody(ctx, room));
+    return Scaffold(
+      appBar: _buildAppBar(ctx),
+      body: _buildBody(ctx, room),
+      bottomNavigationBar: BottomAppBar(
+        elevation: 0,
+        color: Colors.red,
+        child: _buildLeaveRoom(ctx, room.deviceToken),
+      ),
+    );
   }
 
   Widget _buildAppBar(BuildContext ctx) {
@@ -32,21 +40,22 @@ class WaitForPlayersScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext ctx, Room room) {
-    List<Widget> widgets = [
-      Column(
-        children: [
-          _buildRoomName(room.name),
-          _buildJoinCode(room.joinCode),
-          _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
-          _buildQrCode(room.joinCode),
-        ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList(),
-      ),
-      Column(children: [_buildLeaveRoom(ctx, room.deviceToken)]),
-    ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList();
-
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: widgets,
+      children: [
+        Expanded(
+            flex: 9,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                _buildRoomName(room.name),
+                _buildJoinCode(room.joinCode),
+                _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
+                _buildQrCode(room.joinCode),
+              ]
+                  .map((w) => Padding(child: w, padding: EdgeInsets.all(10)))
+                  .toList(),
+            )),
+      ],
     );
   }
 
@@ -71,7 +80,9 @@ class WaitForPlayersScreen extends StatelessWidget {
 
         return Column(
           children: <Widget>[
-            _buildListOfPlayers(ctx, playersNames),
+            Padding(
+                child: _buildListOfPlayers(ctx, playersNames),
+                padding: EdgeInsets.only(bottom: 10)),
             _buildNumOfMissingPlayers(maxPlayers, playersNames.length)
           ],
         );
@@ -104,6 +115,9 @@ class WaitForPlayersScreen extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(
+            child: Text('Kod QR umożliwiający dołączenie do pokoju'), flex: 5),
+        Expanded(
+          flex: 5,
           child: QrImage(
             data: joinCode,
             version: QrVersions.auto,
@@ -114,40 +128,30 @@ class WaitForPlayersScreen extends StatelessWidget {
   }
 
   Widget _buildListOfPlayers(BuildContext ctx, List<String> playersNames) {
-    Widget _buildItem(BuildContext ctx, int index) {
-      return ListTile(
-        title: Text(
-          playersNames[index],
-          style: TextStyle(fontSize: Theme.of(ctx).textTheme.body1.fontSize),
-        ),
-        contentPadding: EdgeInsets.all(0),
-        dense: true,
-      );
-    }
+    final List<Widget> children = [];
+    children.addAll(playersNames.map((name) => Text(name)));
 
-    Text heading = Text(
-      'Lista graczy w pokoju',
-      style: TextStyle(fontSize: Theme.of(ctx).textTheme.headline.fontSize),
-    );
-    ListView listOfPlayers = ListView.builder(
-        itemCount: playersNames.length,
-        itemBuilder: _buildItem,
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true);
-
-    return Column(
-      children: <Widget>[heading, listOfPlayers],
-    );
+    return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Lista graczy w pokoju',
+          ),
+          Column(
+            children: children,
+          )
+        ]);
   }
 
   Widget _buildNumOfMissingPlayers(int maxPlayers, int currNumOfPlayers) {
     int neededNumOfPlayers = maxPlayers - currNumOfPlayers;
+    String content = neededNumOfPlayers == 1
+        ? 'Potrzeba jeszcze 1 gracza aby rozpocząć rozgrywkę'
+        : 'Potrzeba jeszcze $neededNumOfPlayers graczy aby rozpocząć rozgrywkę';
 
     return Row(
-      children: <Widget>[
-        Text(
-            'Potrzeba jeszcze $neededNumOfPlayers graczy aby rozpocząć rozgrywkę')
-      ],
+      children: <Widget>[Text(content)],
     );
   }
 
@@ -160,20 +164,12 @@ class WaitForPlayersScreen extends StatelessWidget {
       });
     });
 
-    final btn = RaisedButton(
+    return FlatButton(
         onPressed: () =>
             showDialog(context: ctx, builder: (_) => confirmationDialog),
         color: Colors.red,
         textColor: Colors.white,
         child: Text('Opuść pokój'));
-
-    return SizedBox(
-      child: Padding(
-        padding: EdgeInsets.only(bottom: 0),
-        child: btn,
-      ),
-      width: double.infinity,
-    );
   }
 }
 
