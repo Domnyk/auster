@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/screens/room/add_question_screen.dart';
@@ -32,13 +33,19 @@ class WaitForPlayersScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext ctx, Room room) {
     List<Widget> widgets = [
-      _buildRoomName(room.name),
-      _buildJoinCode(room.joinCode),
-      _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
-      _buildLeaveRoom(ctx, room.deviceToken)
+      Column(
+        children: [
+          _buildRoomName(room.name),
+          _buildJoinCode(room.joinCode),
+          _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
+          _buildQrCode(room.joinCode),
+        ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList(),
+      ),
+      Column(children: [_buildLeaveRoom(ctx, room.deviceToken)]),
     ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList();
 
     return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: widgets,
     );
   }
@@ -47,17 +54,6 @@ class WaitForPlayersScreen extends StatelessWidget {
     return Query(
       options: _buildQueryOptions(ctx, token),
       builder: (QueryResult result, {fetchMore, refetch}) {
-        //   WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-        // if (isInWaitingState == false) {
-        //   developer.log(
-        //       'All players have add questions, navigation to AnsweringScreen',
-        //       name: 'WaitForOtherQuestionsScreen');
-        //   Navigator.of(ctx).pushNamed('/answering',
-        //       arguments: AnsweringRouteParams(
-        //           (Utils.routeArgs(ctx) as WaitForOtherQuestionsRouteParams)
-        //               .token));
-        // }
-
         if (result.hasException) developer.log('Result has exception');
         if (result.loading) return Text('Proszę czekać, trwa ładowanie');
 
@@ -101,6 +97,19 @@ class WaitForPlayersScreen extends StatelessWidget {
     return Row(
       children: <Widget>[Text('Kod dołączenia'), Text(joinCode)],
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    );
+  }
+
+  Widget _buildQrCode(String joinCode) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: QrImage(
+            data: joinCode,
+            version: QrVersions.auto,
+          ),
+        )
+      ],
     );
   }
 
@@ -159,7 +168,10 @@ class WaitForPlayersScreen extends StatelessWidget {
         child: Text('Opuść pokój'));
 
     return SizedBox(
-      child: btn,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 0),
+        child: btn,
+      ),
       width: double.infinity,
     );
   }
