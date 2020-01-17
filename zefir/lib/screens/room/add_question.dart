@@ -70,8 +70,7 @@ class AddQuestionScreen extends StatelessWidget {
       controller: _questionController,
       minLines: 3,
       maxLines: 10,
-      decoration: InputDecoration(
-          border: OutlineInputBorder(), labelText: 'Twoja pytanie'),
+      decoration: InputDecoration(labelText: 'Twoja pytanie'),
       validator: (v) => v.isEmpty ? 'Podaj treść pytania' : null,
     );
   }

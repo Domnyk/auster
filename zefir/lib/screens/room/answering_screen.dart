@@ -172,8 +172,7 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
   Widget _buildTextField(BuildContext ctx) {
     final validator =
         (String val) => val.isEmpty ? 'Kod nie może być pusty' : null;
-    final decoration =
-        InputDecoration(border: OutlineInputBorder(), labelText: 'Odpowiedź');
+    final decoration = InputDecoration(labelText: 'Odpowiedź');
 
     return TextFormField(
         validator: validator,

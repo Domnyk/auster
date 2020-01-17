@@ -66,8 +66,7 @@ class _NewRoomState extends State<NewRoom> {
   Widget _buildNameOfPlayerField() {
     return TextFormField(
       controller: nameOfPlayerController,
-      decoration: InputDecoration(
-          border: OutlineInputBorder(), labelText: 'Twoja nazwa'),
+      decoration: InputDecoration(labelText: 'Twoja nazwa'),
       validator: (value) {
         return value.isEmpty ? 'Wprowadź nazwę gracza' : null;
       },
@@ -104,8 +103,7 @@ class _NewRoomState extends State<NewRoom> {
       onChanged: (String newVal) {
         roomName = newVal.trim();
       },
-      decoration: InputDecoration(
-          border: OutlineInputBorder(), labelText: 'Nazwa pokoju'),
+      decoration: InputDecoration(labelText: 'Nazwa pokoju'),
       validator: (value) {
         return value.isEmpty ? 'Wprowadź nazwę pokoju' : null;
       },

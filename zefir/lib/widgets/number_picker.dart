@@ -35,8 +35,7 @@ class NumberPicker extends FormField<int> {
                 },
                 controller: controller,
                 readOnly: true,
-                decoration: InputDecoration(
-                    labelText: labelText, border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: labelText),
               );
             }) {
     controller.text = getVal(controller, initialValue).toString();

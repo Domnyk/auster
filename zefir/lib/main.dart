@@ -22,6 +22,7 @@ import 'package:zefir/screens/room/wait_for_players.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/storage.dart';
+import 'package:zefir/zefir_theme.dart';
 import 'dart:developer' as developer;
 
 import 'model/player.dart';
@@ -89,7 +90,8 @@ class Zefir extends InheritedWidget {
         client: client,
         child: MaterialApp(
             title: 'EGO mobile',
-            theme: ThemeData(primarySwatch: Colors.blue),
+            // theme: ThemeData(primarySwatch: Colors.blue),
+            theme: ZefirTheme().themeData,
             initialRoute: '/',
             routes: routes));
   }

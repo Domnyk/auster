@@ -63,8 +63,7 @@ class _JoinRoomState extends State<JoinRoom> {
   TextFormField _buildPlayerNameField(TextEditingController controller) {
     final validator =
         (String val) => val.isEmpty ? 'Nazwa gracza nie może być pusta' : null;
-    final decoration = InputDecoration(
-        border: OutlineInputBorder(), labelText: 'Nazwa graczza');
+    final decoration = InputDecoration(labelText: 'Nazwa graczza');
 
     return TextFormField(
         validator: validator, decoration: decoration, controller: controller);
@@ -73,8 +72,7 @@ class _JoinRoomState extends State<JoinRoom> {
   TextFormField _buildJoinCodeField(TextEditingController controller) {
     final validator =
         (String val) => val.isEmpty ? 'Kod nie może być pusty' : null;
-    final decoration =
-        InputDecoration(border: OutlineInputBorder(), labelText: 'Kod');
+    final decoration = InputDecoration(labelText: 'Kod');
 
     return TextFormField(
         validator: validator, decoration: decoration, controller: controller);
