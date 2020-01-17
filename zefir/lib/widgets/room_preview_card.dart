@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
-import 'package:zefir/screens/room/add_question.dart';
+import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/answering_screen.dart';
-import 'package:zefir/screens/room/dead.dart';
-import 'package:zefir/screens/room/poll_result.dart';
-import 'package:zefir/screens/room/polling/polling_screen.dart';
+import 'package:zefir/screens/room/dead_screen.dart';
+import 'package:zefir/screens/room/poll_result_screen.dart';
+import 'package:zefir/screens/room/polling_screen.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
-import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_screen.dart';
-import 'package:zefir/screens/room/wait_for_players.dart';
+import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
+import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/storage/token.dart';
 
 class RoomPreviewCard extends StatelessWidget {

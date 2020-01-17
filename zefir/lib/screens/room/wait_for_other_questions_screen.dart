@@ -4,7 +4,6 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/answering_screen.dart';
-import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_service.dart';
 import 'package:zefir/services/eurus/queries.dart';
 import 'dart:developer' as developer;
 import 'package:zefir/utils.dart';

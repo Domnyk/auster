@@ -7,7 +7,7 @@ import 'package:zefir/model/player.dart';
 import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
-import 'package:zefir/screens/room/polling/polling_screen.dart';
+import 'package:zefir/screens/room/polling_screen.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/services/eurus/mutations.dart';

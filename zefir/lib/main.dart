@@ -1,8 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:graphql/src/link/fetch_result.dart';
-import 'package:graphql/src/link/operation.dart';
 import 'package:provider/provider.dart';
 import 'package:zefir/model/answer.dart';
 import 'package:zefir/model/user.dart';
@@ -10,25 +7,24 @@ import 'package:zefir/screens/check_rooms.dart';
 import 'package:zefir/screens/join_room.dart';
 import 'package:zefir/screens/new_room.dart';
 import 'package:zefir/screens/no_rooms.dart';
-import 'package:zefir/screens/room/add_question.dart';
+import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/answering_screen.dart';
-import 'package:zefir/screens/room/dead.dart';
-import 'package:zefir/screens/room/poll_result.dart';
-import 'package:zefir/screens/room/polling/polling_screen.dart';
+import 'package:zefir/screens/room/dead_screen.dart';
+import 'package:zefir/screens/room/poll_result_screen.dart';
+import 'package:zefir/screens/room/polling_screen.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
-import 'package:zefir/screens/room/wait_for_other_questions/wait_for_other_questions_screen.dart';
-import 'package:zefir/screens/room/wait_for_players.dart';
+import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
+import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/storage.dart';
 import 'package:zefir/zefir_theme.dart';
-import 'dart:developer' as developer;
-
 import 'model/player.dart';
 import 'model/question.dart';
 import 'model/room.dart';
 import 'model/room_state.dart';
+import 'dart:developer' as developer;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
