@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/utils.dart';
 import 'package:zefir/widgets/room_preview_card.dart';
 
 class RoomList extends StatelessWidget {
+  static const String _leftRoomConfirmation = 'Opuściłeś pokój';
+
   final List<Room> _rooms;
 
   RoomList({List<Room> rooms}) : _rooms = rooms;
@@ -24,7 +27,9 @@ class RoomList extends StatelessWidget {
       appBar: AppBar(
         title: Text('Lista pokojów, w których sie znajdujesz'),
       ),
-      body: _buildList(ctx, rooms),
+      body: Builder(
+        builder: (context) => _buildList(context, rooms),
+      ),
       floatingActionButton: SpeedDial(
         child: Icon(Icons.menu),
         children: [_buildJoinRoomIcon(ctx), _buildNewRoomIcon(ctx)],
@@ -36,7 +41,22 @@ class RoomList extends StatelessWidget {
     return ListView.builder(
         itemCount: rooms.length,
         itemBuilder: (context, index) {
-          return new RoomPreviewCard(key: ObjectKey(index), room: rooms[index]);
+          return Column(
+            children: [
+              Dismissible(
+                background: Container(color: Colors.red),
+                key: ObjectKey(index),
+                child: RoomPreviewCard(room: rooms[index]),
+                onDismissed: (DismissDirection direction) {
+                  Zefir.of(ctx)
+                      .eurus
+                      .leaveRoom(ctx, rooms[index].deviceToken)
+                      .then((_) => Scaffold.of(ctx).showSnackBar(
+                          SnackBar(content: Text(_leftRoomConfirmation))));
+                },
+              ),
+            ],
+          );
         });
   }
 
