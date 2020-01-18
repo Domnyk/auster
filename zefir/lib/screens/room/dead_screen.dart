@@ -6,10 +6,10 @@ import 'package:zefir/utils.dart';
 class DeadScreen extends StatelessWidget {
   static const String appBarTitle = 'Koniec gry';
 
-  final Room room;
+  // final Room room;
   final _formKey = GlobalKey<FormState>();
 
-  DeadScreen(this.room);
+  DeadScreen();
 
   @override
   Widget build(BuildContext ctx) {
@@ -76,7 +76,7 @@ class DeadScreen extends StatelessWidget {
   }
 
   Widget _buildWinner(BuildContext ctx) {
-    // final room = (Utils.routeArgs(ctx) as DeadRouteParams).room;
+    final room = (Utils.routeArgs(ctx) as DeadRouteParams).room;
     room.players.sort((p1, p2) => p2.points.compareTo(p1.points));
     final Map<int, List<Player>> playersDict = Map();
 

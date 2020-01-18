@@ -23,7 +23,11 @@ class Queries {
         players {
           name,
           token,
-          points
+          points,
+          polledAnswer {
+            id,
+            content
+          }
         }
       }
     }

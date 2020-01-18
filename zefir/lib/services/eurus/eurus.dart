@@ -7,7 +7,9 @@ import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/services/eurus/exceptions/no_such_room_exception.dart';
 import 'package:zefir/services/eurus/queries.dart';
+import 'package:zefir/services/eurus/room_stream_service.dart';
 import 'package:zefir/services/storage/state.dart';
+import 'package:zefir/services/storage/storage.dart';
 import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/typedefs.dart';
 import 'dart:developer' as developer;
@@ -15,8 +17,16 @@ import 'mutations.dart';
 
 class Eurus {
   ValueNotifier<GraphQLClient> client;
+  RoomStreamService _roomStreamService;
+  Storage _storage;
 
-  Eurus({@required ValueNotifier<GraphQLClient> client}) : client = client;
+  Eurus({@required ValueNotifier<GraphQLClient> client})
+      : client = client,
+        _storage
+        _roomStreamService = RoomStreamService(client.value, _stateStorage);
+
+  get roomStreamService => _roomStreamService;
+  get storage => _storage;
 
   Future<Room> createNewRoom(TokenStorage storage,
       {@required String roomName,

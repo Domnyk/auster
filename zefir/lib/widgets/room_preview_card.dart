@@ -6,7 +6,8 @@ import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/answering_screen.dart';
 import 'package:zefir/screens/room/dead_screen.dart';
 import 'package:zefir/screens/room/poll_result_screen.dart';
-import 'package:zefir/screens/room/polling_screen.dart';
+import 'package:zefir/screens/room/polling_screen/polling_screen.dart';
+import 'package:zefir/screens/room/polling_screen/polling_screen_for_question_owner.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
@@ -65,8 +66,14 @@ class RoomPreviewCard extends StatelessWidget {
         arguments = WaitForOtherAnswersRouteParams(_room.deviceToken);
         break;
       case RoomState.POLLING:
-        url = '/polling';
-        arguments = PollingRouteParams(_room.deviceToken);
+        if (_room.deviceToken == _room.currPlayer.token) {
+          url = '/pollingForQuestionOwner';
+          arguments =
+              PollingScreenForQuestionOwnerRouteParams(_room.deviceToken);
+        } else {
+          url = '/polling';
+          arguments = PollingRouteParams(_room.deviceToken);
+        }
         break;
       case RoomState.WAIT_FOR_OTHER_POLLS:
         url = '/waitForOtherPolls';

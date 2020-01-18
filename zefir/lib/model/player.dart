@@ -1,19 +1,26 @@
+import 'package:zefir/model/answer.dart';
+
 class Player {
   final int token;
   final String name;
   final int points;
-  // TODO: Add polled answers field
+  final Answer polledAnswer;
 
   Player(
     this.token,
     this.name,
     this.points,
+    this.polledAnswer,
   );
 
-  Player.fromGraphQl(dynamic data)
+  Player.fromGraphQl(Map<String, dynamic> data)
       : token = data['token'],
         name = data['name'],
-        points = data['points'];
+        points = data['points'],
+        polledAnswer =
+            data.containsKey('polledAnswer') && data['polledAnswer'] != null
+                ? Answer.fromGraphQl(data['polledAnswer'])
+                : null;
 
   @override
   String toString() {

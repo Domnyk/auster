@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:zefir/model/answer.dart';
@@ -11,7 +12,8 @@ import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/answering_screen.dart';
 import 'package:zefir/screens/room/dead_screen.dart';
 import 'package:zefir/screens/room/poll_result_screen.dart';
-import 'package:zefir/screens/room/polling_screen.dart';
+import 'package:zefir/screens/room/polling_screen/polling_screen.dart';
+import 'package:zefir/screens/room/polling_screen/polling_screen_for_question_owner.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
@@ -38,23 +40,23 @@ void main() {
 }
 
 class Zefir extends InheritedWidget {
-  static Room room = Room(
-      RoomState.DEAD,
-      "Pokój Dominika",
-      "joinxDCodeXD",
-      5,
-      5,
-      1,
-      Player(1, 'Dominik', 10),
-      [Answer(1, 'Tak'), Answer(2, 'Nie'), Answer(3, 'Ne wem')],
-      Question('Lubisz schabowe', true),
-      [
-        Player(1, 'Dominik', 10),
-        Player(2, 'Damian', 2),
-        Player(3, 'Dobromir', 5),
-        Player(4, 'Dorian', 10),
-      ],
-      123);
+  // static Room room = Room(
+  //     RoomState.DEAD,
+  //     "Pokój Dominika",
+  //     "joinxDCodeXD",
+  //     5,
+  //     5,
+  //     1,
+  //     Player(1, 'Dominik', 10),
+  //     [Answer(1, 'Tak'), Answer(2, 'Nie'), Answer(3, 'Ne wem')],
+  //     Question('Lubisz schabowe', true),
+  //     [
+  //       Player(1, 'Dominik', 10),
+  //       Player(2, 'Damian', 2),
+  //       Player(3, 'Dobromir', 5),
+  //       Player(4, 'Dorian', 10),
+  //     ],
+  //     123);
 
   static Map<String, WidgetBuilder> routes = {
     '/': (ctx) => CheckRoomsWidget(),
@@ -65,7 +67,8 @@ class Zefir extends InheritedWidget {
     '/waitForOtherQuestions': (ctx) => WaitForOtherQuestionsScreen(),
     '/answering': (ctx) => AnsweringScreen(),
     '/waitForOtherAnswers': (ctx) => WaitForOtherAnswersScreen(),
-    '/polling': (ctx) => PollignScreen(),
+    '/polling': (ctx) => PollingScreen(),
+    '/pollingForQuestionOwner': (ctx) => PollingScreenForQuestionOwner(),
     '/waitForOtherPolls': (ctx) => WaitForOtherPollsScreen(),
     '/pollResult': (ctx) => PollResultScreen(),
     '/dead': (ctx) => DeadScreen(),
@@ -73,9 +76,9 @@ class Zefir extends InheritedWidget {
     '/joinRoom': (ctx) => JoinRoom(),
   };
 
-  static ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(
-      cache: InMemoryCache(),
-      link: new HttpLink(uri: 'https://eurus-13.pl:8000/graphql')));
+  // static ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(
+  //     cache: InMemoryCache(),
+  //     link: new HttpLink(uri: 'https://eurus-13.pl:8000/graphql')));
 
   static Zefir of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<Zefir>();

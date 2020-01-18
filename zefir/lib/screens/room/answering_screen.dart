@@ -7,7 +7,8 @@ import 'package:zefir/model/player.dart';
 import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
-import 'package:zefir/screens/room/polling_screen.dart';
+import 'package:zefir/screens/room/polling_screen/polling_screen.dart';
+import 'package:zefir/screens/room/polling_screen/polling_screen_for_question_owner.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/services/eurus/mutations.dart';
@@ -182,21 +183,34 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
 
   void _navigateToNextScreen(
       BuildContext ctx, Room roomAfterMutionFromBackend) {
-    if (_amICurrentPlayer()) {
-      return _navigateToWaitForOtherPolls(ctx);
-    } else {
-      if (roomAfterMutionFromBackend.state == RoomState.POLLING) {
+    if (roomAfterMutionFromBackend.state == RoomState.POLLING) {
+      if (_amICurrentPlayer()) {
+        return _navigateToPollingForQuestionOwner(ctx);
+      } else {
         return _navigateToPolling(ctx, roomAfterMutionFromBackend);
-      } else if (roomAfterMutionFromBackend.state == RoomState.ANSWERING) {
-        return _navigateToWaitForOtherAnswers(ctx);
       }
+    } else if (roomAfterMutionFromBackend.state == RoomState.ANSWERING) {
+      return _navigateToWaitForOtherAnswers(ctx);
+    } else {
+      throw Exception(
+          'Illegal state on this screen ${roomAfterMutionFromBackend.state.toMyString()}');
     }
+
+    // if (_amICurrentPlayer()) {
+    //   return _navigateToWaitForOtherPolls(ctx);
+    // } else {
+    //   if (roomAfterMutionFromBackend.state == RoomState.POLLING) {
+    //     return _navigateToPolling(ctx, roomAfterMutionFromBackend);
+    //   } else if (roomAfterMutionFromBackend.state == RoomState.ANSWERING) {
+    //     return _navigateToWaitForOtherAnswers(ctx);
+    //   }
+    // }
   }
 
-  void _navigateToWaitForOtherPolls(BuildContext ctx) {
-    final String route = '/waitForOtherPolls';
-    final arguments = WaitForOtherPollsRouteParams(_token);
-    final RoomState newState = RoomState.WAIT_FOR_OTHER_POLLS;
+  void _navigateToPollingForQuestionOwner(BuildContext ctx) {
+    final String route = '/pollingForQuestionOwner';
+    final arguments = PollingScreenForQuestionOwnerRouteParams(_token);
+    final RoomState newState = RoomState.POLLING;
 
     _stateStorage.update(_token, newState).then((_) =>
         Navigator.of(ctx).pushReplacementNamed(route, arguments: arguments));

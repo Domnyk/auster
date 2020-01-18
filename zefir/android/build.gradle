@@ -1,10 +1,13 @@
 buildscript {
+    ext.kotlin_version = '1.2.31'
+
     repositories {
         google()
         jcenter()
     }
 
     dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
         classpath 'com.android.tools.build:gradle:3.2.1'
     }
 }
