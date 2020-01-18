@@ -48,20 +48,32 @@ class _NewRoomState extends State<NewRoom> {
     final numOfRoundsField = _buildNumOfRoundsField(
         context: ctx, initialValue: 3, controller: numOfRoundsController);
     final widgets = [
-      _buildNameOfPlayerField(),
-      buildRoomNameField(),
-      numOfPlayersField,
-      numOfRoundsField,
-      ConfirmButton(text: _createRoomText, onPressed: () => _createRoom(ctx)),
-    ]
-        .map((widget) => Padding(child: widget, padding: EdgeInsets.all(10)))
-        .toList();
+      Column(
+        children: [
+          _buildNameOfPlayerField(),
+          buildRoomNameField(),
+          numOfPlayersField,
+          numOfRoundsField,
+        ]
+            .map(
+                (widget) => Padding(child: widget, padding: EdgeInsets.all(10)))
+            .toList(),
+      ),
+    ];
 
     return Scaffold(
         appBar: AppBar(title: Text('Załóż nowy pokój')),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.green,
+          child: ConfirmButton(
+              isRaised: false,
+              text: _createRoomText,
+              onPressed: () => _createRoom(ctx)),
+        ),
         body: Form(
             key: _formKey,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: widgets,
             )));
   }

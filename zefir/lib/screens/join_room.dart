@@ -1,3 +1,4 @@
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/main.dart';
@@ -46,17 +47,21 @@ class _JoinRoomState extends State<JoinRoom> {
 
     return Scaffold(
         appBar: AppBar(title: Text('Dołącz do pokoju')),
-        body: _buildForm(context, _formKey));
+        body: _buildForm(context, _formKey),
+        bottomNavigationBar: BottomAppBar(
+            elevation: 0,
+            color: Colors.green,
+            child: ConfirmButton(
+              isRaised: false,
+              text: _joinButtonText,
+              onPressed: () => _joinRoom(context),
+            )));
   }
 
   Form _buildForm(BuildContext ctx, GlobalKey<FormState> formKey) {
     final widgestWithPaddings = [
       _buildJoinCodeField(_joinCodeController),
       _buildPlayerNameField(_playerNameController),
-      ConfirmButton(
-        text: _joinButtonText,
-        onPressed: () => _joinRoom(ctx),
-      )
     ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList();
 
     return Form(
@@ -78,7 +83,18 @@ class _JoinRoomState extends State<JoinRoom> {
   TextFormField _buildJoinCodeField(TextEditingController controller) {
     final validator =
         (String val) => val.isEmpty ? 'Kod nie może być pusty' : null;
-    final decoration = InputDecoration(labelText: 'Kod');
+    final decoration = InputDecoration(
+      labelText: 'Kod',
+      suffix: IconButton(
+        icon: Icon(Icons.camera_alt),
+        onPressed: () async {
+          String joinCode = await BarcodeScanner.scan();
+          setState(() {
+            _joinCodeController.text = joinCode;
+          });
+        },
+      ),
+    );
 
     return TextFormField(
         validator: validator, decoration: decoration, controller: controller);
