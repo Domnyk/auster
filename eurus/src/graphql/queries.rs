@@ -226,6 +226,25 @@ pub(crate) mod room {
             .set(curr_round.eq(curr_round + 1))
             .execute(&**db_conn)
     }
+
+    // TODO: Delete this query in future release
+    // It's buggy as hell
+    pub fn all_questions(
+        room_code: &str,
+        db_conn: &db::Connection
+    ) -> QueryResult<Vec<db::models::Question>> {
+        let room = {
+            use db::schema::rooms::dsl::*;
+            room.filter(
+                join_code.eq(room_code))
+                .first(&**db_conn)?
+        };
+        let players: Vec<db::models::Player> = 
+            db::models::Player::belonging_to(&room).load(&**db_conn)?;
+        let questions: Vec<db::models::Question> =
+            db::models::Question::belonging_to(&players).load(&**db_conn)?;
+        Ok(questions)
+    }
 }
 
 pub(crate) mod player {

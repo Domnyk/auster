@@ -55,6 +55,9 @@ type Room {
 
 	currQuestion: Question @juniper(ownership: "owned")
 	currAnswers: [Answer!] @juniper(ownership: "owned")
+
+	# Remove in the future, buggy as hell.
+	allQuestions: [Question!]! @juniper(ownership: "owned")
 }
 
 type Player {

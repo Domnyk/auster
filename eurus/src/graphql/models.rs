@@ -345,4 +345,19 @@ impl RoomFields for Room {
             adapters::Question::adapt(q)
         }))
     }
+
+    // TODO: Remove in future. Buggy as hell.
+    fn field_all_questions(&self,
+        executor: &Executor<'_, Context>,
+        _: &QueryTrail<'_, Question, Walked>
+    ) -> FieldResult<Vec<Question>> {
+        let db_conn = executor.context().db_conn();
+        let questions = queries::room::all_questions(
+            &self.join_cod,
+            db_conn)?
+            .into_iter()
+            .map(adapters::Question::adapt)
+            .collect();
+        Ok(questions)
+    }
 }
