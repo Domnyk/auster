@@ -16,17 +16,18 @@ import 'dart:developer' as developer;
 import 'mutations.dart';
 
 class Eurus {
-  ValueNotifier<GraphQLClient> client;
+  GraphQLClient _client;
   RoomStreamService _roomStreamService;
   Storage _storage;
 
-  Eurus({@required ValueNotifier<GraphQLClient> client})
-      : client = client,
-        _storage
-        _roomStreamService = RoomStreamService(client.value, _stateStorage);
+  Eurus({@required GraphQLClient client}) : _client = client {
+    _storage = Storage(_client);
+    _roomStreamService = RoomStreamService(_client, _storage.state);
+  }
 
-  get roomStreamService => _roomStreamService;
-  get storage => _storage;
+  GraphQLClient get client => _client;
+  RoomStreamService get roomStreamService => _roomStreamService;
+  Storage get storage => _storage;
 
   Future<Room> createNewRoom(TokenStorage storage,
       {@required String roomName,
@@ -52,7 +53,7 @@ class Eurus {
           'rounds': numOfRounds
         });
 
-    QueryResult qr = await client.value.mutate(mutationOptions);
+    QueryResult qr = await client.mutate(mutationOptions);
     if (qr.hasException) {
       throw ('Creating new room failed with ' + _createErrorMsg(qr));
     }
@@ -69,7 +70,7 @@ class Eurus {
         document: Mutations.JOIN_ROOM,
         variables: {'roomCode': roomCode, 'playerName': playerName});
 
-    QueryResult qr = await client.value.mutate(mutationOptions);
+    QueryResult qr = await client.mutate(mutationOptions);
     if (qr.hasException) {
       throw NoSuchRoomException(roomCode);
     }
@@ -94,7 +95,7 @@ class Eurus {
       'token': token,
     });
 
-    QueryResult qr = await client.value.mutate(mutationOptions);
+    QueryResult qr = await client.mutate(mutationOptions);
     if (qr.hasException) {
       String errorMsg =
           'Fetching room with token $token failed with ' + _createErrorMsg(qr);
@@ -147,7 +148,7 @@ class Eurus {
   }
 
   Future<void> leaveRoom(BuildContext ctx, int token) async {
-    final TokenStorage storage = Zefir.of(ctx).storage.token;
+    final TokenStorage storage = Zefir.of(ctx).eurus.storage.token;
     await storage.delete(token);
   }
 

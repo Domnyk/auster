@@ -90,6 +90,11 @@ class RoomPreviewCard extends StatelessWidget {
       default:
     }
 
+    Zefir.of(ctx)
+        .eurus
+        .roomStreamService
+        .createStreamFor(token: _room.deviceToken);
+
     return Navigator.pushNamed(ctx, url, arguments: arguments);
   }
 
@@ -107,7 +112,7 @@ class RoomPreviewCard extends StatelessWidget {
   }
 
   Widget _buildActionsInJoingingState(BuildContext ctx) {
-    final TokenStorage tokenStorage = Zefir.of(ctx).storage.token;
+    final TokenStorage tokenStorage = Zefir.of(ctx).eurus.storage.token;
 
     Widget confirm = FlatButton(
       child: Text('Tak'),

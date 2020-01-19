@@ -150,9 +150,9 @@ class _PollingScreenState extends State<PollingScreen> {
   }
 
   Future<int> sendQuestion(BuildContext ctx) async {
-    final stateStorage = Zefir.of(ctx).storage.state;
+    final stateStorage = Zefir.of(ctx).eurus.storage.state;
     final token = (Utils.routeArgs(ctx) as PollingRouteParams).token;
-    final GraphQLClient client = Zefir.of(ctx).eurus.client.value;
+    final GraphQLClient client = Zefir.of(ctx).eurus.client;
     final QueryResult result = await client.mutate(MutationOptions(
         document: Mutations.POLL_ANSWER,
         fetchPolicy: FetchPolicy.networkOnly,

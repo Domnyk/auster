@@ -43,7 +43,7 @@ class _JoinRoomState extends State<JoinRoom> {
   @override
   Widget build(BuildContext context) {
     _eurus = Zefir.of(context).eurus;
-    _storage = Zefir.of(context).storage.token;
+    _storage = Zefir.of(context).eurus.storage.token;
 
     return Scaffold(
         appBar: AppBar(title: Text('Dołącz do pokoju')),

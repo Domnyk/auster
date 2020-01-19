@@ -9,27 +9,25 @@ import 'dart:developer' as developer;
 class RoomStreamService {
   GraphQLClient _client;
   Stream<Room> _stream;
-  // StateStorage _stateStorage;
+  StateStorage _stateStorage;
 
-  RoomStreamService(this._client);
+  RoomStreamService(this._client, this._stateStorage);
 
   get stream => _stream;
 
-  void createStreamFor(
-      {@required int token, @required StateStorage stateStorage}) {
+  void createStreamFor({@required int token}) {
     final options = _buildOptions(token);
 
     _stream = _client
         .watchQuery(options)
         .stream
         .where((result) => !result.hasException && result.data != null)
-        .asyncMap((result) => parseRoom(result, token, stateStorage));
+        .asyncMap((result) => parseRoom(result, token));
   }
 
-  Future<Room> parseRoom(
-      QueryResult result, int token, StateStorage stateStorage) async {
+  Future<Room> parseRoom(QueryResult result, int token) async {
     final room = Room.fromGraphQL(result.data['player']['room'], token);
-    final RoomState stateFromDb = await stateStorage.fetch(token);
+    final RoomState stateFromDb = await _stateStorage.fetch(token);
 
     room.state = RoomStateUtils.merge(stateFromDb, room.state);
     return room;

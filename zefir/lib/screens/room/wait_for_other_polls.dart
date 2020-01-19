@@ -39,7 +39,7 @@ class WaitForOtherPollsScreen extends StatelessWidget {
 
   Stream<Room> _buildStateStream(BuildContext ctx) {
     final token = (Utils.routeArgs(ctx) as WaitForOtherPollsRouteParams).token;
-    final client = Zefir.of(ctx).eurus.client.value;
+    final client = Zefir.of(ctx).eurus.client;
     final options = WatchQueryOptions(
       fetchResults: true,
       pollInterval: 5,
@@ -52,7 +52,8 @@ class WaitForOtherPollsScreen extends StatelessWidget {
     return client.watchQuery(options).stream.asyncMap((result) async {
       if (result.hasException == false && result.data != null) {
         final room = Room.fromGraphQL(result.data['player']['room'], token);
-        final stateFromDb = await Zefir.of(ctx).storage.state.fetch(token);
+        final stateFromDb =
+            await Zefir.of(ctx).eurus.storage.state.fetch(token);
         room.state = RoomStateUtils.merge(stateFromDb, room.state);
 
         return room;
@@ -99,7 +100,7 @@ class WaitForOtherPollsScreen extends StatelessWidget {
 
   void navigateToPollResultScreen(BuildContext ctx, Room room) {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-      final stateStorage = Zefir.of(ctx).storage.state;
+      final stateStorage = Zefir.of(ctx).eurus.storage.state;
       developer.log('All polls present, navigating to PollResult',
           name: 'WaitForOtherPolls');
 

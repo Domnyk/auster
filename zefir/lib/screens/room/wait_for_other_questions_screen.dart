@@ -39,7 +39,7 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
   Stream<RoomState> _buildStateStream(BuildContext ctx) {
     final token =
         (Utils.routeArgs(ctx) as WaitForOtherQuestionsRouteParams).token;
-    final client = Zefir.of(ctx).eurus.client.value;
+    final client = Zefir.of(ctx).eurus.client;
     final options = WatchQueryOptions(
       fetchResults: true,
       pollInterval: 5,
@@ -51,7 +51,8 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
 
     return client.watchQuery(options).stream.asyncMap((result) async {
       if (result.hasException == false && result.data != null) {
-        final stateFromDb = await Zefir.of(ctx).storage.state.fetch(token);
+        final stateFromDb =
+            await Zefir.of(ctx).eurus.storage.state.fetch(token);
         final stateFromBackend = RoomStateUtils.parse(
             result.data['player']['room']['state'] as String);
 

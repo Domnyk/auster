@@ -58,7 +58,8 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
       }
 
       if (result.hasException == false && result.data != null) {
-        final stateFromDb = await Zefir.of(ctx).storage.state.fetch(token);
+        final stateFromDb =
+            await Zefir.of(ctx).eurus.storage.state.fetch(token);
         final Room room =
             Room.fromGraphQL(result.data['player']['room'], token);
         room.state = RoomStateUtils.merge(stateFromDb, room.state);

@@ -15,7 +15,7 @@ class PollResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     final Room room = (Utils.routeArgs(ctx) as PollResultRouteParams).room;
-    final StateStorage storage = Zefir.of(ctx).storage.state;
+    final StateStorage storage = Zefir.of(ctx).eurus.storage.state;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(

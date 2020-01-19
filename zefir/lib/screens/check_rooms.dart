@@ -14,7 +14,7 @@ class CheckRoomsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     final Eurus _eurus = Zefir.of(ctx).eurus;
-    final TokenStorage _storage = Zefir.of(ctx).storage.token;
+    final TokenStorage _storage = Zefir.of(ctx).eurus.storage.token;
 
     return FutureBuilder<List<int>>(
         key: UniqueKey(),
@@ -29,7 +29,8 @@ class CheckRoomsWidget extends StatelessWidget {
 
       return StreamBuilder<Room>(
         stream: eurus.fetchRooms(
-            tokens: snapshot.data, stateStorage: Zefir.of(ctx).storage.state),
+            tokens: snapshot.data,
+            stateStorage: Zefir.of(ctx).eurus.storage.state),
         builder: (ctx, snapshot) => _buildFromStream(ctx, snapshot, rooms),
       );
     } else {

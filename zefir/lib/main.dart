@@ -76,9 +76,9 @@ class Zefir extends InheritedWidget {
     '/joinRoom': (ctx) => JoinRoom(),
   };
 
-  // static ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(
-  //     cache: InMemoryCache(),
-  //     link: new HttpLink(uri: 'https://eurus-13.pl:8000/graphql')));
+  static ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(
+      cache: InMemoryCache(),
+      link: new HttpLink(uri: 'https://eurus-13.pl:8000/graphql')));
 
   static Zefir of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<Zefir>();
@@ -95,11 +95,9 @@ class Zefir extends InheritedWidget {
   }
 
   final Eurus eurus;
-  final Storage storage;
 
   Zefir()
-      : eurus = Eurus(client: client),
-        storage = Storage(client.value),
+      : eurus = Eurus(client: client.value),
         super(child: buildMaterialApp(client));
 
   @override

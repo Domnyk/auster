@@ -81,7 +81,7 @@ class AddQuestionScreen extends StatelessWidget {
 
   Widget _buildSubmitButton(BuildContext ctx) {
     final int token = (Utils.routeArgs(ctx) as AddQuestionRouteParams).token;
-    final StateStorage stateStorage = Zefir.of(ctx).storage.state;
+    final StateStorage stateStorage = Zefir.of(ctx).eurus.storage.state;
     final btn = Mutation(
       options: MutationOptions(
           document: Mutations.ADD_QUESTION,
@@ -112,7 +112,7 @@ class AddQuestionScreen extends StatelessWidget {
     RunMutation runMutation,
   ) {
     final int token = (Utils.routeArgs(ctx) as AddQuestionRouteParams).token;
-    final StateStorage stateStorage = Zefir.of(ctx).storage.state;
+    final StateStorage stateStorage = Zefir.of(ctx).eurus.storage.state;
 
     runMutation({'token': token, 'question': _question});
     developer.log('Send question $_question with token $token',
