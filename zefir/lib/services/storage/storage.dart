@@ -21,7 +21,7 @@ class Storage {
   }
 
   get token => _token;
-  get state => _state;
+  StateStorage get state => _state;
 
   static Future<Database> _createDatabase() {
     return getDatabasesPath()

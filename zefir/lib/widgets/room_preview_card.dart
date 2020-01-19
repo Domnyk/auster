@@ -76,8 +76,14 @@ class RoomPreviewCard extends StatelessWidget {
         }
         break;
       case RoomState.WAIT_FOR_OTHER_POLLS:
-        url = '/waitForOtherPolls';
-        arguments = WaitForOtherPollsRouteParams(_room.deviceToken);
+        if (_room.deviceToken == _room.currPlayer.token) {
+          url = '/pollingForQuestionOwner';
+          arguments =
+              PollingScreenForQuestionOwnerRouteParams(_room.deviceToken);
+        } else {
+          url = '/waitForOtherPolls';
+          arguments = WaitForOtherPollsRouteParams(_room.deviceToken);
+        }
         break;
       case RoomState.POLL_RESULT:
         url = '/pollResult';

@@ -13,7 +13,7 @@ class RoomStreamService {
 
   RoomStreamService(this._client, this._stateStorage);
 
-  get stream => _stream;
+  Stream<Room> get stream => _stream;
 
   void createStreamFor({@required int token}) {
     final options = _buildOptions(token);
@@ -38,7 +38,7 @@ class RoomStreamService {
       fetchResults: true,
       pollInterval: 5,
       document: Queries.FETCH_ROOM,
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: FetchPolicy.noCache,
       errorPolicy: ErrorPolicy.all,
       variables: {'token': token},
     );

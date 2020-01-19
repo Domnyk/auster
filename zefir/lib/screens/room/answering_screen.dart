@@ -210,10 +210,8 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
   void _navigateToPollingForQuestionOwner(BuildContext ctx) {
     final String route = '/pollingForQuestionOwner';
     final arguments = PollingScreenForQuestionOwnerRouteParams(_token);
-    final RoomState newState = RoomState.POLLING;
 
-    _stateStorage.update(_token, newState).then((_) =>
-        Navigator.of(ctx).pushReplacementNamed(route, arguments: arguments));
+    Navigator.of(ctx).pushReplacementNamed(route, arguments: arguments);
   }
 
   void _navigateToPolling(BuildContext ctx, Room room) {

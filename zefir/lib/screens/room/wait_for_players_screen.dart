@@ -93,6 +93,7 @@ class WaitForPlayersScreen extends StatelessWidget {
   QueryOptions _buildQueryOptions(BuildContext ctx, int token) {
     return QueryOptions(
         document: Queries.FETCH_PLAYERS,
+        fetchPolicy: FetchPolicy.noCache,
         pollInterval: 5,
         variables: {'token': token});
   }

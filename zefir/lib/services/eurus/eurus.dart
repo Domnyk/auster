@@ -135,7 +135,7 @@ class Eurus {
   QueryOptions _buildFetchRoomOptions(int token) {
     return QueryOptions(
         document: Queries.FETCH_ROOM,
-        fetchPolicy: FetchPolicy.networkOnly,
+        fetchPolicy: FetchPolicy.noCache,
         variables: {'token': token},
         pollInterval: 5);
   }

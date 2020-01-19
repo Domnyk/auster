@@ -44,7 +44,7 @@ class WaitForOtherQuestionsScreen extends StatelessWidget {
       fetchResults: true,
       pollInterval: 5,
       document: Queries.FEETCH_ROOM_STATE,
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: FetchPolicy.noCache,
       errorPolicy: ErrorPolicy.all,
       variables: {'token': token},
     );

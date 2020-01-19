@@ -24,43 +24,16 @@ class WaitForOtherPollsScreen extends StatelessWidget {
           elevation: 0,
         ),
         body: StreamBuilder(
-          stream: _buildStateStream(ctx),
+          stream: Zefir.of(ctx).eurus.roomStreamService.stream,
           builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
             if (snapshot.hasData &&
                 !snapshot.hasError &&
-                snapshot.data.state == RoomState.POLL_RESULT &&
-                snapshot.data.deviceToken != snapshot.data.currPlayer.token) {
+                snapshot.data.state == RoomState.POLL_RESULT) {
               navigateToPollResultScreen(ctx, snapshot.data);
             }
             return _buildBody(context);
           },
         ));
-  }
-
-  Stream<Room> _buildStateStream(BuildContext ctx) {
-    final token = (Utils.routeArgs(ctx) as WaitForOtherPollsRouteParams).token;
-    final client = Zefir.of(ctx).eurus.client;
-    final options = WatchQueryOptions(
-      fetchResults: true,
-      pollInterval: 5,
-      document: Queries.FETCH_ROOM,
-      fetchPolicy: FetchPolicy.networkOnly,
-      errorPolicy: ErrorPolicy.all,
-      variables: {'token': token},
-    );
-
-    return client.watchQuery(options).stream.asyncMap((result) async {
-      if (result.hasException == false && result.data != null) {
-        final room = Room.fromGraphQL(result.data['player']['room'], token);
-        final stateFromDb =
-            await Zefir.of(ctx).eurus.storage.state.fetch(token);
-        room.state = RoomStateUtils.merge(stateFromDb, room.state);
-
-        return room;
-      } else {
-        return null;
-      }
-    });
   }
 
   Widget _buildBody(BuildContext ctx) {

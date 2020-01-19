@@ -47,7 +47,7 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
       fetchResults: true,
       pollInterval: 5,
       document: Queries.FETCH_ROOM,
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: FetchPolicy.noCache,
       errorPolicy: ErrorPolicy.all,
       variables: {'token': token},
     );
@@ -119,8 +119,11 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
         developer.log(
             'All players have add answers, navigation to polling screen for question creator',
             name: 'WaitForOtherAnswers');
-        Navigator.of(ctx).pushReplacementNamed('/pollingForQuestionOwner',
-            arguments: PollingScreenForQuestionOwnerRouteParams(token));
+
+        final stateStorage = Zefir.of(ctx).eurus.storage.state;
+        stateStorage.update(token, RoomState.WAIT_FOR_OTHER_POLLS).then((_) =>
+            Navigator.of(ctx).pushReplacementNamed('/pollingForQuestionOwner',
+                arguments: PollingScreenForQuestionOwnerRouteParams(token)));
       } else {
         developer.log(
             'All players have add answers, navigation to PollingScreen',
