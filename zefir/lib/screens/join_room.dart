@@ -42,6 +42,7 @@ class _JoinRoomState extends State<JoinRoom> {
     _eurus = Zefir.of(context).eurus;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text('Dołącz do pokoju')),
       body: _buildForm(context, _formKey),
     );
