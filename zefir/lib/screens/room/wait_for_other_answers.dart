@@ -52,26 +52,18 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
       variables: {'token': token},
     );
 
-    return client.watchQuery(options).stream.asyncMap((result) async {
-      if (result.loading) {
-        return null;
-      }
-
-      if (result.hasException == false && result.data != null) {
-        final stateFromDb =
-            await Zefir.of(ctx).eurus.storage.state.fetch(token);
-        final Room room =
-            Room.fromGraphQL(result.data['player']['room'], token);
-        room.state = RoomStateUtils.merge(stateFromDb, room.state);
-
-        developer.log(
-            'State from DB for token $token is: ${stateFromDb.toString()}',
-            name: 'WaitForOtherAnswersScreen');
-
-        return room;
-      } else {
-        return null;
-      }
+    return client
+        .watchQuery(options)
+        .stream
+        .where((result) =>
+            result.loading == false &&
+            result.hasException == false &&
+            result.data != null)
+        .asyncMap((result) async {
+      final stateFromDb = await Zefir.of(ctx).eurus.storage.state.fetch(token);
+      final Room room = Room.fromGraphQL(result.data['player']['room'], token);
+      room.state = RoomStateUtils.merge(stateFromDb, room.state);
+      return room;
     });
   }
 
