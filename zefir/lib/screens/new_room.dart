@@ -59,17 +59,12 @@ class _NewRoomState extends State<NewRoom> {
                 (widget) => Padding(child: widget, padding: EdgeInsets.all(10)))
             .toList(),
       ),
+      Padding(child: _buildJoinRoomButton(ctx), padding: EdgeInsets.fromLTRB(15, 0, 15, 15)),
     ];
 
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(title: Text('Załóż nowy pokój')),
-        bottomNavigationBar: BottomAppBar(
-          color: Colors.green,
-          child: ConfirmButton(
-              isRaised: false,
-              text: _createRoomText,
-              onPressed: () => _createRoom(ctx)),
-        ),
         body: Form(
             key: _formKey,
             child: Column(
@@ -122,6 +117,15 @@ class _NewRoomState extends State<NewRoom> {
       validator: (value) {
         return value.isEmpty ? 'Wprowadź nazwę pokoju' : null;
       },
+    );
+  }
+
+  Widget _buildJoinRoomButton(BuildContext ctx) {
+    return RaisedButton(
+      color: Colors.green,
+      textColor: Colors.white,
+      child: Text(_createRoomText),
+      onPressed: () => _createRoom(ctx),
     );
   }
 
