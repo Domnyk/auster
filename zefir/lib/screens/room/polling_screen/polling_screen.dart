@@ -6,6 +6,9 @@ import 'package:zefir/main.dart';
 import 'package:zefir/model/answer.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/answering_screen.dart';
+import 'package:zefir/screens/room/dead_screen.dart';
+import 'package:zefir/screens/room/poll_result_screen.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/services/eurus/mutations.dart';
 import 'package:zefir/utils.dart';
@@ -69,9 +72,7 @@ class _PollingScreenState extends State<PollingScreen> {
           });
 
           return token;
-        }).then((token) => Navigator.of(ctx).pushReplacementNamed(
-            '/waitForOtherPolls',
-            arguments: WaitForOtherPollsRouteParams(token)));
+        }).then((room) => _navigateToProperScreen(ctx, room));
       },
     );
 
@@ -149,18 +150,27 @@ class _PollingScreenState extends State<PollingScreen> {
         });
   }
 
-  Future<int> sendQuestion(BuildContext ctx) async {
+  Future<Room> sendQuestion(BuildContext ctx) async {
     final stateStorage = Zefir.of(ctx).eurus.storage.state;
     final token = (Utils.routeArgs(ctx) as PollingRouteParams).token;
     final GraphQLClient client = Zefir.of(ctx).eurus.client;
     final QueryResult result = await client.mutate(MutationOptions(
         document: Mutations.POLL_ANSWER,
-        fetchPolicy: FetchPolicy.networkOnly,
+        fetchPolicy: FetchPolicy.noCache,
+        errorPolicy: ErrorPolicy.all,
         variables: {'token': token, 'answerId': _choosedAnswer.id}));
+
+    if (result.hasException)
+      throw Exception('Exception occured in senQuestion');
+
+    if (result.data == null) throw Exception('Data is null');
+
+    Room room =
+        Room.fromGraphQL(result.data['pollAnswer']['player']['room'], token);
 
     return stateStorage
         .update(token, RoomState.WAIT_FOR_OTHER_POLLS)
-        .then((_) => token);
+        .then((_) => room);
   }
 
   Widget _loadingBuilder(BuildContext ctx) {
@@ -170,6 +180,26 @@ class _PollingScreenState extends State<PollingScreen> {
   Widget _errorBuilder(BuildContext ctx, OperationException exception) {
     developer.log(Utils.parseExceptions(exception), name: 'PollingScreen');
     return Text('Error occured');
+  }
+
+  void _navigateToProperScreen(BuildContext ctx, Room roomAfterMutation) {
+    final state = roomAfterMutation.state;
+    final stateStorage = Zefir.of(ctx).eurus.storage.state;
+
+    if (state == RoomState.DEAD) {
+      Navigator.of(ctx).pushReplacementNamed('/dead',
+          arguments: DeadRouteParams(roomAfterMutation));
+    } else if (state == RoomState.POLLING) {
+      stateStorage
+          .update(roomAfterMutation.deviceToken, RoomState.WAIT_FOR_OTHER_POLLS)
+          .then((_) => Navigator.of(ctx).pushReplacementNamed(
+              '/waitForOtherPolls',
+              arguments:
+                  WaitForOtherPollsRouteParams(roomAfterMutation.deviceToken)));
+    } else if (state == RoomState.ANSWERING) {
+      Navigator.of(ctx).pushReplacementNamed('/pollResult',
+          arguments: PollResultRouteParams(roomAfterMutation));
+    }
   }
 }
 

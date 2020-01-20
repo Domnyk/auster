@@ -45,7 +45,7 @@ class RoomList extends StatelessWidget {
             children: [
               Dismissible(
                 background: Container(color: Colors.red),
-                key: ObjectKey(index),
+                key: ObjectKey(rooms[index].joinCode),
                 child: RoomPreviewCard(room: rooms[index]),
                 onDismissed: (DismissDirection direction) {
                   Zefir.of(ctx)

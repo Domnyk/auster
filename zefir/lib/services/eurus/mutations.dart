@@ -85,11 +85,48 @@ class Mutations {
 
   static const String POLL_ANSWER = """
   mutation chooseAnswer(\$token: Int!, \$answerId: Int!) {
-    pollAnswer(token: \$token, answer: \$answerId) {
+    pollAnswer(token:\$token, answer: \$answerId) {
       id,
       content,
       question {
         content
+      },
+      player {
+        room {
+          name,
+          joinCode,
+          maxRounds,
+          maxPlayers,
+          currRound,
+          currPlayer {
+            name,
+            token,
+            points
+          },
+          currAnswers {
+            id,
+            content,
+            player {
+              name
+            }
+          },
+          currQuestion {
+            content,
+            player {
+              name
+            }
+          },
+          state,
+          players {
+            name,
+            token,
+            points,
+            polledAnswer {
+              id,
+              content
+            }
+          }  
+        }
       }
     }
   }

@@ -4,6 +4,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/dead_screen.dart';
 import 'package:zefir/screens/room/poll_result_screen.dart';
 import 'package:zefir/services/eurus/queries.dart';
 import 'package:zefir/utils.dart';
@@ -29,7 +30,7 @@ class WaitForOtherPollsScreen extends StatelessWidget {
             if (snapshot.hasData &&
                 !snapshot.hasError &&
                 snapshot.data.state == RoomState.POLL_RESULT) {
-              navigateToPollResultScreen(ctx, snapshot.data);
+              _navigateToProperScreen(ctx, snapshot.data);
             }
             return _buildBody(context);
           },
@@ -71,15 +72,24 @@ class WaitForOtherPollsScreen extends StatelessWidget {
     );
   }
 
-  void navigateToPollResultScreen(BuildContext ctx, Room room) {
+  void _navigateToProperScreen(BuildContext ctx, Room room) {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-      final stateStorage = Zefir.of(ctx).eurus.storage.state;
-      developer.log('All polls present, navigating to PollResult',
-          name: 'WaitForOtherPolls');
+      final state = room.state;
 
-      stateStorage.update(room.deviceToken, RoomState.POLL_RESULT).then((_) =>
-          Navigator.of(ctx).pushReplacementNamed('/pollResult',
-              arguments: PollResultRouteParams(room)));
+      if (state == RoomState.POLL_RESULT) {
+        developer.log('All polls present, navigating to PollResult',
+            name: 'WaitForOtherPolls');
+
+        final stateStorage = Zefir.of(ctx).eurus.storage.state;
+        stateStorage.update(room.deviceToken, RoomState.POLL_RESULT).then((_) =>
+            Navigator.of(ctx).pushReplacementNamed('/pollResult',
+                arguments: PollResultRouteParams(room)));
+      } else if (state == RoomState.DEAD) {
+        Navigator.of(ctx)
+            .pushReplacementNamed('/dead', arguments: DeadRouteParams(room));
+      } else {
+        throw Exception('Illegal state on WaitForOtherPolls screen');
+      }
     });
   }
 }

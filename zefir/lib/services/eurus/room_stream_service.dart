@@ -22,7 +22,8 @@ class RoomStreamService {
         .watchQuery(options)
         .stream
         .where((result) => !result.hasException && result.data != null)
-        .asyncMap((result) => parseRoom(result, token));
+        .asyncMap((result) => parseRoom(result, token))
+        .asBroadcastStream();
   }
 
   Future<Room> parseRoom(QueryResult result, int token) async {

@@ -24,6 +24,8 @@ class PollingScreenForQuestionOwner extends StatelessWidget {
         body: StreamBuilder(
           stream: Zefir.of(ctx).eurus.roomStreamService.stream,
           builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
+            if (snapshot.hasError) throw Exception(snapshot.error);
+
             if (!snapshot.hasData) {
               return Column(
                 mainAxisSize: MainAxisSize.max,
@@ -34,7 +36,11 @@ class PollingScreenForQuestionOwner extends StatelessWidget {
             }
 
             Room room = snapshot.data;
-            if (room.state == RoomState.POLL_RESULT) {
+            developer
+                .log('Got room data with state ${room.state.toMyString()}');
+
+            // if (room.state == RoomState.POLL_RESULT) {
+            if (room.state == RoomState.ANSWERING) {
               return RaisedButton(
                 child: Text('Przejdź do listy wyników'),
                 onPressed: () => Navigator.of(ctx).pushReplacementNamed(

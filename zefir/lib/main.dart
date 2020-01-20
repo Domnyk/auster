@@ -77,8 +77,7 @@ class Zefir extends InheritedWidget {
   };
 
   static ValueNotifier<GraphQLClient> client = ValueNotifier(GraphQLClient(
-      // cache: InMemoryCache(),
-      cache: null,
+      cache: InMemoryCache(),
       link: new HttpLink(uri: 'https://eurus-13.pl:8000/graphql')));
 
   static Zefir of(BuildContext context) {

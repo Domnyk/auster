@@ -28,7 +28,7 @@ class DeadScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             FlatButton(
-              onPressed: () => Navigator.of(ctx).pushReplacementNamed('/'),
+              onPressed: () => Navigator.of(ctx).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false),
               color: Colors.blue,
               textColor: Colors.white,
               child: Text('Przejdź do listy pokoi'),

@@ -90,10 +90,12 @@ class Eurus {
   }
 
   Future<Room> _fetchRoom(token, StateStorage stateStorage) async {
-    final mutationOptions =
-        MutationOptions(document: Queries.FETCH_ROOM, variables: {
-      'token': token,
-    });
+    final mutationOptions = MutationOptions(
+        fetchPolicy: FetchPolicy.noCache,
+        document: Queries.FETCH_ROOM,
+        variables: {
+          'token': token,
+        });
 
     QueryResult qr = await client.mutate(mutationOptions);
     if (qr.hasException) {
