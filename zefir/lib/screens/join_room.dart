@@ -7,8 +7,6 @@ import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/eurus/eurus.dart';
-import 'package:zefir/services/storage/token.dart';
-import 'package:zefir/widgets/confirm_button.dart';
 import 'package:zefir/widgets/error_dialog.dart';
 import 'dart:developer' as developer;
 
@@ -28,7 +26,6 @@ class _JoinRoomState extends State<JoinRoom> {
   String _playerName;
 
   Eurus _eurus;
-  TokenStorage _storage;
 
   _JoinRoomState() {
     _joinCodeController.addListener(() {
@@ -43,30 +40,27 @@ class _JoinRoomState extends State<JoinRoom> {
   @override
   Widget build(BuildContext context) {
     _eurus = Zefir.of(context).eurus;
-    _storage = Zefir.of(context).eurus.storage.token;
 
     return Scaffold(
-        appBar: AppBar(title: Text('Dołącz do pokoju')),
-        body: _buildForm(context, _formKey),
-        bottomNavigationBar: BottomAppBar(
-            elevation: 0,
-            color: Colors.green,
-            child: ConfirmButton(
-              isRaised: false,
-              text: _joinButtonText,
-              onPressed: () => _joinRoom(context),
-            )));
+      appBar: AppBar(title: Text('Dołącz do pokoju')),
+      body: _buildForm(context, _formKey),
+    );
   }
 
   Form _buildForm(BuildContext ctx, GlobalKey<FormState> formKey) {
     final widgestWithPaddings = [
-      _buildJoinCodeField(_joinCodeController),
-      _buildPlayerNameField(_playerNameController),
-    ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList();
+      Column(children: <Widget>[
+        _buildJoinCodeField(_joinCodeController),
+        _buildPlayerNameField(_playerNameController),
+      ].map((w) => Padding(child: w, padding: EdgeInsets.all(10),)).toList()
+      ,),
+      Padding(child: _buildJoinRoomButton(ctx), padding: EdgeInsets.fromLTRB(15, 0, 15, 15)),
+    ];
 
     return Form(
         key: formKey,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: widgestWithPaddings,
         ));
   }
@@ -100,6 +94,15 @@ class _JoinRoomState extends State<JoinRoom> {
         validator: validator, decoration: decoration, controller: controller);
   }
 
+  Widget _buildJoinRoomButton(BuildContext ctx) {
+    return RaisedButton(
+      color: Colors.green,
+      textColor: Colors.white,
+      child: Text(_joinButtonText),
+      onPressed: () => _joinRoom(ctx),
+    );
+  }
+
   void _joinRoom(BuildContext ctx) {
     bool isFormValid = _formKey.currentState.validate();
     if (isFormValid == false) {
@@ -127,14 +130,14 @@ class _JoinRoomState extends State<JoinRoom> {
   }
 
   Future<void> _navigateToWaitForPlayers(BuildContext ctx, Room room) async {
-    await _storage.insert(room.deviceToken, initialState: RoomState.JOINING);
+    await _eurus.storage.token.insert(room.deviceToken, initialState: RoomState.JOINING);
 
     Navigator.pushReplacementNamed(ctx, '/waitForPlayers',
         arguments: WaitForPlayersRouteParams(room));
   }
 
   Future<void> _navigatToAddQuestion(BuildContext ctx, int token) async {
-    await _storage.insert(token, initialState: RoomState.COLLECTING);
+    await _eurus.storage.token.insert(token, initialState: RoomState.COLLECTING);
 
     Navigator.pushReplacementNamed(ctx, '/addQuestion',
         arguments: AddQuestionRouteParams(token));
