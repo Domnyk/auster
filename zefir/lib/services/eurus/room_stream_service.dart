@@ -21,7 +21,24 @@ class RoomStreamService {
     _stream = _client
         .watchQuery(options)
         .stream
-        .where((result) => !result.hasException && result.data != null)
+        .where((result) =>
+            result.loading == false &&
+            !result.hasException &&
+            result.data != null)
+        .asyncMap((result) => parseRoom(result, token))
+        .asBroadcastStream();
+  }
+
+  Stream<Room> createStreamFor2({@required int token}) {
+    final options = _buildOptions(token);
+
+    return _client
+        .watchQuery(options)
+        .stream
+        .where((result) =>
+            result.loading == false &&
+            !result.hasException &&
+            result.data != null)
         .asyncMap((result) => parseRoom(result, token))
         .asBroadcastStream();
   }

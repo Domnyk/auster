@@ -17,12 +17,14 @@ class PollingScreenForQuestionOwner extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
+    int token = (Utils.routeArgs(ctx) as PollingScreenForQuestionOwnerRouteParams).token;
+    
     return Scaffold(
         appBar: AppBar(
           title: Text('Głosowanie'),
         ),
         body: StreamBuilder(
-          stream: Zefir.of(ctx).eurus.roomStreamService.stream,
+          stream: Zefir.of(ctx).eurus.roomStreamService.createStreamFor2(token: token),
           builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
             if (snapshot.hasError) throw Exception(snapshot.error);
 
@@ -39,8 +41,7 @@ class PollingScreenForQuestionOwner extends StatelessWidget {
             developer
                 .log('Got room data with state ${room.state.toMyString()}');
 
-            // if (room.state == RoomState.POLL_RESULT) {
-            if (room.state == RoomState.ANSWERING) {
+            if (room.state == RoomState.ANSWERING && room.deviceToken != room.currPlayer.token) {
               return RaisedButton(
                 child: Text('Przejdź do listy wyników'),
                 onPressed: () => Navigator.of(ctx).pushReplacementNamed(
