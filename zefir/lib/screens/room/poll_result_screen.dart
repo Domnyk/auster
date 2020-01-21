@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/player.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/answering_screen.dart';
 import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/utils.dart';
+import 'package:zefir/zefir.dart';
 
 class PollResultScreen extends StatelessWidget {
   static const String appBarTitle = 'Wyniki głosowania';

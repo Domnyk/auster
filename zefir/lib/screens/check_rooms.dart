@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/screens/loading.dart';
@@ -8,6 +7,7 @@ import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/token.dart';
+import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
 class CheckRoomsWidget extends StatelessWidget {

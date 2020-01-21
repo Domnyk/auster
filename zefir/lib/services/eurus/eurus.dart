@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:meta/meta.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/model/room_state.dart';
@@ -12,6 +11,7 @@ import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/services/storage/storage.dart';
 import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/typedefs.dart';
+import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 import 'mutations.dart';
 

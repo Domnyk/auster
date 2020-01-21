@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/storage/token.dart';
-import 'package:zefir/widgets/confirm_button.dart';
 import 'package:zefir/widgets/number_picker.dart';
-import 'dart:developer' as developer;
 import 'package:zefir/services/eurus/eurus.dart';
+import 'package:zefir/zefir.dart';
+import 'dart:developer' as developer;
 
 class NewRoom extends StatefulWidget {
   @override

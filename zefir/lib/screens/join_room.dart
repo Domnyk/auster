@@ -1,13 +1,13 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/widgets/error_dialog.dart';
+import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
 class JoinRoom extends StatefulWidget {

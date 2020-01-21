@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/utils.dart';
 import 'package:zefir/widgets/room_preview_card.dart';
+import 'package:zefir/zefir.dart';
 
 class RoomList extends StatelessWidget {
   static const String _leftRoomConfirmation = 'Opuściłeś pokój';

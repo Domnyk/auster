@@ -8,9 +8,9 @@ import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/dead_screen.dart';
 import 'package:zefir/screens/room/poll_result_screen.dart';
-import 'dart:developer' as developer;
-
 import 'package:zefir/utils.dart';
+import 'package:zefir/zefir.dart';
+import 'dart:developer' as developer;
 
 // TODO: Change name to something shorter
 class PollingScreenForQuestionOwner extends StatelessWidget {

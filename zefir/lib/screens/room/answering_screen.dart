@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/player.dart';
 import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room.dart';
@@ -10,11 +9,11 @@ import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/polling_screen/polling_screen.dart';
 import 'package:zefir/screens/room/polling_screen/polling_screen_for_question_owner.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
-import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/services/eurus/mutations.dart';
 import 'package:zefir/services/eurus/queries.dart';
 import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/utils.dart';
+import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
 class AnsweringScreen extends StatefulWidget {

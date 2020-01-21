@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question_screen.dart';
@@ -13,6 +12,7 @@ import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/storage/token.dart';
+import 'package:zefir/zefir.dart';
 
 class RoomPreviewCard extends StatelessWidget {
   final Room _room;

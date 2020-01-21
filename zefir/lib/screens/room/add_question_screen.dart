@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:zefir/main.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
-import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/services/eurus/mutations.dart';
 import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/utils.dart';
-import 'dart:developer' as developer;
-
 import 'package:zefir/widgets/confirm_button.dart';
+import 'package:zefir/zefir.dart';
+import 'dart:developer' as developer;
 
 class AddQuestionScreen extends StatelessWidget {
   static const String _addQuestionText = 'Dodaj pytanie';
