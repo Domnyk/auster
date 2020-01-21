@@ -1,23 +1,51 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:zefir/model/player.dart';
 import 'package:zefir/model/room.dart';
-import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/services/eurus/eurus.dart';
-import 'package:zefir/services/eurus/queries.dart';
-import 'package:zefir/utils.dart';
 import 'package:zefir/widgets/confirmation_dialog_widget.dart';
-import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
-class WaitForPlayersScreen extends StatelessWidget {
+class WaitForPlayersScreen extends StatefulWidget {
+  final Eurus _eurus;
+  final Room _room;
+
+  const WaitForPlayersScreen(this._eurus, this._room);
+
+  @override
+  _WaitForPlayersScreenState createState() => _WaitForPlayersScreenState();
+}
+
+class _WaitForPlayersScreenState extends State<WaitForPlayersScreen> {
+  StreamSubscription _playersSubscription;
+  List<Player> _players = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _playersSubscription = widget._eurus.roomStreamService
+        .createStreamFor(token: widget._room.deviceToken)
+        .map((room) => room.players)
+        .listen((players) {
+      setState(() {
+        _players = players;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _playersSubscription?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext ctx) {
-    final Room room = (Utils.routeArgs(ctx) as WaitForPlayersRouteParams).room;
-
     return Scaffold(
       appBar: _buildAppBar(ctx),
-      body: _buildBody(ctx, room),
+      body: _buildBody(ctx, widget._room),
     );
   }
 
@@ -35,61 +63,40 @@ class WaitForPlayersScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext ctx, Room room) {
-    return Column(children: [
-      Column(
-        children: [
-          _buildRoomName(room.name),
-          _buildJoinCode(room.joinCode),
-          _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
-          _buildQrCode(room.joinCode),
-        ]
-            .map((w) => Padding(child: w, padding: EdgeInsets.all(10)))
-            .toList(),
-      ),
-      Padding(
-        child: _buildLeaveRoomButton(ctx, room.deviceToken),
-        padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
-      )
-    ], mainAxisAlignment: MainAxisAlignment.spaceBetween,);
-  }
-
-  Widget _buildPlayersWidgets(BuildContext ctx, int token, int maxPlayers) {
-    return Query(
-      options: _buildQueryOptions(ctx, token),
-      builder: (QueryResult result, {fetchMore, refetch}) {
-        if (result.hasException) developer.log('Result has exception');
-        if (result.loading) return Text('Proszę czekać, trwa ładowanie');
-
-        List<String> playersNames =
-            (result.data['player']['room']['players'] as List<dynamic>)
-                .map((p) => p['name'] as String)
-                .toList();
-
-        WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-          if (playersNames.length == maxPlayers) {
-            Navigator.pushReplacementNamed(ctx, '/addQuestion',
-                arguments: AddQuestionRouteParams(token));
-          }
-        });
-
-        return Column(
-          children: <Widget>[
-            Padding(
-                child: _buildListOfPlayers(ctx, playersNames),
-                padding: EdgeInsets.only(bottom: 10)),
-            _buildNumOfMissingPlayers(maxPlayers, playersNames.length)
-          ],
-        );
-      },
+    return Column(
+      children: [
+        Column(
+          children: [
+            _buildRoomName(room.name),
+            _buildJoinCode(room.joinCode),
+            _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
+            _buildQrCode(room.joinCode),
+          ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList(),
+        ),
+        Padding(
+          child: _buildLeaveRoomButton(ctx, room.deviceToken),
+          padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
+        )
+      ],
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
     );
   }
 
-  QueryOptions _buildQueryOptions(BuildContext ctx, int token) {
-    return QueryOptions(
-        document: Queries.FETCH_PLAYERS,
-        fetchPolicy: FetchPolicy.noCache,
-        pollInterval: 5,
-        variables: {'token': token});
+  Widget _buildPlayersWidgets(BuildContext ctx, int token, int maxPlayers) {
+    List<String> playersNames = _players.map((p) => p.name).toList();
+
+    Widget loading = Text('Proszę czekać, ładuję listę graczy...');
+
+    Widget playersList = Column(
+      children: <Widget>[
+        Padding(
+            child: _buildListOfPlayers(ctx, playersNames),
+            padding: EdgeInsets.only(bottom: 10)),
+        _buildNumOfMissingPlayers(maxPlayers, playersNames.length)
+      ],
+    );
+
+    return playersNames.isEmpty ? loading : playersList;
   }
 
   Widget _buildRoomName(String roomName) {
@@ -151,10 +158,9 @@ class WaitForPlayersScreen extends StatelessWidget {
   }
 
   Widget _buildLeaveRoomButton(BuildContext ctx, int token) {
-    final Eurus eurus = Zefir.of(ctx).eurus;
     Widget confirmationDialog = ConfirmationDialogWidget(
         'Opuszczasz pokój', 'Jesteś pewien, że chcesz opuścic pokój', () {
-      eurus.leaveRoom(ctx, token).then((_) {
+      widget._eurus.leaveRoom(ctx, token).then((_) {
         Navigator.of(ctx).popUntil(ModalRoute.withName('/'));
       });
     });
@@ -169,7 +175,8 @@ class WaitForPlayersScreen extends StatelessWidget {
 }
 
 class WaitForPlayersRouteParams {
+  final Eurus eurus;
   final Room room;
 
-  const WaitForPlayersRouteParams(this.room);
+  const WaitForPlayersRouteParams(this.room, this.eurus);
 }

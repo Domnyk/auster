@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_preview.dart';
+import 'package:zefir/screens/join_room.dart';
+import 'package:zefir/screens/new_room_screen.dart';
 import 'package:zefir/utils.dart';
 import 'package:zefir/widgets/room_preview_card.dart';
 import 'package:zefir/zefir.dart';
@@ -11,24 +13,16 @@ class RoomList extends StatelessWidget {
 
   final List<Room> _rooms;
 
-  RoomList({List<Room> rooms}) : _rooms = rooms;
-
-  List<Room> getRooms(BuildContext ctx) {
-    return this._rooms != null
-        ? this._rooms
-        : (Utils.routeArgs(ctx) as _RoomListRouteParams).rooms;
-  }
+  RoomList(this._rooms);
 
   @override
   Widget build(BuildContext ctx) {
-    final List<Room> rooms = getRooms(ctx);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Lista pokojów, w których sie znajdujesz'),
       ),
       body: Builder(
-        builder: (context) => _buildList(context, rooms),
+        builder: (context) => _buildList(context, _rooms),
       ),
       floatingActionButton: SpeedDial(
         child: Icon(Icons.menu),
@@ -46,7 +40,7 @@ class RoomList extends StatelessWidget {
               Dismissible(
                 background: Container(color: Colors.red),
                 key: ObjectKey(rooms[index].joinCode),
-                child: RoomPreviewCard(room: rooms[index]),
+                child: RoomPreviewCard(room: rooms[index], eurus: Zefir.of(ctx).eurus),
                 onDismissed: (DismissDirection direction) {
                   Zefir.of(ctx)
                       .eurus
@@ -66,7 +60,7 @@ class RoomList extends StatelessWidget {
         backgroundColor: Colors.black,
         label: 'Załóż nowy pokój',
         labelStyle: TextStyle(fontSize: 18.0),
-        onTap: () => Navigator.pushNamed(ctx, '/newRoom'));
+        onTap: () => Navigator.pushNamed(ctx, '/newRoom', arguments: NewRoomRouteParams(Zefir.of(ctx).eurus)));
   }
 
   SpeedDialChild _buildJoinRoomIcon(BuildContext ctx) {
@@ -75,12 +69,12 @@ class RoomList extends StatelessWidget {
         backgroundColor: Colors.black,
         label: 'Dołącz do istniejącego pokoju',
         labelStyle: TextStyle(fontSize: 18.0),
-        onTap: () => Navigator.pushNamed(ctx, '/joinRoom'));
+        onTap: () => Navigator.pushNamed(ctx, '/joinRoom', arguments: JoinRoomRouteParams(Zefir.of(ctx).eurus)));
   }
 }
 
-class _RoomListRouteParams {
+class RoomListRouteParams {
   final List<Room> rooms;
 
-  _RoomListRouteParams(this.rooms);
+  RoomListRouteParams(this.rooms);
 }

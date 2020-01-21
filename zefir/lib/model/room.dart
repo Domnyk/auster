@@ -45,28 +45,27 @@ class Room {
         maxRounds = data['maxRounds'],
         maxPlayers = data['maxPlayers'],
         currRound = data['currRound'],
-        deviceToken = deviceToken {
+        deviceToken = deviceToken,
+        players = Room.parsePlayers(data['players']) {
     if (state == RoomState.JOINING ||
         state == RoomState.COLLECTING ||
         state == RoomState.WAIT_FOR_OTHER_QUESTIONS) {
       currPlayer = null;
       currAnswers = null;
       currQuestion = null;
-      players = null;
+      
     } else if (state == RoomState.ANSWERING ||
         state == RoomState.WAIT_FOR_OTHER_ANSWERS) {
       currPlayer = Player.fromGraphQl(data['currPlayer']);
       currQuestion = Question.fromGraphQl(data['currQuestion']);
-      players = Room.parsePlayers(data['players']);
     } else if (state == RoomState.POLLING ||
         state == RoomState.WAIT_FOR_OTHER_POLLS ||
         state == RoomState.POLL_RESULT) {
       currPlayer = Player.fromGraphQl(data['currPlayer']);
       currQuestion = Question.fromGraphQl(data['currQuestion']);
       currAnswers = Room.parseCurrAnswers(data['currAnswers']);
-      players = Room.parsePlayers(data['players']);
     } else if (state == RoomState.DEAD) {
-      players = Room.parsePlayers(data['players']);
+      // TODO Do nothing. I should refactor this code
     } else {
       throw Exception('Unkown state when parsing room info $state');
     }

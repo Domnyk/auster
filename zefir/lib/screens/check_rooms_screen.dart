@@ -1,34 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zefir/model/room.dart';
-import 'package:zefir/model/room_preview.dart';
 import 'package:zefir/screens/loading.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
-import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
-class CheckRoomsWidget extends StatelessWidget {
+class CheckRoomsScreen extends StatelessWidget {
+  final Eurus _eurus;
+
+  const CheckRoomsScreen(this._eurus);
+
   @override
   Widget build(BuildContext ctx) {
-    final Eurus _eurus = Zefir.of(ctx).eurus;
-    final TokenStorage _storage = Zefir.of(ctx).eurus.storage.token;
-
     return FutureBuilder<List<int>>(
         key: UniqueKey(),
-        future: _storage.fetchAll(),
-        builder: (ctx, snapshot) => _buildFromFuture(ctx, snapshot, _eurus));
+        future: _eurus.storage.token.fetchAll(),
+        builder: _buildFromFuture);
   }
 
   Widget _buildFromFuture(
-      BuildContext ctx, AsyncSnapshot<List<int>> snapshot, final Eurus eurus) {
+      BuildContext ctx, AsyncSnapshot<List<int>> snapshot) {
     if (snapshot.hasData) {
       final List<Room> rooms = [];
 
       return StreamBuilder<Room>(
-        stream: eurus.fetchRooms(
+        stream: _eurus.fetchRooms(
             tokens: snapshot.data,
             stateStorage: Zefir.of(ctx).eurus.storage.state),
         builder: (ctx, snapshot) => _buildFromStream(ctx, snapshot, rooms),
@@ -59,10 +58,16 @@ class CheckRoomsWidget extends StatelessWidget {
   }
 
   Widget _buildIfDone(BuildContext ctx, List<Room> rooms) {
-    return rooms.isEmpty ? NoRooms() : RoomList(rooms: rooms);
+    return rooms.isEmpty ? NoRooms() : RoomList(rooms);
   }
 
   Widget _buildIfError(BuildContext ctx, Exception err) {
     return Text('Wystąpił błąd w czasie pobierania danych');
   }
+}
+
+class CheckRoomsRouteParams {
+  final Eurus eurus;
+
+  CheckRoomsRouteParams(this.eurus);
 }

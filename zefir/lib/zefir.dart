@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/routes.dart';
+import 'package:zefir/screens/check_rooms_screen.dart';
+import 'package:zefir/screens/join_room.dart';
+import 'package:zefir/screens/new_room_screen.dart';
+import 'package:zefir/screens/no_rooms.dart';
+import 'package:zefir/screens/room/wait_for_players_screen.dart';
+import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/zefir_theme.dart';
+
+import 'model/room.dart';
 
 class Zefir extends InheritedWidget {
   // static Room room = Room(
@@ -33,20 +41,60 @@ class Zefir extends InheritedWidget {
   }
 
   static Widget buildMaterialApp(ValueNotifier<GraphQLClient> client) {
-    return GraphQLProvider(
-        client: client,
-        child: MaterialApp(
-            title: 'EGO mobile',
-            theme: ZefirTheme().themeData,
-            initialRoute: '/',
-            routes: Routes.routes));
+    return MaterialApp(
+      title: 'EGO mobile',
+      theme: ZefirTheme().themeData,
+      onGenerateRoute: generateRoute,
+      routes: Routes.routes,
+    );
   }
 
-  final Eurus eurus;
+  static MaterialPageRoute generateRoute(RouteSettings settings) {
+    Widget Function(BuildContext) builder;
+
+    switch (settings.name) {
+      case '/':
+        builder = (BuildContext ctx) => CheckRoomsScreen(Zefir.of(ctx).eurus);
+        break;
+      case '/noRooms':
+        builder = (BuildContext ctx) => NoRooms();
+        break;
+      case '/roomList':
+        List<Room> rooms = (settings.arguments as RoomListRouteParams).rooms;
+        builder = (BuildContext ctx) => RoomList(rooms);
+        break;
+      case '/waitForPlayers':
+        WaitForPlayersRouteParams params =
+            (settings.arguments as WaitForPlayersRouteParams);
+        builder = (BuildContext ctx) =>
+            WaitForPlayersScreen(params.eurus, params.room);
+        break;
+      case '/newRoom':
+        Eurus eurus = (settings.arguments as NewRoomRouteParams).eurus;
+        builder = (BuildContext ctx) => NewRoomScreen(eurus);
+        break;
+      case '/joinRoom':
+        Eurus eurus = (settings.arguments as JoinRoomRouteParams).eurus;
+        builder = (BuildContext ctx) => JoinRoom(eurus);
+        break;
+      default:
+        break;
+      // throw Exception('Unkonw route ${settings.name}');
+    }
+
+    return builder != null
+        ? MaterialPageRoute(builder: builder, settings: settings)
+        : null;
+  }
+
+  final Eurus eurus = Eurus(client: client.value);
 
   Zefir()
-      : eurus = Eurus(client: client.value),
-        super(child: buildMaterialApp(client));
+      : super(
+            child: GraphQLProvider(
+          client: client,
+          child: buildMaterialApp(client),
+        ));
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => true;

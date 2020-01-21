@@ -11,13 +11,15 @@ import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
 import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
+import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/storage/token.dart';
 import 'package:zefir/zefir.dart';
 
 class RoomPreviewCard extends StatelessWidget {
+  final Eurus _eurus;
   final Room _room;
 
-  RoomPreviewCard({@required Room room}) : _room = room;
+  RoomPreviewCard({@required Room room, @required Eurus eurus}) : _room = room, _eurus = eurus;
 
   @override
   Widget build(BuildContext ctx) {
@@ -47,7 +49,7 @@ class RoomPreviewCard extends StatelessWidget {
     switch (_room.state) {
       case RoomState.JOINING:
         url = '/waitForPlayers';
-        arguments = WaitForPlayersRouteParams(_room);
+        arguments = WaitForPlayersRouteParams(_room, _eurus);
         break;
       case RoomState.COLLECTING:
         url = '/addQuestion';

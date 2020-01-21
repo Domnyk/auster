@@ -11,8 +11,12 @@ import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
 class JoinRoom extends StatefulWidget {
+  final Eurus _eurus;
+
+  JoinRoom(this._eurus);
+
   @override
-  _JoinRoomState createState() => _JoinRoomState();
+  _JoinRoomState createState() => _JoinRoomState(_eurus);
 }
 
 class _JoinRoomState extends State<JoinRoom> {
@@ -21,13 +25,12 @@ class _JoinRoomState extends State<JoinRoom> {
   final _formKey = GlobalKey<FormState>();
   final _joinCodeController = TextEditingController();
   final _playerNameController = TextEditingController();
+  final Eurus _eurus;
 
   String _joinCode;
   String _playerName;
 
-  Eurus _eurus;
-
-  _JoinRoomState() {
+  _JoinRoomState(this._eurus) {
     _joinCodeController.addListener(() {
       _joinCode = _joinCodeController.value.text.trim();
     });
@@ -39,8 +42,6 @@ class _JoinRoomState extends State<JoinRoom> {
 
   @override
   Widget build(BuildContext context) {
-    _eurus = Zefir.of(context).eurus;
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(title: Text('Dołącz do pokoju')),
@@ -50,12 +51,20 @@ class _JoinRoomState extends State<JoinRoom> {
 
   Form _buildForm(BuildContext ctx, GlobalKey<FormState> formKey) {
     final widgestWithPaddings = [
-      Column(children: <Widget>[
-        _buildJoinCodeField(_joinCodeController),
-        _buildPlayerNameField(_playerNameController),
-      ].map((w) => Padding(child: w, padding: EdgeInsets.all(10),)).toList()
-      ,),
-      Padding(child: _buildJoinRoomButton(ctx), padding: EdgeInsets.fromLTRB(15, 0, 15, 15)),
+      Column(
+        children: <Widget>[
+          _buildJoinCodeField(_joinCodeController),
+          _buildPlayerNameField(_playerNameController),
+        ]
+            .map((w) => Padding(
+                  child: w,
+                  padding: EdgeInsets.all(10),
+                ))
+            .toList(),
+      ),
+      Padding(
+          child: _buildJoinRoomButton(ctx),
+          padding: EdgeInsets.fromLTRB(15, 0, 15, 15)),
     ];
 
     return Form(
@@ -126,14 +135,16 @@ class _JoinRoomState extends State<JoinRoom> {
   }
 
   Future<void> _navigateToWaitForPlayers(BuildContext ctx, Room room) async {
-    await _eurus.storage.token.insert(room.deviceToken, initialState: RoomState.JOINING);
+    await _eurus.storage.token
+        .insert(room.deviceToken, initialState: RoomState.JOINING);
 
     Navigator.pushReplacementNamed(ctx, '/waitForPlayers',
-        arguments: WaitForPlayersRouteParams(room));
+        arguments: WaitForPlayersRouteParams(room, _eurus));
   }
 
   Future<void> _navigatToAddQuestion(BuildContext ctx, int token) async {
-    await _eurus.storage.token.insert(token, initialState: RoomState.COLLECTING);
+    await _eurus.storage.token
+        .insert(token, initialState: RoomState.COLLECTING);
 
     Navigator.pushReplacementNamed(ctx, '/addQuestion',
         arguments: AddQuestionRouteParams(token));
@@ -146,4 +157,10 @@ class _JoinRoomState extends State<JoinRoom> {
           return ErrorDialog.build(ctx, err);
         });
   }
+}
+
+class JoinRoomRouteParams {
+  final Eurus eurus;
+
+  JoinRoomRouteParams(this.eurus);
 }

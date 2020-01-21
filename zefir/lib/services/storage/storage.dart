@@ -20,7 +20,7 @@ class Storage {
     _state = StateStorage(_database, graphQLClient);
   }
 
-  get token => _token;
+  TokenStorage get token => _token;
   StateStorage get state => _state;
 
   static Future<Database> _createDatabase() {

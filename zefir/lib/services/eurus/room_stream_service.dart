@@ -22,7 +22,7 @@ class RoomStreamService {
             result.loading == false &&
             !result.hasException &&
             result.data != null)
-        .asyncMap((result) => _parseRoom(result, token))
+        .asyncMap((result) async => await _parseRoom(result, token))
         .asBroadcastStream();
   }
 
