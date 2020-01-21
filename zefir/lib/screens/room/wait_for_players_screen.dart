@@ -18,11 +18,6 @@ class WaitForPlayersScreen extends StatelessWidget {
     return Scaffold(
       appBar: _buildAppBar(ctx),
       body: _buildBody(ctx, room),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 0,
-        color: Colors.red,
-        child: _buildLeaveRoom(ctx, room.deviceToken),
-      ),
     );
   }
 
@@ -40,23 +35,22 @@ class WaitForPlayersScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext ctx, Room room) {
-    return Column(
-      children: [
-        Expanded(
-            flex: 9,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                _buildRoomName(room.name),
-                _buildJoinCode(room.joinCode),
-                _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
-                _buildQrCode(room.joinCode),
-              ]
-                  .map((w) => Padding(child: w, padding: EdgeInsets.all(10)))
-                  .toList(),
-            )),
-      ],
-    );
+    return Column(children: [
+      Column(
+        children: [
+          _buildRoomName(room.name),
+          _buildJoinCode(room.joinCode),
+          _buildPlayersWidgets(ctx, room.deviceToken, room.maxPlayers),
+          _buildQrCode(room.joinCode),
+        ]
+            .map((w) => Padding(child: w, padding: EdgeInsets.all(10)))
+            .toList(),
+      ),
+      Padding(
+        child: _buildLeaveRoomButton(ctx, room.deviceToken),
+        padding: EdgeInsets.fromLTRB(15, 0, 15, 15),
+      )
+    ], mainAxisAlignment: MainAxisAlignment.spaceBetween,);
   }
 
   Widget _buildPlayersWidgets(BuildContext ctx, int token, int maxPlayers) {
@@ -156,7 +150,7 @@ class WaitForPlayersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLeaveRoom(BuildContext ctx, int token) {
+  Widget _buildLeaveRoomButton(BuildContext ctx, int token) {
     final Eurus eurus = Zefir.of(ctx).eurus;
     Widget confirmationDialog = ConfirmationDialogWidget(
         'Opuszczasz pokój', 'Jesteś pewien, że chcesz opuścic pokój', () {
@@ -165,7 +159,7 @@ class WaitForPlayersScreen extends StatelessWidget {
       });
     });
 
-    return FlatButton(
+    return RaisedButton(
         onPressed: () =>
             showDialog(context: ctx, builder: (_) => confirmationDialog),
         color: Colors.red,
