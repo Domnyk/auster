@@ -19,7 +19,7 @@ class RoomList extends StatelessWidget {
   Widget build(BuildContext ctx) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lista pokojów, w których sie znajdujesz'),
+        title: Text('Lista pokojów'),
       ),
       body: Builder(
         builder: (context) => _buildList(context, _rooms),
