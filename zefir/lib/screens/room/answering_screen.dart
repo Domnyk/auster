@@ -110,38 +110,41 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
   Widget _buildQuestionForm(BuildContext ctx) {
     return Form(
       key: _formKey,
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [ 
-            Column(
-              children: <Widget>[
-                Padding(child: _buildQuestionText(ctx), padding: const EdgeInsets.fromLTRB(10, 10, 10, 0)),
-                _buildRoleText(ctx, _token, _currPlayer),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: _buildTextField(ctx),
-            ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: _buildSubmitButton(ctx, _token,
-                  onError: (exception) => developer.log(
-                      'Error occured when sending mutation: ${Utils.parseExceptions(exception)}',
-                      name: 'AsnweringScreen'),
-                  onCompleted: (room) => _navigateToNextScreen(ctx, room),
-                  builder: (runMutation, result) {
-                    return RaisedButton(
-                        onPressed: _isButtonDisabled
-                            ? null
-                            : () => _sendAnswer(runMutation),
-                        color: Colors.green,
-                        textColor: Colors.white,
-                        child: Text('Dodaj odpowiedź'));
-                  }),
-            ),
-          ]),
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        Column(children: _buildFormFields(ctx)),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+          child: _buildSubmitButton(ctx, _token,
+              onError: (exception) => developer.log(
+                  'Error occured when sending mutation: ${Utils.parseExceptions(exception)}',
+                  name: 'AsnweringScreen'),
+              onCompleted: (room) => _navigateToNextScreen(ctx, room),
+              builder: (runMutation, result) {
+                return RaisedButton(
+                    onPressed: _isButtonDisabled
+                        ? null
+                        : () => _sendAnswer(runMutation),
+                    color: Colors.green,
+                    textColor: Colors.white,
+                    child: Text('Dodaj odpowiedź'));
+              }),
+        ),
+      ]),
     );
+  }
+
+  List<Widget> _buildFormFields(BuildContext ctx) {
+    final questionText = Padding(
+        child: _buildQuestionText(ctx),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    final roleText = _buildRoleText(ctx, _token, _currPlayer);
+    final textField = Padding(
+      padding: const EdgeInsets.all(10),
+      child: _buildTextField(ctx),
+    );
+
+    return [questionText, roleText, textField].where((w) => w != null).toList();
   }
 
   Widget _buildRoleText(BuildContext ctx, int deviceToken, Player currPlayer) {
