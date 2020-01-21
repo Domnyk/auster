@@ -66,6 +66,7 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
     _stateStorage = Zefir.of(ctx).eurus.storage.state;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Odpowiedz na pytanie'),
       ),
@@ -110,33 +111,36 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
     return Form(
       key: _formKey,
       child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildRoleText(ctx, _token, _currPlayer),
-            _buildQuestionText(ctx),
-            _buildTextField(ctx),
-            _buildSubmitButton(ctx, _token,
-                onError: (exception) => developer.log(
-                    'Error occured when sending mutation: ${Utils.parseExceptions(exception)}',
-                    name: 'AsnweringScreen'),
-                onCompleted: (room) => _navigateToNextScreen(ctx, room),
-                builder: (runMutation, result) {
-                  return SizedBox(
-                      width: double.infinity,
-                      child: RaisedButton(
-                          onPressed: _isButtonDisabled
-                              ? null
-                              : () => _sendAnswer(runMutation),
-                          color: Colors.green,
-                          textColor: Colors.white,
-                          child: Text('Dodaj odpowiedź')));
-                }),
-          ]
-              .map((w) => Padding(
-                    child: w,
-                    padding: EdgeInsets.all(10),
-                  ))
-              .toList()),
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [ 
+            Column(
+              children: <Widget>[
+                Padding(child: _buildQuestionText(ctx), padding: const EdgeInsets.fromLTRB(10, 10, 10, 0)),
+                _buildRoleText(ctx, _token, _currPlayer),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: _buildTextField(ctx),
+            ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+              child: _buildSubmitButton(ctx, _token,
+                  onError: (exception) => developer.log(
+                      'Error occured when sending mutation: ${Utils.parseExceptions(exception)}',
+                      name: 'AsnweringScreen'),
+                  onCompleted: (room) => _navigateToNextScreen(ctx, room),
+                  builder: (runMutation, result) {
+                    return RaisedButton(
+                        onPressed: _isButtonDisabled
+                            ? null
+                            : () => _sendAnswer(runMutation),
+                        color: Colors.green,
+                        textColor: Colors.white,
+                        child: Text('Dodaj odpowiedź'));
+                  }),
+            ),
+          ]),
     );
   }
 
@@ -195,16 +199,6 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
       throw Exception(
           'Illegal state on this screen ${roomAfterMutionFromBackend.state.toMyString()}');
     }
-
-    // if (_amICurrentPlayer()) {
-    //   return _navigateToWaitForOtherPolls(ctx);
-    // } else {
-    //   if (roomAfterMutionFromBackend.state == RoomState.POLLING) {
-    //     return _navigateToPolling(ctx, roomAfterMutionFromBackend);
-    //   } else if (roomAfterMutionFromBackend.state == RoomState.ANSWERING) {
-    //     return _navigateToWaitForOtherAnswers(ctx);
-    //   }
-    // }
   }
 
   void _navigateToPollingForQuestionOwner(BuildContext ctx) {
