@@ -5,6 +5,7 @@ import 'package:zefir/model/player.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/widgets/confirmation_dialog_widget.dart';
+import 'add_question_screen.dart';
 import 'dart:developer' as developer;
 
 class WaitForPlayersScreen extends StatefulWidget {
@@ -43,6 +44,13 @@ class _WaitForPlayersScreenState extends State<WaitForPlayersScreen> {
 
   @override
   Widget build(BuildContext ctx) {
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      if (_players.length == widget._room.maxPlayers) {
+        Navigator.pushReplacementNamed(ctx, '/addQuestion',
+        arguments: AddQuestionRouteParams(widget._room.deviceToken));
+      }
+    });
+    
     return Scaffold(
       appBar: _buildAppBar(ctx),
       body: _buildBody(ctx, widget._room),
