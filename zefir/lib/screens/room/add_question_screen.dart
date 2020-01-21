@@ -29,7 +29,7 @@ class AddQuestionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    return Scaffold(appBar: _buildAppBar(ctx), body: _buildBody(ctx));
+    return Scaffold(resizeToAvoidBottomInset: false, appBar: _buildAppBar(ctx), body: _buildBody(ctx));
   }
 
   Widget _buildAppBar(BuildContext ctx) {
@@ -46,27 +46,22 @@ class AddQuestionScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext ctx) {
-    return Column(children: [
-      Form(
-          key: _formKey,
-          child: Column(
-            children: _buildFormControls(ctx),
-          ))
-    ]);
-  }
-
-  List<Widget> _buildFormControls(BuildContext ctx) {
-    final List<Widget> controls = [
+    final List<Widget> controls = [      
       _buildQuestionField(ctx),
       _buildSubmitButton(ctx),
-    ];
-
-    return controls
-        .map((w) => Padding(
+    ].map((w) => Padding(
               child: w,
               padding: EdgeInsets.all(10),
             ))
         .toList();
+    
+    return Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: controls,
+        ));
   }
 
   Widget _buildQuestionField(BuildContext ctx) {
