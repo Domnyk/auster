@@ -147,11 +147,6 @@ class _NewRoomState extends State<NewRoom> {
   }
 
   void _navigateToWaitForPlayersScreen(BuildContext ctx, Room room) {
-    Zefir.of(ctx)
-        .eurus
-        .roomStreamService
-        .createStreamFor(token: room.deviceToken);
-
     Navigator.pushReplacementNamed(ctx, '/waitForPlayers',
         arguments: WaitForPlayersRouteParams(room));
   }

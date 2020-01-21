@@ -67,6 +67,8 @@ class AddQuestionScreen extends StatelessWidget {
   Widget _buildQuestionField(BuildContext ctx) {
     return TextFormField(
       controller: _questionController,
+      keyboardType: TextInputType.text,
+      textInputAction: TextInputAction.done,
       minLines: 3,
       maxLines: 10,
       decoration: InputDecoration(labelText: 'Twoja pytanie'),

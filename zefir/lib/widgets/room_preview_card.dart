@@ -96,11 +96,6 @@ class RoomPreviewCard extends StatelessWidget {
       default:
     }
 
-    Zefir.of(ctx)
-        .eurus
-        .roomStreamService
-        .createStreamFor(token: _room.deviceToken);
-
     return Navigator.pushNamed(ctx, url, arguments: arguments);
   }
 

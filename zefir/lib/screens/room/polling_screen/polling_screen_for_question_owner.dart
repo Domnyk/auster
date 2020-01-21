@@ -6,6 +6,7 @@ import 'package:zefir/model/player.dart';
 import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/dead_screen.dart';
 import 'package:zefir/screens/room/poll_result_screen.dart';
 import 'dart:developer' as developer;
 
@@ -24,7 +25,7 @@ class PollingScreenForQuestionOwner extends StatelessWidget {
           title: Text('Głosowanie'),
         ),
         body: StreamBuilder(
-          stream: Zefir.of(ctx).eurus.roomStreamService.createStreamFor2(token: token),
+          stream: Zefir.of(ctx).eurus.roomStreamService.createStreamFor(token: token),
           builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
             if (snapshot.hasError) throw Exception(snapshot.error);
 
@@ -40,6 +41,15 @@ class PollingScreenForQuestionOwner extends StatelessWidget {
             Room room = snapshot.data;
             developer
                 .log('Got room data with state ${room.state.toMyString()}');
+
+            if (room.state == RoomState.DEAD) {
+              return RaisedButton(
+                child: Text('Przejdź do listy wyników'),
+                onPressed: () => Navigator.of(ctx).pushReplacementNamed(
+                    '/dead',
+                    arguments: DeadRouteParams(room)),
+              );
+            }
 
             if (room.state == RoomState.ANSWERING && room.deviceToken != room.currPlayer.token) {
               return RaisedButton(

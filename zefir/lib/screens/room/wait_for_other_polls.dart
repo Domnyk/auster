@@ -18,6 +18,8 @@ class WaitForOtherPollsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
+    final token = (Utils.routeArgs(ctx) as WaitForOtherPollsRouteParams).token;
+    
     return Scaffold(
         backgroundColor: Colors.blue,
         appBar: AppBar(
@@ -25,7 +27,7 @@ class WaitForOtherPollsScreen extends StatelessWidget {
           elevation: 0,
         ),
         body: StreamBuilder(
-          stream: Zefir.of(ctx).eurus.roomStreamService.stream,
+          stream: Zefir.of(ctx).eurus.roomStreamService.createStreamFor(token: token),
           builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
             if (snapshot.hasData &&
                 !snapshot.hasError &&

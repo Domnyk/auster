@@ -118,11 +118,6 @@ class _JoinRoomState extends State<JoinRoom> {
 
   Future<void> _navigateToNextScreen(
       BuildContext ctx, Room roomAfterJoining) async {
-    Zefir.of(ctx)
-        .eurus
-        .roomStreamService
-        .createStreamFor(token: roomAfterJoining.deviceToken);
-
     if (roomAfterJoining.state == RoomState.COLLECTING) {
       await _navigatToAddQuestion(ctx, roomAfterJoining.deviceToken);
     } else if (roomAfterJoining.state == RoomState.JOINING) {
