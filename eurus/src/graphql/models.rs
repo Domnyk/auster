@@ -353,7 +353,7 @@ impl RoomFields for Room {
     ) -> FieldResult<Vec<Question>> {
         let db_conn = executor.context().db_conn();
         let questions = queries::room::all_questions(
-            &self.join_cod,
+            &self.join_code,
             db_conn)?
             .into_iter()
             .map(adapters::Question::adapt)

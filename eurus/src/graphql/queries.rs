@@ -233,9 +233,9 @@ pub(crate) mod room {
         room_code: &str,
         db_conn: &db::Connection
     ) -> QueryResult<Vec<db::models::Question>> {
-        let room = {
+        let room: db::models::Room = {
             use db::schema::rooms::dsl::*;
-            room.filter(
+            rooms.filter(
                 join_code.eq(room_code))
                 .first(&**db_conn)?
         };
