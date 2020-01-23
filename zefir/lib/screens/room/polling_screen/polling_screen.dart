@@ -192,8 +192,7 @@ class _PollingScreenState extends State<PollingScreen> {
           .update(roomAfterMutation.deviceToken, RoomState.WAIT_FOR_OTHER_POLLS)
           .then((_) => Navigator.of(ctx).pushReplacementNamed(
               '/waitForOtherPolls',
-              arguments:
-                  WaitForOtherPollsRouteParams(roomAfterMutation.deviceToken)));
+              arguments: WaitForOtherPollsRouteParams(roomAfterMutation)));
     } else if (state == RoomState.ANSWERING) {
       Navigator.of(ctx).pushReplacementNamed('/pollResult',
           arguments: PollResultRouteParams(roomAfterMutation));

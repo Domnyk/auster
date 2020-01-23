@@ -12,19 +12,35 @@ class RoomStreamService {
 
   RoomStreamService(this._client, this._stateStorage);
 
-  Stream<Room> createStreamFor({@required int token}) {
+  dynamic createWatchableQueryFor({@required int token}) {
     final options = _buildOptions(token);
 
-    return _client
-        .watchQuery(options)
-        .stream
+    return _client.watchQuery(options);
+  }
+
+  Stream<Room> createStreamFrom(observableQuery, {@required int token}) {
+    Stream<QueryResult> s = observableQuery.stream as Stream<QueryResult>;
+
+    return s
         .where((result) =>
             result.loading == false &&
             !result.hasException &&
             result.data != null)
-        .asyncMap((result) async => await _parseRoom(result, token))
-        .asBroadcastStream();
+        .asyncMap((result) async => await _parseRoom(result, token));
   }
+
+  // Stream<Room> createStreamFor({@required int token}) {
+  //   final options = _buildOptions(token);
+
+  //   return _client
+  //       .watchQuery(options)
+  //       .stream
+  //       .where((result) =>
+  //           result.loading == false &&
+  //           !result.hasException &&
+  //           result.data != null)
+  //       .asyncMap((result) async => await _parseRoom(result, token));
+  // }
 
   Future<Room> _parseRoom(QueryResult result, int token) async {
     final room = Room.fromGraphQL(result.data['player']['room'], token);

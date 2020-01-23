@@ -8,6 +8,10 @@ import 'package:zefir/screens/join_room.dart';
 import 'package:zefir/screens/new_room_screen.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room/add_question_screen.dart';
+import 'package:zefir/screens/room/polling_screen/polling_screen_for_question_owner.dart';
+import 'package:zefir/screens/room/wait_for_other_answers.dart';
+import 'package:zefir/screens/room/wait_for_other_polls.dart';
+import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/screens/save_questions_screen.dart';
@@ -72,11 +76,23 @@ class Zefir extends InheritedWidget {
         builder = (BuildContext ctx) =>
             WaitForPlayersScreen(params.eurus, params.room);
         break;
+      case '/waitForOtherAnswers':
+        WaitForOtherAnswersRouteParams params =
+            (settings.arguments as WaitForOtherAnswersRouteParams);
+        builder = (BuildContext ctx) =>
+            WaitForOtherAnswersScreen(Zefir.of(ctx).eurus, params.token);
+        break;
       case '/addQuestion':
         AddQuestionRouteParams params =
             (settings.arguments as AddQuestionRouteParams);
         builder = (BuildContext ctx) =>
             AddQuestionScreen(params.token, params.numOfQuestions);
+        break;
+      case '/waitForOtherQuestions':
+        WaitForOtherQuestionsRouteParams params =
+            (settings.arguments as WaitForOtherQuestionsRouteParams);
+        builder = (BuildContext ctx) =>
+            WaitForOtherQuestionsScreen(Zefir.of(ctx).eurus, params.token);
         break;
       case '/newRoom':
         Eurus eurus = (settings.arguments as NewRoomRouteParams).eurus;
@@ -90,6 +106,18 @@ class Zefir extends InheritedWidget {
         SaveQuestionsRouteParams params =
             (settings.arguments as SaveQuestionsRouteParams);
         builder = (BuildContext ctx) => SaveQuestionsScreen(params.questions);
+        break;
+      case '/pollingForQuestionOwner':
+        PollingScreenForQuestionOwnerRouteParams params =
+            (settings.arguments as PollingScreenForQuestionOwnerRouteParams);
+        builder = (BuildContext ctx) =>
+            PollingScreenForQuestionOwner(Zefir.of(ctx).eurus, params.room);
+        break;
+      case '/waitForOtherPolls':
+        WaitForPlayersRouteParams params =
+            (settings.arguments as WaitForPlayersRouteParams);
+        builder = (BuildContext ctx) =>
+            WaitForOtherPollsScreen(Zefir.of(ctx).eurus, params.room);
         break;
       default:
         throw Exception('Unkonw route ${settings.name}');

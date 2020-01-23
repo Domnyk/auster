@@ -19,7 +19,9 @@ class RoomPreviewCard extends StatelessWidget {
   final Eurus _eurus;
   final Room _room;
 
-  RoomPreviewCard({@required Room room, @required Eurus eurus}) : _room = room, _eurus = eurus;
+  RoomPreviewCard({@required Room room, @required Eurus eurus})
+      : _room = room,
+        _eurus = eurus;
 
   @override
   Widget build(BuildContext ctx) {
@@ -70,8 +72,7 @@ class RoomPreviewCard extends StatelessWidget {
       case RoomState.POLLING:
         if (_room.deviceToken == _room.currPlayer.token) {
           url = '/pollingForQuestionOwner';
-          arguments =
-              PollingScreenForQuestionOwnerRouteParams(_room.deviceToken);
+          arguments = PollingScreenForQuestionOwnerRouteParams(_room);
         } else {
           url = '/polling';
           arguments = PollingRouteParams(_room.deviceToken);
@@ -80,11 +81,10 @@ class RoomPreviewCard extends StatelessWidget {
       case RoomState.WAIT_FOR_OTHER_POLLS:
         if (_room.deviceToken == _room.currPlayer.token) {
           url = '/pollingForQuestionOwner';
-          arguments =
-              PollingScreenForQuestionOwnerRouteParams(_room.deviceToken);
+          arguments = PollingScreenForQuestionOwnerRouteParams(_room);
         } else {
           url = '/waitForOtherPolls';
-          arguments = WaitForOtherPollsRouteParams(_room.deviceToken);
+          arguments = WaitForOtherPollsRouteParams(_room);
         }
         break;
       case RoomState.POLL_RESULT:

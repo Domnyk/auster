@@ -1,46 +1,74 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/dead_screen.dart';
 import 'package:zefir/screens/room/poll_result_screen.dart';
-import 'package:zefir/services/eurus/queries.dart';
-import 'package:zefir/utils.dart';
+import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
-class WaitForOtherPollsScreen extends StatelessWidget {
+class WaitForOtherPollsScreen extends StatefulWidget {
   static const String pleaseWait = 'Proszę czekać na głosy innych graczy';
   static const String appBarText = 'Oczekiwanie na głosy';
 
-  const WaitForOtherPollsScreen();
+  final Eurus _eurus;
+  final Room _room;
+
+  const WaitForOtherPollsScreen(this._eurus, this._room);
+
+  @override
+  _WaitForOtherPollsScreenState createState() =>
+      _WaitForOtherPollsScreenState();
+}
+
+class _WaitForOtherPollsScreenState extends State<WaitForOtherPollsScreen> {
+  dynamic _observableQuery;
+  StreamSubscription _roomSubscription;
+  Room _room;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _observableQuery = widget._eurus.roomStreamService
+        .createWatchableQueryFor(token: widget._room.deviceToken);
+
+    _roomSubscription = widget._eurus.roomStreamService
+        .createStreamFrom(_observableQuery, token: widget._room.deviceToken)
+        .listen((newRoom) {
+      setState(() {
+        _room = newRoom;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _roomSubscription.cancel().then((_) => _observableQuery.close(force: true));
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext ctx) {
-    final token = (Utils.routeArgs(ctx) as WaitForOtherPollsRouteParams).token;
-    
+    if (_room.state == RoomState.POLL_RESULT) {
+      _navigateToProperScreen(ctx, _room);
+    }
+
     return Scaffold(
-        backgroundColor: Colors.blue,
-        appBar: AppBar(
-          title: Text(appBarText),
-          elevation: 0,
-        ),
-        body: StreamBuilder(
-          stream: Zefir.of(ctx).eurus.roomStreamService.createStreamFor(token: token),
-          builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
-            if (snapshot.hasData &&
-                !snapshot.hasError &&
-                snapshot.data.state == RoomState.POLL_RESULT) {
-              _navigateToProperScreen(ctx, snapshot.data);
-            }
-            return _buildBody(context);
-          },
-        ));
+      backgroundColor: Colors.blue,
+      appBar: AppBar(
+        title: Text(WaitForOtherPollsScreen.appBarText),
+        elevation: 0,
+      ),
+      body: _buildBody(ctx),
+    );
   }
 
   Widget _buildBody(BuildContext ctx) {
     final spinner = _buildSpinner(ctx);
-    final text = _buildText(ctx, pleaseWait);
+    final text = _buildText(ctx, WaitForOtherPollsScreen.pleaseWait);
 
     List<Widget> padded = [spinner, text]
         .map((w) => Padding(
@@ -96,7 +124,7 @@ class WaitForOtherPollsScreen extends StatelessWidget {
 }
 
 class WaitForOtherPollsRouteParams {
-  final int token;
+  final Room room;
 
-  const WaitForOtherPollsRouteParams(this.token);
+  const WaitForOtherPollsRouteParams(this.room);
 }

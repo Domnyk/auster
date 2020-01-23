@@ -19,6 +19,7 @@ class WaitForPlayersScreen extends StatefulWidget {
 }
 
 class _WaitForPlayersScreenState extends State<WaitForPlayersScreen> {
+  dynamic _observableQuery;
   StreamSubscription _playersSubscription;
   List<Player> _players = [];
 
@@ -26,8 +27,11 @@ class _WaitForPlayersScreenState extends State<WaitForPlayersScreen> {
   void initState() {
     super.initState();
 
+    _observableQuery = widget._eurus.roomStreamService
+        .createWatchableQueryFor(token: widget._room.deviceToken);
+
     _playersSubscription = widget._eurus.roomStreamService
-        .createStreamFor(token: widget._room.deviceToken)
+        .createStreamFrom(_observableQuery, token: widget._room.deviceToken)
         .map((room) => room.players)
         .listen((players) {
       setState(() {
@@ -38,7 +42,9 @@ class _WaitForPlayersScreenState extends State<WaitForPlayersScreen> {
 
   @override
   void dispose() {
-    _playersSubscription?.cancel();
+    _playersSubscription
+        .cancel()
+        .then((_) => _observableQuery.close(force: true));
     super.dispose();
   }
 
@@ -47,10 +53,11 @@ class _WaitForPlayersScreenState extends State<WaitForPlayersScreen> {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       if (_players.length == widget._room.maxPlayers) {
         Navigator.pushReplacementNamed(ctx, '/addQuestion',
-        arguments: AddQuestionRouteParams(widget._room.deviceToken, widget._room.maxRounds));
+            arguments: AddQuestionRouteParams(
+                widget._room.deviceToken, widget._room.maxRounds));
       }
     });
-    
+
     return Scaffold(
       appBar: _buildAppBar(ctx),
       body: _buildBody(ctx, widget._room),

@@ -1,75 +1,74 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/polling_screen/polling_screen.dart';
 import 'package:zefir/screens/room/polling_screen/polling_screen_for_question_owner.dart';
-import 'package:zefir/services/eurus/queries.dart';
+import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/utils.dart';
 import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
-class WaitForOtherAnswersScreen extends StatelessWidget {
+class WaitForOtherAnswersScreen extends StatefulWidget {
   static const String pleaseWait = 'Proszę czekać na odpowiedzi innych graczy';
   static const String appBarText = 'Oczekiwanie na odpowiedzi';
 
-  const WaitForOtherAnswersScreen();
+  final Eurus _eurus;
+  final int _token;
+
+  const WaitForOtherAnswersScreen(this._eurus, this._token);
+
+  @override
+  _WaitForOtherAnswersScreenState createState() =>
+      _WaitForOtherAnswersScreenState();
+}
+
+class _WaitForOtherAnswersScreenState extends State<WaitForOtherAnswersScreen> {
+  dynamic _observableQuery;
+  StreamSubscription _roomSubscription;
+  Room _room;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _observableQuery = widget._eurus.roomStreamService
+        .createWatchableQueryFor(token: widget._token);
+
+    _roomSubscription = widget._eurus.roomStreamService
+        .createStreamFrom(_observableQuery, token: widget._token)
+        .listen((newRoom) {
+      setState(() {
+        _room = newRoom;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _roomSubscription.cancel().then((_) => _observableQuery.close(force: true));
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext ctx) {
+    if (_room != null && _room.state == RoomState.POLLING) {
+      navigateToPollingScreen(ctx, _room);
+    }
+
     return Scaffold(
         backgroundColor: Colors.blue,
         appBar: AppBar(
-          title: Text(appBarText),
+          title: Text(WaitForOtherAnswersScreen.appBarText),
           elevation: 0,
         ),
-        body: StreamBuilder(
-          stream: _buildStateStream(ctx),
-          builder: (BuildContext context, AsyncSnapshot<Room> snapshot) {
-            final room = snapshot.data;
-
-            if (snapshot.hasData &&
-                !snapshot.hasError &&
-                room.state == RoomState.POLLING) {
-              navigateToPollingScreen(ctx, room.currPlayer.token);
-            }
-            return _buildBody(context);
-          },
-        ));
-  }
-
-  Stream<Room> _buildStateStream(BuildContext ctx) {
-    final token =
-        (Utils.routeArgs(ctx) as WaitForOtherAnswersRouteParams).token;
-    final client = Zefir.of(ctx).eurus.client;
-    final options = WatchQueryOptions(
-      fetchResults: true,
-      pollInterval: 5,
-      document: Queries.FETCH_ROOM,
-      fetchPolicy: FetchPolicy.noCache,
-      errorPolicy: ErrorPolicy.all,
-      variables: {'token': token},
-    );
-
-    return client
-        .watchQuery(options)
-        .stream
-        .where((result) =>
-            result.loading == false &&
-            result.hasException == false &&
-            result.data != null)
-        .asyncMap((result) async {
-      final stateFromDb = await Zefir.of(ctx).eurus.storage.state.fetch(token);
-      final Room room = Room.fromGraphQL(result.data['player']['room'], token);
-      room.state = RoomStateUtils.merge(stateFromDb, room.state);
-      return room;
-    });
+        body: _buildBody(ctx));
   }
 
   Widget _buildBody(BuildContext ctx) {
     final spinner = _buildSpinner(ctx);
-    final text = _buildText(ctx, pleaseWait);
+    final text = _buildText(ctx, WaitForOtherAnswersScreen.pleaseWait);
 
     List<Widget> padded = [spinner, text]
         .map((w) => Padding(
@@ -102,12 +101,12 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
     );
   }
 
-  void navigateToPollingScreen(BuildContext ctx, int currPlayerToken) {
+  void navigateToPollingScreen(BuildContext ctx, Room roomInNewState) {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       final int token =
           (Utils.routeArgs(ctx) as WaitForOtherAnswersRouteParams).token;
 
-      if (token == currPlayerToken) {
+      if (token == roomInNewState.currPlayer.token) {
         developer.log(
             'All players have add answers, navigation to polling screen for question creator',
             name: 'WaitForOtherAnswers');
@@ -115,7 +114,8 @@ class WaitForOtherAnswersScreen extends StatelessWidget {
         final stateStorage = Zefir.of(ctx).eurus.storage.state;
         stateStorage.update(token, RoomState.WAIT_FOR_OTHER_POLLS).then((_) =>
             Navigator.of(ctx).pushReplacementNamed('/pollingForQuestionOwner',
-                arguments: PollingScreenForQuestionOwnerRouteParams(token)));
+                arguments:
+                    PollingScreenForQuestionOwnerRouteParams(roomInNewState)));
       } else {
         developer.log(
             'All players have add answers, navigation to PollingScreen',

@@ -40,7 +40,8 @@ class RoomList extends StatelessWidget {
               Dismissible(
                 background: Container(color: Colors.red),
                 key: ObjectKey(rooms[index].joinCode),
-                child: RoomPreviewCard(room: rooms[index], eurus: Zefir.of(ctx).eurus),
+                child: RoomPreviewCard(
+                    room: rooms[index], eurus: Zefir.of(ctx).eurus),
                 onDismissed: (DismissDirection direction) {
                   Zefir.of(ctx)
                       .eurus
@@ -60,7 +61,8 @@ class RoomList extends StatelessWidget {
         backgroundColor: Colors.black,
         label: 'Załóż nowy pokój',
         labelStyle: TextStyle(fontSize: 18.0),
-        onTap: () => Navigator.pushNamed(ctx, '/newRoom', arguments: NewRoomRouteParams(Zefir.of(ctx).eurus)));
+        onTap: () => Navigator.pushNamed(ctx, '/newRoom',
+            arguments: NewRoomRouteParams(Zefir.of(ctx).eurus)));
   }
 
   SpeedDialChild _buildJoinRoomIcon(BuildContext ctx) {
@@ -69,7 +71,8 @@ class RoomList extends StatelessWidget {
         backgroundColor: Colors.black,
         label: 'Dołącz do istniejącego pokoju',
         labelStyle: TextStyle(fontSize: 18.0),
-        onTap: () => Navigator.pushNamed(ctx, '/joinRoom', arguments: JoinRoomRouteParams(Zefir.of(ctx).eurus)));
+        onTap: () => Navigator.pushNamed(ctx, '/joinRoom',
+            arguments: JoinRoomRouteParams(Zefir.of(ctx).eurus)));
   }
 }
 

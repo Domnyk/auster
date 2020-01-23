@@ -93,14 +93,14 @@ class Eurus {
   }
 
   Future<Room> _fetchRoom(token, StateStorage stateStorage) async {
-    final mutationOptions = MutationOptions(
+    final mutationOptions = QueryOptions(
         fetchPolicy: FetchPolicy.noCache,
         document: Queries.FETCH_ROOM,
         variables: {
           'token': token,
         });
 
-    QueryResult qr = await client.mutate(mutationOptions);
+    QueryResult qr = await client.query(mutationOptions);
     if (qr.hasException) {
       String errorMsg =
           'Fetching room with token $token failed with ' + _createErrorMsg(qr);

@@ -25,6 +25,16 @@ class Room {
     return data.map((a) => Player.fromGraphQl(a)).toList();
   }
 
+  static bool isDead(Room room) {
+    return room.state == RoomState.DEAD;
+  }
+
+  // TODO: Not tested. Use only in PollingScreenForQuestionOwner
+  static bool isNextRoundStarted(Room room) {
+    return room.state == RoomState.ANSWERING &&
+        room.deviceToken != room.currPlayer.token;
+  }
+
   Room(
     this.state,
     this.name,

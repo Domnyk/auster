@@ -191,7 +191,8 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
       BuildContext ctx, Room roomAfterMutionFromBackend) {
     if (roomAfterMutionFromBackend.state == RoomState.POLLING) {
       if (_amICurrentPlayer()) {
-        return _navigateToPollingForQuestionOwner(ctx);
+        return _navigateToPollingForQuestionOwner(
+            ctx, roomAfterMutionFromBackend);
       } else {
         return _navigateToPolling(ctx, roomAfterMutionFromBackend);
       }
@@ -203,9 +204,10 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
     }
   }
 
-  void _navigateToPollingForQuestionOwner(BuildContext ctx) {
+  void _navigateToPollingForQuestionOwner(
+      BuildContext ctx, Room roomInNewState) {
     final String route = '/pollingForQuestionOwner';
-    final arguments = PollingScreenForQuestionOwnerRouteParams(_token);
+    final arguments = PollingScreenForQuestionOwnerRouteParams(roomInNewState);
 
     Navigator.of(ctx).pushReplacementNamed(route, arguments: arguments);
   }
