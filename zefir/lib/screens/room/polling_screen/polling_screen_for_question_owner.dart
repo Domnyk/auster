@@ -60,11 +60,6 @@ class _PollingScreenForQuestionOwnerState
 
   @override
   Widget build(BuildContext ctx) {
-    List<Answer> polledAnswers = _room.players
-        .where((p) => p.polledAnswer != null)
-        .map((p) => p.polledAnswer)
-        .toList();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Głosowanie'),
@@ -76,11 +71,6 @@ class _PollingScreenForQuestionOwnerState
           _buildQuestion(context, _room.currQuestion),
           Divider(),
           _buildCurrentAnswers(ctx, _room.currAnswers),
-          Divider(),
-          _buildPolledAnswers(
-              ctx,
-              _room.players.where((p) =>
-                  p.token != _room.deviceToken && p.polledAnswer != null)),
           if (_nextScreen != null) _buildNextScreenButton(ctx),
         ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList(),
       )),
@@ -115,28 +105,6 @@ class _PollingScreenForQuestionOwnerState
       itemCount: answers.length,
       itemBuilder: (BuildContext ctx, int index) {
         return Text(answers[index].content);
-      },
-    );
-  }
-
-  Widget _buildPolledAnswers(BuildContext ctx, Iterable<Player> players) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text('Odpowiedzi jakie zostały wybrane:'),
-        ),
-        Expanded(child: _buildPolledAnswersList(players)),
-      ],
-    );
-  }
-
-  Widget _buildPolledAnswersList(Iterable<Player> players) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: players.length,
-      itemBuilder: (BuildContext ctx, int index) {
-        final player = players.elementAt(index);
-        return Text('${player.name}: ${player.polledAnswer.content}');
       },
     );
   }

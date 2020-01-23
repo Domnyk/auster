@@ -121,7 +121,7 @@ class _WaitForOtherAnswersScreenState extends State<WaitForOtherAnswersScreen> {
             'All players have add answers, navigation to PollingScreen',
             name: 'WaitForOtherAnswers');
         Navigator.of(ctx).pushReplacementNamed('/polling',
-            arguments: PollingRouteParams(token));
+            arguments: PollingRouteParams(token, room: roomInNewState));
       }
     });
   }

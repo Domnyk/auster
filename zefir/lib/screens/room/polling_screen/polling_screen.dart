@@ -13,10 +13,6 @@ import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
 class PollingScreen extends StatefulWidget {
-  // final Room room;
-
-  // const PollingScreen();
-
   @override
   _PollingScreenState createState() => _PollingScreenState(null);
 }
@@ -27,7 +23,6 @@ class _PollingScreenState extends State<PollingScreen> {
 
   Answer _choosedAnswer;
   bool _isSending;
-  // final Room room;
 
   _PollingScreenState(this._choosedAnswer);
 
@@ -44,7 +39,7 @@ class _PollingScreenState extends State<PollingScreen> {
     return Scaffold(
       floatingActionButton: _buildFAB(ctx),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      body: room != null ? _builder(ctx, room) : _buildBody(ctx),
+      body: _builder(ctx, room),
       appBar: AppBar(title: Text(appBartTitle)),
     );
   }
@@ -82,16 +77,6 @@ class _PollingScreenState extends State<PollingScreen> {
     );
 
     return Padding(padding: padding, child: _isSending ? inactiveFab : fab);
-  }
-
-  Widget _buildBody(BuildContext ctx) {
-    return Zefir.of(ctx).eurus.buildRoom(
-          ctx: ctx,
-          token: (Utils.routeArgs(ctx) as PollingRouteParams).token,
-          loadingBuilder: _loadingBuilder,
-          errorBuilder: _errorBuilder,
-          builder: _builder,
-        );
   }
 
   Widget _builder(BuildContext ctx, Room room) {
@@ -169,15 +154,6 @@ class _PollingScreenState extends State<PollingScreen> {
     return stateStorage
         .update(token, RoomState.WAIT_FOR_OTHER_POLLS)
         .then((_) => room);
-  }
-
-  Widget _loadingBuilder(BuildContext ctx) {
-    return Text('Wczytywanie...');
-  }
-
-  Widget _errorBuilder(BuildContext ctx, OperationException exception) {
-    developer.log(Utils.parseExceptions(exception), name: 'PollingScreen');
-    return Text('Error occured');
   }
 
   void _navigateToProperScreen(BuildContext ctx, Room roomAfterMutation) {
