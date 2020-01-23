@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/model/question.dart';
+import 'package:zefir/zefir.dart';
+import 'dart:developer' as developer;
 
 class SaveQuestionsScreen extends StatefulWidget {
   static const String _appBarTitle = 'Zapisz pytania';
@@ -82,17 +84,70 @@ class _SaveQuestionsScreenState extends State<SaveQuestionsScreen> {
   Widget _buildSaveButton(BuildContext ctx) {
     return RaisedButton(
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      color: Colors.green,
+      color: Colors.blue,
       textColor: Colors.white,
-      child: Text('Dodaj'),
-      onPressed: () {},
+      child: Text('Zapisz'),
+      onPressed: () async {
+        bool succeded = await _addQuestions(ctx);
+        await _showResultDialog(ctx, succeded);
+      },
     );
+  }
+
+  Future _showResultDialog(BuildContext ctx, bool succeded) async {
+    AlertDialog successDialog = AlertDialog(
+      title: Text("Udało się!"),
+      content: Text("Wybrane przez Ciebie pytania zostały zapisane."),
+      actions: [
+        FlatButton(
+          child: Text("Zamknij"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        )
+      ],
+    );
+    AlertDialog failureDialog = AlertDialog(
+      title: Text("Wystąpił błąd"),
+      content:
+          Text("Nie udało się zapisać Twoich pytań. Spróbuj ponownie później."),
+      actions: [
+        FlatButton(
+          child: Text("Zamknij"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        )
+      ],
+    );
+
+    return succeded
+        ? showDialog(context: ctx, builder: (context) => successDialog)
+        : showDialog(context: ctx, builder: (context) => failureDialog);
   }
 
   int _calculateNumOfSelected() {
     return _isSelected
         .map((selected) => selected ? 1 : 0)
         .reduce((acc, elem) => acc + elem);
+  }
+
+  Future<bool> _addQuestions(BuildContext ctx) async {
+    List<Question> questions = [];
+    for (var i = 0; i < _questions.length; i++) {
+      if (_isSelected[i]) {
+        questions.add(_questions[i]);
+      }
+    }
+
+    try {
+      await Zefir.of(ctx).eurus.question.addAll(questions);
+      return true;
+    } catch (err) {
+      developer.log('Error occured while saving questions: ${err.toString()}',
+          name: this.runtimeType.toString());
+      return false;
+    }
   }
 }
 

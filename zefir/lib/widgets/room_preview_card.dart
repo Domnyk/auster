@@ -53,7 +53,7 @@ class RoomPreviewCard extends StatelessWidget {
         break;
       case RoomState.COLLECTING:
         url = '/addQuestion';
-        arguments = AddQuestionRouteParams(_room.deviceToken);
+        arguments = AddQuestionRouteParams(_room.deviceToken, _room.maxRounds);
         break;
       case RoomState.WAIT_FOR_OTHER_QUESTIONS:
         url = '/waitForOtherQuestions';

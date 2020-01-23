@@ -128,7 +128,7 @@ class _JoinRoomState extends State<JoinRoom> {
   Future<void> _navigateToNextScreen(
       BuildContext ctx, Room roomAfterJoining) async {
     if (roomAfterJoining.state == RoomState.COLLECTING) {
-      await _navigatToAddQuestion(ctx, roomAfterJoining.deviceToken);
+      await _navigatToAddQuestion(ctx, roomAfterJoining);
     } else if (roomAfterJoining.state == RoomState.JOINING) {
       await _navigateToWaitForPlayers(ctx, roomAfterJoining);
     }
@@ -142,12 +142,12 @@ class _JoinRoomState extends State<JoinRoom> {
         arguments: WaitForPlayersRouteParams(room, _eurus));
   }
 
-  Future<void> _navigatToAddQuestion(BuildContext ctx, int token) async {
+  Future<void> _navigatToAddQuestion(BuildContext ctx, Room room) async {
     await _eurus.storage.token
-        .insert(token, initialState: RoomState.COLLECTING);
+        .insert(room.deviceToken, initialState: RoomState.COLLECTING);
 
     Navigator.pushReplacementNamed(ctx, '/addQuestion',
-        arguments: AddQuestionRouteParams(token));
+        arguments: AddQuestionRouteParams(room.deviceToken, room.maxRounds));
   }
 
   void _showErrorDialog(BuildContext ctx, Exception err) {

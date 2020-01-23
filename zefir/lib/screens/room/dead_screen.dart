@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:zefir/model/player.dart';
 import 'package:zefir/model/room.dart';
+import 'package:zefir/screens/save_questions_screen.dart';
 import 'package:zefir/utils.dart';
 
 class DeadScreen extends StatelessWidget {
   static const String appBarTitle = 'Koniec gry';
 
-  // final Room room;
   final _formKey = GlobalKey<FormState>();
 
   DeadScreen();
@@ -28,51 +28,25 @@ class DeadScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             FlatButton(
-              onPressed: () => Navigator.of(ctx).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false),
+              onPressed: () => Navigator.of(ctx).pushNamedAndRemoveUntil(
+                  '/', (Route<dynamic> route) => false),
               color: Colors.blue,
               textColor: Colors.white,
               child: Text('Przejdź do listy pokoi'),
             ),
             FlatButton(
-              onPressed: () => showDialog(
-                  context: ctx, child: _buildSaveQuestiosDialog(ctx)),
+              onPressed: () {
+                final questions =
+                    (Utils.routeArgs(ctx) as DeadRouteParams).room.allQuestions;
+                Navigator.pushReplacementNamed(ctx, '/saveQuestions',
+                    arguments: SaveQuestionsRouteParams(questions));
+              },
               color: Colors.blue,
               textColor: Colors.white,
               child: Text('Zapisz zestaw pytań'),
             ),
           ],
         ));
-  }
-
-  Widget _buildSaveQuestiosDialog(BuildContext ctx) {
-    return AlertDialog(
-      title: Text('Zapisz zestaw pytań'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Nazwa zestawu'),
-            ),
-          ],
-        ),
-      ),
-      actions: <Widget>[
-        FlatButton(
-          child: Text('Anuluj'),
-          onPressed: () => Navigator.pop(ctx),
-        ),
-        FlatButton(
-          child: Text('Zapisz'),
-          onPressed: () {
-            Navigator.pop(ctx);
-            Scaffold.of(ctx).showSnackBar(
-                SnackBar(content: Text('Pytania zostały zapisane')));
-          },
-        ),
-      ],
-    );
   }
 
   Widget _buildWinner(BuildContext ctx) {
@@ -90,34 +64,26 @@ class DeadScreen extends StatelessWidget {
     int winnersKey = (playersDict.keys..toList().sort()).first;
     List<Player> winners = playersDict[winnersKey];
 
-    Widget l = ListView.builder(
-      shrinkWrap: true,
-      itemCount: room.players.length,
-      itemBuilder: (BuildContext context, int index) {
-        final Widget leading = winners.contains(room.players[index])
-            ? Icon(
-                Icons.grade,
-                color: Colors.orange,
-              )
-            : Icon(null);
+    Widget title = _buildTitle(ctx, winners, room.deviceToken);
+    List<Widget> children = [title];
+    room.players.forEach((p) {
+      Widget maybeStar = winners.contains(p)
+          ? Icon(Icons.grade, color: Colors.orange)
+          : Icon(null);
+      Widget points = Text(p.points.toString());
 
-        return ListTile(
-          leading: leading,
-          title: Text(
-            room.players[index].name,
-          ),
-          trailing: Text(room.players[index].points.toString()),
-        );
-      },
-    );
+      children.add(ListTile(
+        leading: maybeStar,
+        title: Text(p.name),
+        trailing: points,
+      ));
+    });
 
-    return Column(
+    return SingleChildScrollView(
+        child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        _buildTitle(ctx, winners, room.deviceToken),
-        l,
-      ],
-    );
+      children: children,
+    ));
   }
 
   Widget _buildTitle(BuildContext ctx, List<Player> winners, int deviceToken) {
@@ -142,6 +108,7 @@ class DeadScreen extends StatelessWidget {
         padding: EdgeInsets.only(top: 10, bottom: 10),
         child: Text(
           content,
+          textAlign: TextAlign.center,
           style: TextStyle(fontSize: Theme.of(ctx).textTheme.display1.fontSize),
         ));
   }

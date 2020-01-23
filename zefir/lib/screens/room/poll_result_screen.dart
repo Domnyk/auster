@@ -39,7 +39,7 @@ class PollResultScreen extends StatelessWidget {
   }
 
   Widget _buildHeadline(BuildContext ctx, Room room) {
-    String msg = 'Tabela wyników po rundzie ${room.currRound + 1}.';
+    String msg = 'Tabela wyników';
 
     return Text(msg,
         style: TextStyle(

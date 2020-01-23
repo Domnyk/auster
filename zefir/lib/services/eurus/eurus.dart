@@ -7,6 +7,7 @@ import 'package:zefir/model/room_state.dart';
 import 'package:zefir/services/eurus/exceptions/no_such_room_exception.dart';
 import 'package:zefir/services/eurus/queries.dart';
 import 'package:zefir/services/eurus/room_stream_service.dart';
+import 'package:zefir/services/storage/question.dart';
 import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/services/storage/storage.dart';
 import 'package:zefir/services/storage/token.dart';
@@ -28,6 +29,8 @@ class Eurus {
   GraphQLClient get client => _client;
   RoomStreamService get roomStreamService => _roomStreamService;
   Storage get storage => _storage;
+
+  QuestionStorage get question => _storage.question;
 
   Future<Room> createNewRoom(TokenStorage storage,
       {@required String roomName,
@@ -156,9 +159,18 @@ class Eurus {
 
   // TODO: move to utils
   String _createErrorMsg(QueryResult qr) {
-    return qr.exception.graphqlErrors
-        .toList()
-        .map((e) => e.message)
-        .reduce((acc, val) => acc + val + '\n');
+    List<String> errors = [];
+    qr.exception.graphqlErrors.forEach((e) {
+      if (e != null && e.message != null) {
+        errors.add(e.message);
+      }
+    });
+
+    ClientException clientException = qr.exception.clientException;
+    if (clientException != null && clientException.message != null) {
+      errors.add(clientException.toString());
+    }
+
+    return errors.reduce((acc, val) => acc + val + '\n');
   }
 }

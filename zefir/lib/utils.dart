@@ -7,12 +7,18 @@ class Utils {
   }
 
   static String parseExceptions(OperationException exception) {
-    final List<String> errors = exception.graphqlErrors
-        .toList()
-        .map((e) => e.message)
-        .toList()
-          ..add(exception.clientException.message);
+    List<String> errors = [];
+    exception.graphqlErrors.forEach((e) {
+      if (e != null && e.message != null) {
+        errors.add(e.message);
+      }
+    });
 
-    return errors.reduce((acc, val) => acc + val);
+    ClientException clientException = exception.clientException;
+    if (clientException != null && clientException.message != null) {
+      errors.add(clientException.toString());
+    }
+
+    return errors.reduce((acc, val) => acc + val + '\n');
   }
 }

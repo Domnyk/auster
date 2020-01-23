@@ -14,6 +14,7 @@ class Room {
   List<Answer> currAnswers;
   Question currQuestion;
   List<Player> players;
+  List<Question> allQuestions;
   int deviceToken;
 
   static List<Answer> parseCurrAnswers(List<dynamic> data) {
@@ -35,6 +36,7 @@ class Room {
     this.currAnswers,
     this.currQuestion,
     this.players,
+    this.allQuestions,
     this.deviceToken,
   );
 
@@ -53,19 +55,24 @@ class Room {
       currPlayer = null;
       currAnswers = null;
       currQuestion = null;
-      
+      allQuestions = null;
     } else if (state == RoomState.ANSWERING ||
         state == RoomState.WAIT_FOR_OTHER_ANSWERS) {
       currPlayer = Player.fromGraphQl(data['currPlayer']);
       currQuestion = Question.fromGraphQl(data['currQuestion']);
+      allQuestions = null;
     } else if (state == RoomState.POLLING ||
         state == RoomState.WAIT_FOR_OTHER_POLLS ||
         state == RoomState.POLL_RESULT) {
       currPlayer = Player.fromGraphQl(data['currPlayer']);
       currQuestion = Question.fromGraphQl(data['currQuestion']);
       currAnswers = Room.parseCurrAnswers(data['currAnswers']);
+      allQuestions = null;
     } else if (state == RoomState.DEAD) {
-      // TODO Do nothing. I should refactor this code
+      // TODO: Uncomment after recompilation of eurus
+      // final questions = data['allQuestions'] as List<dynamic>;
+      // allQuestions = questions.map((q) => Question.fromGraphQl(q));
+      allQuestions = [Question('To jest pytanie testowe!1!one', false)];
     } else {
       throw Exception('Unkown state when parsing room info $state');
     }

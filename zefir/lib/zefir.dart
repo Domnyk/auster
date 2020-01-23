@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:zefir/model/question.dart';
 import 'package:zefir/routes.dart';
 import 'package:zefir/screens/check_rooms_screen.dart';
 import 'package:zefir/screens/join_room.dart';
 import 'package:zefir/screens/new_room_screen.dart';
 import 'package:zefir/screens/no_rooms.dart';
+import 'package:zefir/screens/room/add_question_screen.dart';
 import 'package:zefir/screens/room/wait_for_players_screen.dart';
 import 'package:zefir/screens/room_list.dart';
+import 'package:zefir/screens/save_questions_screen.dart';
 import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/zefir_theme.dart';
 
@@ -69,6 +72,12 @@ class Zefir extends InheritedWidget {
         builder = (BuildContext ctx) =>
             WaitForPlayersScreen(params.eurus, params.room);
         break;
+      case '/addQuestion':
+        AddQuestionRouteParams params =
+            (settings.arguments as AddQuestionRouteParams);
+        builder = (BuildContext ctx) =>
+            AddQuestionScreen(params.token, params.numOfQuestions);
+        break;
       case '/newRoom':
         Eurus eurus = (settings.arguments as NewRoomRouteParams).eurus;
         builder = (BuildContext ctx) => NewRoomScreen(eurus);
@@ -77,9 +86,13 @@ class Zefir extends InheritedWidget {
         Eurus eurus = (settings.arguments as JoinRoomRouteParams).eurus;
         builder = (BuildContext ctx) => JoinRoom(eurus);
         break;
-      default:
+      case '/saveQuestions':
+        SaveQuestionsRouteParams params =
+            (settings.arguments as SaveQuestionsRouteParams);
+        builder = (BuildContext ctx) => SaveQuestionsScreen(params.questions);
         break;
-      // throw Exception('Unkonw route ${settings.name}');
+      default:
+        throw Exception('Unkonw route ${settings.name}');
     }
 
     return builder != null

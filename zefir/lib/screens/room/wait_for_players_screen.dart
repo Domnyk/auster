@@ -47,7 +47,7 @@ class _WaitForPlayersScreenState extends State<WaitForPlayersScreen> {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       if (_players.length == widget._room.maxPlayers) {
         Navigator.pushReplacementNamed(ctx, '/addQuestion',
-        arguments: AddQuestionRouteParams(widget._room.deviceToken));
+        arguments: AddQuestionRouteParams(widget._room.deviceToken, widget._room.maxRounds));
       }
     });
     
