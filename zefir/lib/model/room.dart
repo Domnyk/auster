@@ -2,6 +2,7 @@ import 'package:zefir/model/player.dart';
 import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room_state.dart';
 import 'answer.dart';
+import 'dart:developer' as developer;
 
 class Room {
   RoomState state;
@@ -79,10 +80,8 @@ class Room {
       currAnswers = Room.parseCurrAnswers(data['currAnswers']);
       allQuestions = null;
     } else if (state == RoomState.DEAD) {
-      // TODO: Uncomment after recompilation of eurus
-      // final questions = data['allQuestions'] as List<dynamic>;
-      // allQuestions = questions.map((q) => Question.fromGraphQl(q));
-      allQuestions = [Question('To jest pytanie testowe!1!one', false)];
+      final questions = data['allQuestions'] as List<dynamic>;
+      allQuestions = questions.map((q) => Question.fromGraphQl(q)).toList();
     } else {
       throw Exception('Unkown state when parsing room info $state');
     }

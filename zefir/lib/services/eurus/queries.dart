@@ -28,6 +28,10 @@ class Queries {
             id,
             content
           }
+        },
+        allQuestions {
+          content,
+          picked
         }
       }
     }

@@ -31,17 +31,25 @@ class _SaveQuestionsScreenState extends State<SaveQuestionsScreen> {
   @override
   Widget build(BuildContext ctx) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(SaveQuestionsScreen._appBarTitle),
-          elevation: 0,
-        ),
-        body: Column(
-          children: [
-            _buildNumOfQuestionsSelected(ctx),
-            Expanded(child: _buildListOfQuestions(ctx)),
-            SizedBox(width: double.infinity, child: _buildSaveButton(ctx))
-          ],
-        ));
+      appBar: AppBar(
+        title: Text(SaveQuestionsScreen._appBarTitle),
+        elevation: 0,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          bool succeded = await _addQuestions(ctx);
+          await _showResultDialog(ctx, succeded);
+        },
+        child: Icon(Icons.save),
+        backgroundColor: Colors.blue,
+      ),
+      body: Column(
+        children: [
+          _buildNumOfQuestionsSelected(ctx),
+          Expanded(child: _buildListOfQuestions(ctx)),
+        ],
+      ),
+    );
   }
 
   Widget _buildNumOfQuestionsSelected(BuildContext ctx) {
@@ -79,19 +87,6 @@ class _SaveQuestionsScreenState extends State<SaveQuestionsScreen> {
             });
           });
         });
-  }
-
-  Widget _buildSaveButton(BuildContext ctx) {
-    return RaisedButton(
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      color: Colors.blue,
-      textColor: Colors.white,
-      child: Text('Zapisz'),
-      onPressed: () async {
-        bool succeded = await _addQuestions(ctx);
-        await _showResultDialog(ctx, succeded);
-      },
-    );
   }
 
   Future _showResultDialog(BuildContext ctx, bool succeded) async {

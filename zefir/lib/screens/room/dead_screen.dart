@@ -14,7 +14,10 @@ class DeadScreen extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     return Scaffold(
-      appBar: AppBar(leading: null, title: Text(appBarTitle)),
+      appBar: AppBar(
+          leading: null,
+          title: Text(appBarTitle),
+          automaticallyImplyLeading: false),
       bottomNavigationBar:
           Builder(builder: (context) => _buildBottomAppBar(context)),
       body: _buildWinner(ctx),
@@ -23,30 +26,25 @@ class DeadScreen extends StatelessWidget {
 
   Widget _buildBottomAppBar(BuildContext ctx) {
     return BottomAppBar(
-        color: Colors.blue,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            FlatButton(
-              onPressed: () => Navigator.of(ctx).pushNamedAndRemoveUntil(
-                  '/', (Route<dynamic> route) => false),
-              color: Colors.blue,
-              textColor: Colors.white,
-              child: Text('Przejdź do listy pokoi'),
-            ),
-            FlatButton(
-              onPressed: () {
-                final questions =
-                    (Utils.routeArgs(ctx) as DeadRouteParams).room.allQuestions;
-                Navigator.pushReplacementNamed(ctx, '/saveQuestions',
-                    arguments: SaveQuestionsRouteParams(questions));
-              },
-              color: Colors.blue,
-              textColor: Colors.white,
-              child: Text('Zapisz zestaw pytań'),
-            ),
-          ],
-        ));
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        FlatButton(
+          onPressed: () => Navigator.of(ctx)
+              .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false),
+          child: Text('Przejdź do listy pokoi'),
+        ),
+        FlatButton(
+          onPressed: () {
+            final questions =
+                (Utils.routeArgs(ctx) as DeadRouteParams).room.allQuestions;
+            Navigator.pushNamed(ctx, '/saveQuestions',
+                arguments: SaveQuestionsRouteParams(questions));
+          },
+          child: Text('Zapisz zestaw pytań'),
+        ),
+      ],
+    ));
   }
 
   Widget _buildWinner(BuildContext ctx) {
@@ -67,15 +65,25 @@ class DeadScreen extends StatelessWidget {
     Widget title = _buildTitle(ctx, winners, room.deviceToken);
     List<Widget> children = [title];
     room.players.forEach((p) {
+      Widget playerIcon = Padding(
+          child: Icon(Icons.person), padding: EdgeInsets.only(left: 10));
       Widget maybeStar = winners.contains(p)
           ? Icon(Icons.grade, color: Colors.orange)
           : Icon(null);
       Widget points = Text(p.points.toString());
 
-      children.add(ListTile(
-        leading: maybeStar,
-        title: Text(p.name),
-        trailing: points,
+      children.add(Column(
+        children: [
+          ListTile(
+            leading: maybeStar,
+            title: Row(children: [
+              Text(p.name),
+              if (room.deviceToken == p.token) playerIcon
+            ]),
+            trailing: points,
+          ),
+          Divider()
+        ],
       ));
     });
 

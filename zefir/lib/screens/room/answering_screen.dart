@@ -110,7 +110,7 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
     return Form(
       key: _formKey,
       child:
-          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Column(children: _buildFormFields(ctx)),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
@@ -124,7 +124,7 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
                     onPressed: _isButtonDisabled
                         ? null
                         : () => _sendAnswer(runMutation),
-                    color: Colors.green,
+                    color: Colors.blue,
                     textColor: Colors.white,
                     child: Text('Dodaj odpowiedź'));
               }),
@@ -134,21 +134,31 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
   }
 
   List<Widget> _buildFormFields(BuildContext ctx) {
-    final questionText = Padding(
-        child: _buildQuestionText(ctx),
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0));
+    final questionText = SizedBox(
+        width: double.infinity,
+        child: Padding(
+            child: _buildQuestionText(ctx),
+            padding: const EdgeInsets.fromLTRB(10, 30, 0, 0)));
     final roleText = _buildRoleText(ctx, _token, _currPlayer);
     final textField = Padding(
       padding: const EdgeInsets.all(10),
       child: _buildTextField(ctx),
     );
 
-    return [questionText, roleText, textField].where((w) => w != null).toList();
+    return [questionText, textField, roleText].where((w) => w != null).toList();
   }
 
   Widget _buildRoleText(BuildContext ctx, int deviceToken, Player currPlayer) {
     return deviceToken == currPlayer.token
-        ? Text('Inni gracze będą odpowiadać tak jak Ty')
+        ? SizedBox(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: Text(
+                'Inni gracze będą odpowiadać tak jak Ty',
+                textAlign: TextAlign.left,
+              ),
+            ),
+            width: double.infinity)
         : null;
   }
 
@@ -171,14 +181,13 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
   Widget _buildQuestionText(BuildContext ctx) {
     return Text(
       _question.content,
-      textAlign: TextAlign.center,
       style: TextStyle(fontSize: Theme.of(ctx).textTheme.headline.fontSize),
     );
   }
 
   Widget _buildTextField(BuildContext ctx) {
     final validator =
-        (String val) => val.isEmpty ? 'Kod nie może być pusty' : null;
+        (String val) => val.isEmpty ? 'Odpowiedź nie może być pusta' : null;
     final decoration = InputDecoration(labelText: 'Odpowiedź');
 
     return TextFormField(

@@ -37,71 +37,62 @@ class _PollingScreenState extends State<PollingScreen> {
   Widget build(BuildContext ctx) {
     final Room room = (Utils.routeArgs(ctx) as PollingRouteParams).room;
     return Scaffold(
-      floatingActionButton: _buildFAB(ctx),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: _builder(ctx, room),
       appBar: AppBar(title: Text(appBartTitle)),
     );
   }
 
-  Widget _buildFAB(BuildContext ctx) {
-    final EdgeInsets padding = MediaQuery.of(ctx).padding.bottom != 0
-        ? EdgeInsets.only(bottom: MediaQuery.of(ctx).padding.bottom)
-        : EdgeInsets.only(bottom: 10);
-    const double elevation = 4.0;
-
-    Widget fab = FloatingActionButton.extended(
-      backgroundColor: Colors.green,
-      elevation: elevation,
-      label: const Text('Prześlij odpowiedź'),
-      onPressed: () {
-        setState(() {
-          _isSending = true;
-        });
-
-        sendQuestion(ctx).then((token) {
-          setState(() {
-            _isSending = false;
-          });
-
-          return token;
-        }).then((room) => _navigateToProperScreen(ctx, room));
-      },
-    );
-
-    Widget inactiveFab = FloatingActionButton.extended(
-      elevation: elevation,
-      label: const Text('Trwa przesyłanie odpowiedzi...'),
-      backgroundColor: Colors.grey,
-      onPressed: null,
-    );
-
-    return Padding(padding: padding, child: _isSending ? inactiveFab : fab);
-  }
-
   Widget _builder(BuildContext ctx, Room room) {
-    final List<Widget> childen = [
-      _buildCurrentPlayer(ctx, room.currPlayer.name),
-      _buildQuestion(ctx, room.currPlayer.name, room.currQuestion.content),
+    final upperPart = Column(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+        child: SizedBox(
+            width: double.infinity,
+            child: _buildQuestion(
+                ctx, room.currPlayer.name, room.currQuestion.content)),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(left: 20),
+        child: SizedBox(
+            width: double.infinity,
+            child: _buildCurrentPlayer(ctx, room.currPlayer.name)),
+      ),
       _buildAnswers(ctx, room.currAnswers),
-    ]
-        .map((w) => Padding(
-              child: w,
-              padding: EdgeInsets.all(10),
-            ))
-        .toList();
+    ]);
+
+    final lowerPart = Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+        child: RaisedButton(
+            onPressed: _isSending
+                ? null
+                : () {
+                    setState(() {
+                      _isSending = true;
+                    });
+
+                    sendQuestion(ctx).then((token) {
+                      setState(() {
+                        _isSending = false;
+                      });
+
+                      return token;
+                    }).then((room) => _navigateToProperScreen(ctx, room));
+                  },
+            color: Colors.blue,
+            textColor: Colors.white,
+            child: Text('Dodaj odpowiedź')));
 
     return Column(
       mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: childen,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [upperPart, lowerPart],
     );
   }
 
   Widget _buildCurrentPlayer(BuildContext ctx, String currentPlayerName) {
     return Text(
       'Odpowiedz tak jak $currentPlayerName',
-      style: TextStyle(fontSize: Theme.of(ctx).textTheme.headline.fontSize),
+      style: TextStyle(fontSize: Theme.of(ctx).textTheme.body1.fontSize),
     );
   }
 
