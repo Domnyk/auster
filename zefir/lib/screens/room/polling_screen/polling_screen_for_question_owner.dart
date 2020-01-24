@@ -64,35 +64,47 @@ class _PollingScreenForQuestionOwnerState
       appBar: AppBar(
         title: Text('Głosowanie'),
       ),
-      body: SingleChildScrollView(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildQuestion(context, _room.currQuestion),
+      body:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Column(children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 25),
+            child: _buildQuestion(context, _room.currQuestion),
+          ),
           Divider(),
-          _buildCurrentAnswers(ctx, _room.currAnswers),
-          if (_nextScreen != null) _buildNextScreenButton(ctx),
-        ].map((w) => Padding(child: w, padding: EdgeInsets.all(10))).toList(),
-      )),
+          Padding(
+            padding: const EdgeInsets.all(17.0),
+            child: _buildCurrentAnswers(ctx, _room.currAnswers),
+          )
+        ]),
+        if (_nextScreen != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _buildNextScreenButton(ctx),
+          ),
+      ]),
     );
   }
 
   Widget _buildQuestion(BuildContext ctx, Question q) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text('Twoje pytanie:'),
-        ),
-        Expanded(child: Text(q.content)),
-      ],
-    );
+    String formattedQuestion =
+        q.content.substring(0, 1).toLowerCase() + q.content.substring(1);
+
+    return Text('Twoje pytanie: $formattedQuestion',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: Theme.of(ctx).textTheme.headline.fontSize,
+        ));
   }
 
   Widget _buildCurrentAnswers(BuildContext ctx, List<Answer> allAnswers) {
     return Row(
       children: [
         Expanded(
-          child: Text('Odpowiedzi jakie zostały dodane:'),
+          child: Text(
+            'Odpowiedzi jakie zostały dodane:',
+            textAlign: TextAlign.center,
+          ),
         ),
         Expanded(child: _buildCurrentAnswersList(allAnswers)),
       ],
@@ -104,7 +116,10 @@ class _PollingScreenForQuestionOwnerState
       shrinkWrap: true,
       itemCount: answers.length,
       itemBuilder: (BuildContext ctx, int index) {
-        return Text(answers[index].content);
+        return Text(
+          answers[index].content,
+          textAlign: TextAlign.center,
+        );
       },
     );
   }

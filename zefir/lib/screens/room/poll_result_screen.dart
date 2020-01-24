@@ -15,36 +15,35 @@ class PollResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     final Room room = (Utils.routeArgs(ctx) as PollResultRouteParams).room;
-    final StateStorage storage = Zefir.of(ctx).eurus.storage.state;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        label: Text('Następne pytanie'),
-        onPressed: () => storage
-            .update(room.deviceToken, RoomState.ANSWERING)
-            .then((_) => Navigator.of(ctx).pushReplacementNamed('/answering',
-                arguments: AnsweringRouteParams(room.deviceToken))),
-      ),
       appBar: AppBar(
-        title: _buildHeadline(ctx, room),
+        title: Text(appBarTitle),
       ),
-      body: ListView.builder(
-        shrinkWrap: true,
-        itemCount: room.players.length,
-        itemBuilder: (BuildContext context, int index) {
-          return _buildListItem(ctx, room.players[index]);
-        },
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: room.players.length,
+            itemBuilder: (BuildContext context, int index) {
+              return _buildListItem(ctx, room.players[index]);
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: RaisedButton(
+              color: Colors.blue,
+              textColor: Colors.white,
+              child: Text('Następne pytanie'),
+              onPressed: () async {
+                await _navigateToNextQuestion(ctx);
+              },
+            ),
+          ),
+        ],
       ),
     );
-  }
-
-  Widget _buildHeadline(BuildContext ctx, Room room) {
-    String msg = 'Tabela wyników';
-
-    return Text(msg,
-        style: TextStyle(
-            fontSize: Theme.of(ctx).textTheme.headline.fontSize,
-            color: Colors.white));
   }
 
   Widget _buildListItem(BuildContext ctx, Player player) {
@@ -66,6 +65,15 @@ class PollResultScreen extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(20, 10, 40, 10)),
       Divider(height: 5, color: Colors.grey),
     ]);
+  }
+
+  Future<void> _navigateToNextQuestion(BuildContext ctx) {
+    final Room room = (Utils.routeArgs(ctx) as PollResultRouteParams).room;
+    final StateStorage storage = Zefir.of(ctx).eurus.storage.state;
+
+    return storage.update(room.deviceToken, RoomState.ANSWERING).then((_) =>
+        Navigator.of(ctx).pushReplacementNamed('/answering',
+            arguments: AnsweringRouteParams(room.deviceToken)));
   }
 }
 
