@@ -154,7 +154,7 @@ class _AnsweringScreenState extends State<AnsweringScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
               child: Text(
-                'Inni gracze będą odpowiadać tak jak Ty',
+                'Inni gracze będą odpowiadać tak jak Ty.',
                 textAlign: TextAlign.left,
               ),
             ),
