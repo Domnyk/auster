@@ -125,6 +125,10 @@ class Mutations {
               id,
               content
             }
+          },
+          allQuestions {
+            content,
+            picked
           }  
         }
       }
