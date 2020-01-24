@@ -6,6 +6,16 @@ class QuestionStorage {
 
   QuestionStorage(this._database);
 
+  Future<List<String>> fetchAll() async {
+    final db = await _database;
+
+    return (await db.query(
+      'questions',
+    ))
+        .map((record) => record['question'] as String)
+        .toList();
+  }
+
   Future<void> addAll(List<Question> questions) async {
     questions.forEach((q) async {
       await add(q);

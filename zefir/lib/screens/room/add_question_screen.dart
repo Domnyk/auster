@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room_state.dart';
+import 'package:zefir/screens/room/load_question_screen.dart';
 import 'package:zefir/screens/room/wait_for_other_questions_screen.dart';
+import 'package:zefir/services/eurus/eurus.dart';
 import 'package:zefir/services/eurus/mutations.dart';
 import 'package:zefir/services/storage/state.dart';
 import 'package:zefir/utils.dart';
@@ -81,7 +84,7 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
   Widget _buildBody(BuildContext ctx, double appBarHeight) {
     final List<Widget> controls = [
       Column(children: _buildQuestionFields(ctx)),
-      _buildSubmitButton(ctx),
+      _buildButtons(ctx),
     ]
         .map((w) => Padding(
               child: w,
@@ -89,20 +92,26 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
             ))
         .toList();
 
-    final _pageSize = MediaQuery.of(context).size.height;
-    final _notifySize = MediaQuery.of(context).padding.top;
-
-    return SingleChildScrollView(
-        child: SizedBox(
-      height: _pageSize - (_notifySize + appBarHeight),
-      child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: controls,
-          )),
-    ));
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return SingleChildScrollView(
+            child: ConstrainedBox(
+          constraints: constraints.copyWith(
+            minHeight: constraints.maxHeight,
+            maxHeight: double.infinity,
+          ),
+          child: IntrinsicHeight(
+            child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: controls,
+                )),
+          ),
+        ));
+      },
+    );
   }
 
   List<Widget> _buildQuestionFields(BuildContext ctx) {
@@ -118,56 +127,78 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
                 textInputAction: TextInputAction.done,
                 minLines: 2,
                 maxLines: 3,
-                decoration:
-                    InputDecoration(labelText: 'Pytanie numer ${i + 1}'),
+                decoration: InputDecoration(
+                    labelText: numOfQuestions == 1
+                        ? 'Pytanie'
+                        : 'Pytanie numer ${i + 1}'),
                 validator: (v) => v.isEmpty ? 'Podaj treść pytania' : null,
               ),
             ))
         .toList() as List<Widget>;
   }
 
-  Widget _buildSubmitButton(BuildContext ctx) {
-    return Mutation(
-      options: MutationOptions(
-          document: Mutations.ADD_QUESTION,
-          onError: (OperationException exception) {
-            developer.log(
-                'Exception occured when sending question ${exception.graphqlErrors[0].toString()}');
-          },
-          onCompleted: (data) {
-            developer
-                .log('Sending of question has ended. Resp: ${data.toString()}');
-          }),
-      builder: (RunMutation runMutation, QueryResult result) {
-        return RaisedButton(
-          child: Text(AddQuestionScreen._addQuestionText),
-          onPressed: () {
-            if (!_formKey.currentState.validate()) return;
+  Widget _buildButtons(BuildContext ctx) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [_navigateToLoadQuestionButton(ctx), _buildSubmitButton(ctx)],
+    );
+  }
 
-            Iterable.generate(widget._numOfQuestions)
-                .forEach((i) => _addQuestion(ctx, runMutation, i));
-          },
-          color: Colors.blue,
-          textColor: Colors.white,
-        );
+  Widget _navigateToLoadQuestionButton(BuildContext ctx) {
+    return RaisedButton(
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: Text('Wczytaj pytania'),
+      onPressed: () {
+        Zefir.of(ctx).eurus.question.fetchAll().then((questions) {
+          Navigator.of(ctx).pushNamed('/loadQuestion',
+              arguments: LoadQuestionRouteParams(
+                  widget._token, widget._numOfQuestions, questions));
+        });
       },
     );
   }
 
-  void _addQuestion(
-    BuildContext ctx,
-    RunMutation runMutation,
-    int idx,
-  ) {
-    final int token = (Utils.routeArgs(ctx) as AddQuestionRouteParams).token;
-    final StateStorage stateStorage = Zefir.of(ctx).eurus.storage.state;
+  Widget _buildSubmitButton(BuildContext ctx) {
+    return RaisedButton(
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: Text(AddQuestionScreen._addQuestionText),
+      onPressed: () {
+        if (!_formKey.currentState.validate()) return;
 
-    runMutation({'token': token, 'question': _questions[idx]});
-    developer.log('Send question ${_questions[idx]} with token $token',
-        name: 'AddQuestionScreen');
-    stateStorage.update(token, RoomState.WAIT_FOR_OTHER_QUESTIONS).then((_) =>
-        Navigator.of(ctx).pushReplacementNamed('/waitForOtherQuestions',
-            arguments: WaitForOtherQuestionsRouteParams(token)));
+        Iterable.generate(widget._numOfQuestions).forEach((i) async {
+          await _addQuestion(ctx, _questions[i]);
+        });
+
+        final StateStorage stateStorage = Zefir.of(ctx).eurus.storage.state;
+        stateStorage
+            .update(widget._token, RoomState.WAIT_FOR_OTHER_QUESTIONS)
+            .then((_) => Navigator.of(ctx).pushReplacementNamed(
+                '/waitForOtherQuestions',
+                arguments: WaitForOtherQuestionsRouteParams(widget._token)));
+      },
+    );
+  }
+
+  Future<void> _addQuestion(BuildContext ctx, String q) async {
+    final Eurus eurus = Zefir.of(ctx).eurus;
+
+    await eurus.client.mutate(_buildOptions(q));
+  }
+
+  MutationOptions _buildOptions(String q) {
+    return MutationOptions(
+        document: Mutations.ADD_QUESTION,
+        onError: (OperationException exception) {
+          developer.log(
+              'Exception occured when sending question ${exception.graphqlErrors[0].toString()}');
+        },
+        onCompleted: (data) {
+          developer
+              .log('Sending of question has ended. Resp: ${data.toString()}');
+        },
+        variables: {'token': widget._token, 'question': q});
   }
 }
 

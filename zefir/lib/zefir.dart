@@ -8,6 +8,7 @@ import 'package:zefir/screens/join_room.dart';
 import 'package:zefir/screens/new_room_screen.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room/add_question_screen.dart';
+import 'package:zefir/screens/room/load_question_screen.dart';
 import 'package:zefir/screens/room/polling_screen/polling_screen_for_question_owner.dart';
 import 'package:zefir/screens/room/wait_for_other_answers.dart';
 import 'package:zefir/screens/room/wait_for_other_polls.dart';
@@ -87,6 +88,12 @@ class Zefir extends InheritedWidget {
             (settings.arguments as AddQuestionRouteParams);
         builder = (BuildContext ctx) =>
             AddQuestionScreen(params.token, params.numOfQuestions);
+        break;
+      case '/loadQuestion':
+        LoadQuestionRouteParams params =
+            (settings.arguments as LoadQuestionRouteParams);
+        builder = (BuildContext ctx) => LoadQuestionScreen(
+            params.token, params.numOfQuestionsToChoose, params.questions);
         break;
       case '/waitForOtherQuestions':
         WaitForOtherQuestionsRouteParams params =
