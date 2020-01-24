@@ -198,7 +198,7 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
           developer
               .log('Sending of question has ended. Resp: ${data.toString()}');
         },
-        variables: {'token': widget._token, 'question': q});
+        variables: {'token': widget._token, 'question': Question.format(q)});
   }
 }
 
