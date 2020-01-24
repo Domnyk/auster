@@ -106,7 +106,7 @@ class _JoinRoomState extends State<JoinRoom> {
 
   Widget _buildJoinRoomButton(BuildContext ctx) {
     return RaisedButton(
-      color: Colors.green,
+      color: Colors.blue,
       textColor: Colors.white,
       child: Text(_joinButtonText),
       onPressed: () => _joinRoom(ctx),

@@ -128,7 +128,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
 
   Widget _buildJoinRoomButton(BuildContext ctx) {
     return RaisedButton(
-      color: Colors.green,
+      color: Colors.blue,
       textColor: Colors.white,
       child: Text(_createRoomText),
       onPressed: () => _createRoom(ctx),

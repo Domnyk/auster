@@ -147,7 +147,7 @@ class _AddQuestionScreenState extends State<AddQuestionScreen> {
             Iterable.generate(widget._numOfQuestions)
                 .forEach((i) => _addQuestion(ctx, runMutation, i));
           },
-          color: Colors.green,
+          color: Colors.blue,
           textColor: Colors.white,
         );
       },
