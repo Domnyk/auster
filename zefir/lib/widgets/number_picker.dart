@@ -23,6 +23,8 @@ class NumberPicker extends FormField<int> {
                       context: context,
                       builder: (BuildContext context) {
                         return NumberPickerDialog.integer(
+                            confirmWidget: Text('Wybierz'),
+                            cancelWidget: Text('Anuluj'),
                             maxValue: 10,
                             minValue: minValue,
                             initialIntegerValue:
