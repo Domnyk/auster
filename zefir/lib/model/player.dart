@@ -16,7 +16,7 @@ class Player {
   Player.fromGraphQl(Map<String, dynamic> data)
       : token = data['token'],
         name = data['name'],
-        points = data['points'],
+        points = int.tryParse(data['points'].toString(), radix: 10),
         polledAnswer =
             data.containsKey('polledAnswer') && data['polledAnswer'] != null
                 ? Answer.fromGraphQl(data['polledAnswer'])
