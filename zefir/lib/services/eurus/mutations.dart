@@ -66,7 +66,10 @@ class Mutations {
           },
           currAnswers {
             id,
-            content
+            content,
+            player {
+              token
+            }
           },
           currQuestion {
             content
