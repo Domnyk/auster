@@ -10,11 +10,15 @@ class Queries {
         currRound,
         currPlayer {
           name,
+          points,
           token
         },
         currAnswers {
           id,
-          content
+          content,
+          player {
+            token
+          }
         },
         currQuestion {
           content
