@@ -152,9 +152,12 @@ class Eurus {
     return errorBuilder(ctx, result.exception);
   }
 
-  Future<void> leaveRoom(BuildContext ctx, int token) async {
+  Future<int> leaveRoom(BuildContext ctx, int token) async {
     final TokenStorage storage = Zefir.of(ctx).eurus.storage.token;
     await storage.delete(token);
+
+    final List<int> tokens = await storage.fetchAll();
+    return tokens.length;
   }
 
   // TODO: move to utils
