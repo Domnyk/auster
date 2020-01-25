@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:zefir/model/answer.dart';
+import 'package:zefir/model/player_poll_result.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/dead_screen.dart';
@@ -70,7 +71,7 @@ class _PollingScreenState extends State<PollingScreen> {
                       _isSending = true;
                     });
 
-                    sendQuestion(ctx).then((token) {
+                    _sendAnswer(ctx).then((token) {
                       setState(() {
                         _isSending = false;
                       });
@@ -97,11 +98,8 @@ class _PollingScreenState extends State<PollingScreen> {
   }
 
   Widget _buildQuestion(BuildContext ctx, String playerName, String question) {
-    final q =
-        question[0].toLowerCase() + question.substring(1, question.length - 1);
-
     return Text(
-      q,
+      question,
       style: TextStyle(fontSize: Theme.of(ctx).textTheme.headline.fontSize),
     );
   }
@@ -124,7 +122,7 @@ class _PollingScreenState extends State<PollingScreen> {
         });
   }
 
-  Future<Room> sendQuestion(BuildContext ctx) async {
+  Future<Room> _sendAnswer(BuildContext ctx) async {
     final stateStorage = Zefir.of(ctx).eurus.storage.state;
     final token = (Utils.routeArgs(ctx) as PollingRouteParams).token;
     final GraphQLClient client = Zefir.of(ctx).eurus.client;
@@ -157,13 +155,37 @@ class _PollingScreenState extends State<PollingScreen> {
     } else if (state == RoomState.POLLING) {
       stateStorage
           .update(roomAfterMutation.deviceToken, RoomState.WAIT_FOR_OTHER_POLLS)
+          .then((_) => _savePlayerPollResult(ctx))
           .then((_) => Navigator.of(ctx).pushReplacementNamed(
               '/waitForOtherPolls',
               arguments: WaitForOtherPollsRouteParams(roomAfterMutation)));
     } else if (state == RoomState.ANSWERING) {
+      final Room room = (Utils.routeArgs(ctx) as PollingRouteParams).room;
+
       Navigator.of(ctx).pushReplacementNamed('/pollResult',
-          arguments: PollResultRouteParams(roomAfterMutation));
+          arguments: PollResultRouteParams(
+              roomAfterMutation,
+              PlayerPollResult(
+                  room.getDevicePlayer().points,
+                  room.currQuestion.content,
+                  room.getCorrectAnswer().content,
+                  _choosedAnswer.content,
+                  false)));
     }
+  }
+
+  Future<void> _savePlayerPollResult(BuildContext ctx) {
+    final stateStorage = Zefir.of(ctx).eurus.storage.state;
+    final Room room = (Utils.routeArgs(ctx) as PollingRouteParams).room;
+
+    return stateStorage.savePlayerPollResult(
+        room.deviceToken,
+        PlayerPollResult(
+            room.getDevicePlayer().points,
+            room.currQuestion.content,
+            room.getCorrectAnswer().content,
+            _choosedAnswer.content,
+            false));
   }
 }
 

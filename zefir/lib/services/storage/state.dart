@@ -1,5 +1,6 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:zefir/model/player_poll_result.dart';
 import 'dart:developer' as developer;
 
 import 'package:zefir/model/room_state.dart';
@@ -58,6 +59,38 @@ class StateStorage {
         where: "token = ?",
         whereArgs: [token],
         conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> savePlayerPollResult(int token, PlayerPollResult p) async {
+    final Database db = await _database;
+
+    final Map<String, dynamic> map = {
+      'token': token,
+      'pastpoints': p.pastPoints,
+      'question': p.question,
+      'correctanswer': p.correctAnswer,
+      'choosedanswer': p.choosedAnswer,
+      'wasowner': p.wasOwner.toString()
+    };
+
+    await db.update('rooms', map);
+  }
+
+  Future<PlayerPollResult> fetchPlayerPollResult(int token) async {
+    final Database db = await _database;
+
+    Map<String, dynamic> data = (await db.query('rooms'))
+        .firstWhere((Map<String, dynamic> map) => map['token'] == token);
+
+    bool wasOwner = data['wasowner'] == 'true';
+    if (wasOwner) {
+      return PlayerPollResult(null, null, null, null, true);
+    } else {
+      final int pastPoints = int.tryParse(data['pastpoints'], radix: 10);
+
+      return PlayerPollResult(pastPoints, data['question'],
+          data['correctAnswer'], data['choosedAnswer'], false);
+    }
   }
 
   Future<RoomState> _fetchFromBackend(int token) async {

@@ -22,6 +22,10 @@ class Room {
     return data.map((a) => Answer.fromGraphQl(a)).toList();
   }
 
+  static List<Answer> parseCurrAnswersWitToken(List<dynamic> data) {
+    return data.map((a) => Answer.fromGraphQlWithPlayerToken(a)).toList();
+  }
+
   static List<Player> parsePlayers(List<dynamic> data) {
     return data.map((a) => Player.fromGraphQl(a)).toList();
   }
@@ -77,7 +81,13 @@ class Room {
         state == RoomState.POLL_RESULT) {
       currPlayer = Player.fromGraphQl(data['currPlayer']);
       currQuestion = Question.fromGraphQl(data['currQuestion']);
-      currAnswers = Room.parseCurrAnswers(data['currAnswers']);
+
+      if (state == RoomState.POLLING ||
+          state == RoomState.WAIT_FOR_OTHER_POLLS) {
+        currAnswers = Room.parseCurrAnswersWitToken(data['currAnswers']);
+      } else {
+        currAnswers = Room.parseCurrAnswers(data['currAnswers']);
+      }
       allQuestions = null;
     } else if (state == RoomState.DEAD) {
       final questions = data['allQuestions'] as List<dynamic>;
@@ -85,6 +95,14 @@ class Room {
     } else {
       throw Exception('Unkown state when parsing room info $state');
     }
+  }
+
+  Player getDevicePlayer() {
+    return players.firstWhere((p) => p.token == deviceToken);
+  }
+
+  Answer getCorrectAnswer() {
+    return currAnswers.firstWhere((a) => a.playerToken == currPlayer.token);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:zefir/model/answer.dart';
 import 'package:zefir/model/player.dart';
+import 'package:zefir/model/player_poll_result.dart';
 import 'package:zefir/model/question.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
@@ -129,7 +130,10 @@ class _PollingScreenForQuestionOwnerState
 
     final void Function() onPressed = _nextScreen == _NextScreen.POLL_RESULT
         ? () => Navigator.of(ctx).pushReplacementNamed('/pollResult',
-            arguments: PollResultRouteParams(_roomForNextScreen))
+            arguments: PollResultRouteParams(
+                _roomForNextScreen,
+                PlayerPollResult(null, _room.currQuestion.content,
+                    _room.getCorrectAnswer().content, null, true)))
         : () => Navigator.of(ctx).pushReplacementNamed('/dead',
             arguments: DeadRouteParams(_roomForNextScreen));
 

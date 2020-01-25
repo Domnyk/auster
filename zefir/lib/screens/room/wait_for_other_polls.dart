@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:zefir/model/player_poll_result.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/dead_screen.dart';
@@ -27,6 +28,7 @@ class _WaitForOtherPollsScreenState extends State<WaitForOtherPollsScreen> {
   dynamic _observableQuery;
   StreamSubscription _roomSubscription;
   Room _room;
+  Room _roomInPollingState;
 
   @override
   void initState() {
@@ -52,9 +54,7 @@ class _WaitForOtherPollsScreenState extends State<WaitForOtherPollsScreen> {
 
   @override
   Widget build(BuildContext ctx) {
-    if (_room.state == RoomState.POLL_RESULT) {
-      _navigateToProperScreen(ctx, _room);
-    }
+    _navigateToProperScreenIfNecessary(ctx, _room);
 
     return Scaffold(
       backgroundColor: Colors.blue,
@@ -101,8 +101,15 @@ class _WaitForOtherPollsScreenState extends State<WaitForOtherPollsScreen> {
     );
   }
 
-  void _navigateToProperScreen(BuildContext ctx, Room room) {
+  void _navigateToProperScreenIfNecessary(BuildContext ctx, Room room) {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      if (room.state == RoomState.POLLING) {
+        setState(() {
+          _roomInPollingState =
+              room; // TOOD: This sucks as I update room on each frame
+        });
+      }
+
       final state = room.state;
 
       if (state == RoomState.POLL_RESULT) {
@@ -110,9 +117,12 @@ class _WaitForOtherPollsScreenState extends State<WaitForOtherPollsScreen> {
             name: 'WaitForOtherPolls');
 
         final stateStorage = Zefir.of(ctx).eurus.storage.state;
-        stateStorage.update(room.deviceToken, RoomState.POLL_RESULT).then((_) =>
-            Navigator.of(ctx).pushReplacementNamed('/pollResult',
-                arguments: PollResultRouteParams(room)));
+        stateStorage
+            .update(room.deviceToken, RoomState.POLL_RESULT)
+            .then((_) => stateStorage.fetchPlayerPollResult(room.deviceToken))
+            .then((PlayerPollResult p) => Navigator.of(ctx)
+                .pushReplacementNamed('/pollResult',
+                    arguments: PollResultRouteParams(room, p)));
       } else if (state == RoomState.DEAD) {
         Navigator.of(ctx)
             .pushReplacementNamed('/dead', arguments: DeadRouteParams(room));

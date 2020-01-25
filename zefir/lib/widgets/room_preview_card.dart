@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zefir/model/player_poll_result.dart';
 import 'package:zefir/model/room.dart';
 import 'package:zefir/model/room_state.dart';
 import 'package:zefir/screens/room/add_question_screen.dart';
@@ -89,8 +90,13 @@ class RoomPreviewCard extends StatelessWidget {
         break;
       case RoomState.POLL_RESULT:
         url = '/pollResult';
-        arguments = PollResultRouteParams(_room);
-        break;
+        return Zefir.of(ctx)
+            .eurus
+            .storage
+            .state
+            .fetchPlayerPollResult(_room.deviceToken)
+            .then((PlayerPollResult p) => Navigator.pushNamed(ctx, url,
+                arguments: PollResultRouteParams(_room, p)));
       case RoomState.DEAD:
         url = '/dead';
         arguments = DeadRouteParams(_room);
