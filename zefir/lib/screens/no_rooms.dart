@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:zefir/services/eurus/eurus.dart';
-import 'package:zefir/services/storage/token.dart';
+import 'package:zefir/screens/new_room_screen.dart';
+import 'package:zefir/zefir.dart';
+
 import 'join_room.dart';
-import 'new_room.dart';
 
 class NoRooms extends StatelessWidget {
   @override
@@ -41,9 +41,7 @@ class NoRooms extends StatelessWidget {
     return RaisedButton(
       child: Text('Dołącz do pokoju'),
       color: Colors.white,
-      onPressed: () => {
-        Navigator.push(ctx, MaterialPageRoute(builder: (context) => JoinRoom()))
-      },
+      onPressed: () => Navigator.pushNamed(ctx, '/joinRoom', arguments: JoinRoomRouteParams(Zefir.of(ctx).eurus)),
     );
   }
 
@@ -51,9 +49,7 @@ class NoRooms extends StatelessWidget {
     return RaisedButton(
       child: Text('Załóż pokój'),
       color: Colors.white,
-      onPressed: () => {
-        Navigator.push(ctx, MaterialPageRoute(builder: (context) => NewRoom()))
-      },
+      onPressed: () => Navigator.pushNamed(ctx, '/newRoom', arguments: NewRoomRouteParams(Zefir.of(ctx).eurus)),
     );
   }
 }

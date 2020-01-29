@@ -9,6 +9,7 @@ class NumberPicker extends FormField<int> {
       @required String labelText,
       FormFieldSetter<int> onSaved,
       FormFieldValidator<int> validator,
+      int minValue = 2,
       bool autovalidate = false})
       : super(
             onSaved: onSaved,
@@ -22,8 +23,10 @@ class NumberPicker extends FormField<int> {
                       context: context,
                       builder: (BuildContext context) {
                         return NumberPickerDialog.integer(
+                            confirmWidget: Text('Wybierz'),
+                            cancelWidget: Text('Anuluj'),
                             maxValue: 10,
-                            minValue: 2,
+                            minValue: minValue,
                             initialIntegerValue:
                                 getVal(controller, initialValue));
                       });
@@ -34,8 +37,7 @@ class NumberPicker extends FormField<int> {
                 },
                 controller: controller,
                 readOnly: true,
-                decoration: InputDecoration(
-                    labelText: labelText, border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: labelText),
               );
             }) {
     controller.text = getVal(controller, initialValue).toString();

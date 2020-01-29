@@ -1,32 +1,35 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:zefir/main.dart';
-import 'package:zefir/model/room_preview.dart';
+import 'package:zefir/model/room.dart';
 import 'package:zefir/screens/loading.dart';
 import 'package:zefir/screens/no_rooms.dart';
 import 'package:zefir/screens/room_list.dart';
 import 'package:zefir/services/eurus/eurus.dart';
-import 'package:zefir/services/storage/token.dart';
+import 'package:zefir/zefir.dart';
 import 'dart:developer' as developer;
 
-class CheckRoomsWidget extends StatelessWidget {
+class CheckRoomsScreen extends StatelessWidget {
+  final Eurus _eurus;
+
+  const CheckRoomsScreen(this._eurus);
+
   @override
   Widget build(BuildContext ctx) {
-    final Eurus _eurus = Zefir.of(ctx).eurus;
-    final TokenStorage _storage = Zefir.of(ctx).storage;
-
     return FutureBuilder<List<int>>(
-        future: _storage.fetchAll(),
-        builder: (ctx, snapshot) => _buildFromFuture(ctx, snapshot, _eurus));
+        key: UniqueKey(),
+        future: _eurus.storage.token.fetchAll(),
+        builder: _buildFromFuture);
   }
 
   Widget _buildFromFuture(
-      BuildContext ctx, AsyncSnapshot<List<int>> snapshot, final Eurus eurus) {
+      BuildContext ctx, AsyncSnapshot<List<int>> snapshot) {
     if (snapshot.hasData) {
-      final List<RoomPreview> rooms = [];
+      final List<Room> rooms = [];
 
-      return StreamBuilder<RoomPreview>(
-        stream: eurus.fetchRoomsPreview(tokens: snapshot.data),
+      return StreamBuilder<Room>(
+        stream: _eurus.fetchRooms(
+            tokens: snapshot.data,
+            stateStorage: Zefir.of(ctx).eurus.storage.state),
         builder: (ctx, snapshot) => _buildFromStream(ctx, snapshot, rooms),
       );
     } else {
@@ -34,8 +37,8 @@ class CheckRoomsWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildFromStream(BuildContext ctx, AsyncSnapshot<RoomPreview> snapshot,
-      final List<RoomPreview> rooms) {
+  Widget _buildFromStream(
+      BuildContext ctx, AsyncSnapshot<Room> snapshot, final List<Room> rooms) {
     if (snapshot.hasError) {
       return _buildIfError(ctx, snapshot.error);
     }
@@ -54,11 +57,17 @@ class CheckRoomsWidget extends StatelessWidget {
     return null;
   }
 
-  Widget _buildIfDone(BuildContext ctx, List<RoomPreview> rooms) {
-    return rooms.isEmpty ? NoRooms() : RoomList(rooms: rooms);
+  Widget _buildIfDone(BuildContext ctx, List<Room> rooms) {
+    return rooms.isEmpty ? NoRooms() : RoomList(rooms);
   }
 
   Widget _buildIfError(BuildContext ctx, Exception err) {
     return Text('Wystąpił błąd w czasie pobierania danych');
   }
+}
+
+class CheckRoomsRouteParams {
+  final Eurus eurus;
+
+  CheckRoomsRouteParams(this.eurus);
 }
