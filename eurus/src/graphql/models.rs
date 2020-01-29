@@ -59,6 +59,7 @@ impl MutationFields for Mutation {
         players: i32,
         rounds: i32
     ) -> FieldResult<Room> {
+        let _lock = executor.context().get_lock().lock()?;
         let db_conn = executor.context().db_conn();
         let r = db::models::NewRoom {
             name,
@@ -76,6 +77,7 @@ impl MutationFields for Mutation {
         room_code: String,
         player_name: String
     ) -> FieldResult<Option<Player>> {
+        let _lock = executor.context().get_lock().lock()?;
         let db_conn = executor.context().db_conn();
         // XXX: match on error and return none
         let room = queries::room::get(
@@ -93,6 +95,7 @@ impl MutationFields for Mutation {
         token: i32,
         content: String
     ) -> FieldResult<Option<Question>> {
+        let _lock = executor.context().get_lock().lock()?;
         let db_conn = executor.context().db_conn();
         let q = queries::question::new(token, &content, db_conn)?;
         Ok(Some(adapters::Question::adapt(q)))
@@ -105,6 +108,7 @@ impl MutationFields for Mutation {
         token: i32,
         content: String
     ) -> FieldResult<Option<Answer>> {
+        let _lock = executor.context().get_lock().lock()?;
         let db_conn = executor.context().db_conn();
         let a = queries::answer::new(token, &content, db_conn)?;
         Ok(Some(adapters::Answer::adapt(a)))
@@ -116,6 +120,7 @@ impl MutationFields for Mutation {
         token: i32,
         answer: i32
     ) -> FieldResult<Option<Answer>> {
+        let _lock = executor.context().get_lock().lock()?;
         let db_conn = executor.context().db_conn();
         let a = queries::player::poll_ans(token, answer, db_conn)?;
         Ok(Some(adapters::Answer::adapt(a)))
